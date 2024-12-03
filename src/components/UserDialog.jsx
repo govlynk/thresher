@@ -38,7 +38,6 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 	const [formData, setFormData] = useState(initialFormState);
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(false);
-	const [isSubmitting, setIsSubmitting] = useState(false);
 	const { companies, fetchCompanies } = useCompanyStore();
 	const { addUser, updateUser } = useUserStore();
 	const { addUserCompanyRole, removeUserCompanyRole } = useUserCompanyRoleStore();
@@ -46,6 +45,7 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 	const [userCompanyRoles, setUserCompanyRoles] = useState([]);
 	const [companyDetails, setCompanyDetails] = useState([]);
 
+	// Fetch companies and user company roles
 	useEffect(() => {
 		const loadData = async () => {
 			if (open) {
@@ -68,6 +68,7 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 
 	const fetchUserCompanyRoles = async (userId) => {
 		try {
+			console.log("UserDialog: Fetching company roles for user:", userId);
 			const response = await client.models.UserCompanyRole.list({
 				filter: { userId: { eq: userId } },
 			});
@@ -75,6 +76,7 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 			if (response?.data) {
 				setUserCompanyRoles(response.data);
 
+				// Fetch full company details for each role
 				const companiesData = await Promise.all(
 					response.data.map(async (role) => {
 						const companyResponse = await client.models.Company.get({ id: role.companyId });
@@ -86,6 +88,7 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 					})
 				);
 
+				console.log("UserDialog: Fetched company details:", companiesData);
 				setCompanyDetails(companiesData);
 				setFormData((prev) => ({
 					...prev,
@@ -123,6 +126,7 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 	};
 
 	const handleCompanyChange = (event, newValue) => {
+		console.log("UserDialog: Company selection changed:", newValue);
 		setFormData((prev) => ({
 			...prev,
 			selectedCompanies: newValue || [],
@@ -138,21 +142,16 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 			setError("Name is required");
 			return false;
 		}
-		if (!formData.cognitoId?.trim()) {
-			setError("Cognito ID is required");
-			return false;
-		}
 		return true;
 	};
 
 	const handleSubmit = async () => {
-		if (isSubmitting || !validateForm()) return;
+		if (!validateForm()) return;
 
-		setIsSubmitting(true);
 		setLoading(true);
 		try {
 			const userData = {
-				cognitoId: formData.cognitoId.trim(),
+				cognitoId: formData.cognitoId || currentUser?.sub,
 				email: formData.email.trim(),
 				name: formData.name.trim(),
 				phone: formData.phone?.trim() || null,
@@ -194,7 +193,6 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 			setError(err.message || "Failed to save user");
 		} finally {
 			setLoading(false);
-			setIsSubmitting(false);
 		}
 	};
 
@@ -208,16 +206,6 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 							{error}
 						</Alert>
 					)}
-					<TextField
-						fullWidth
-						label='Cognito ID'
-						name='cognitoId'
-						value={formData.cognitoId}
-						onChange={handleChange}
-						required
-						error={!formData.cognitoId && Boolean(error)}
-						disabled={loading}
-					/>
 					<TextField
 						fullWidth
 						label='Email'
@@ -283,11 +271,11 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 				</Box>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={onClose} disabled={loading || isSubmitting}>
+				<Button onClick={onClose} disabled={loading}>
 					Cancel
 				</Button>
-				<Button onClick={handleSubmit} variant='contained' disabled={loading || isSubmitting}>
-					{loading || isSubmitting ? "Saving..." : editUser ? "Save Changes" : "Add User"}
+				<Button onClick={handleSubmit} variant='contained' disabled={loading}>
+					{loading ? "Saving..." : editUser ? "Save Changes" : "Add User"}
 				</Button>
 			</DialogActions>
 		</Dialog>
