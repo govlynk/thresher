@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box, Container } from "@mui/material";
-import { AssessmentForm } from "../components/Assessment/AssessmentForm";
+import { AssessmentForm } from "../components/assessment/AssessmentForm";
 
 function AssessmentScreen() {
 	return (
