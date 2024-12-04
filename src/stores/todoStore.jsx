@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
+import { useTeamTodoStore } from "./teamTodoStore";
+import { useUserCompanyStore } from "./userCompanyStore";
 
 const client = generateClient({
 	authMode: "userPool",
@@ -12,13 +14,34 @@ export const useTodoStore = create((set, get) => ({
 	subscription: null,
 
 	fetchTodos: async () => {
+		const activeCompany = useUserCompanyStore.getState().getActiveCompany();
+		if (!activeCompany?.id) {
+			set({
+				todos: [],
+				loading: false,
+				error: "No active company selected",
+			});
+			return;
+		}
+
+		// Cleanup existing subscription
+		const currentSub = get().subscription;
+		if (currentSub) {
+			currentSub.unsubscribe();
+		}
+
 		set({ loading: true });
 		try {
-			const subscription = client.models.Todo.observeQuery().subscribe({
+			const selectedTeamId = useTeamTodoStore.getState().selectedTeamId;
+
+			const subscription = client.models.Todo.observeQuery({
+				filter: selectedTeamId === "all" ? undefined : { teamId: { eq: selectedTeamId } },
+			}).subscribe({
 				next: ({ items }) => {
 					set({
 						todos: items.sort((a, b) => a.position - b.position),
 						loading: false,
+						error: null,
 					});
 				},
 				error: (err) => {
@@ -26,6 +49,7 @@ export const useTodoStore = create((set, get) => ({
 					set({ error: "Failed to fetch todos", loading: false });
 				},
 			});
+
 			set({ subscription });
 		} catch (err) {
 			console.error("Fetch todos error:", err);
@@ -62,12 +86,7 @@ export const useTodoStore = create((set, get) => ({
 				teamId: todoData.teamId,
 			});
 
-			set((state) => ({
-				todos: [...state.todos, todo],
-				loading: false,
-				error: null,
-			}));
-
+			set({ loading: false, error: null });
 			return todo;
 		} catch (err) {
 			console.error("Create todo error:", err);
@@ -83,10 +102,7 @@ export const useTodoStore = create((set, get) => ({
 				...updates,
 			});
 
-			set((state) => ({
-				todos: state.todos.map((todo) => (todo.id === id ? updatedTodo : todo)),
-				error: null,
-			}));
+			set({ error: null });
 			return updatedTodo;
 		} catch (err) {
 			console.error("Error updating todo:", err);
@@ -105,7 +121,7 @@ export const useTodoStore = create((set, get) => ({
 					status: todo.status,
 				});
 			}
-			set({ todos: newTodos, error: null });
+			set({ error: null });
 		} catch (err) {
 			console.error("Error updating todos:", err);
 			set({ error: "Failed to update todos" });
@@ -118,10 +134,7 @@ export const useTodoStore = create((set, get) => ({
 			await client.models.Todo.delete({
 				id,
 			});
-			set((state) => ({
-				todos: state.todos.filter((todo) => todo.id !== id),
-				error: null,
-			}));
+			set({ error: null });
 		} catch (err) {
 			console.error("Error removing todo:", err);
 			set({ error: "Failed to remove todo" });
@@ -134,5 +147,11 @@ export const useTodoStore = create((set, get) => ({
 		if (subscription) {
 			subscription.unsubscribe();
 		}
+		set({
+			todos: [],
+			loading: false,
+			error: null,
+			subscription: null,
+		});
 	},
 }));

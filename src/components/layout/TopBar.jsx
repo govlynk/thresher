@@ -16,6 +16,7 @@ import { LogOut, User, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "aws-amplify/auth";
 import { CompanySwitcher } from "./CompanySwitcher";
+import { TeamSelector } from "./TeamSelector";
 import { useAuthStore } from "../../stores/authStore";
 
 function stringToColor(string) {
@@ -94,8 +95,13 @@ export default function TopBar() {
 			}}
 		>
 			<Toolbar sx={{ gap: 2 }}>
-				{user && <CompanySwitcher />}
-				<Divider orientation='vertical' flexItem />
+				{user && (
+					<>
+						<CompanySwitcher />
+						<TeamSelector />
+						<Divider orientation='vertical' flexItem />
+					</>
+				)}
 
 				<Box sx={{ flexGrow: 1 }} />
 
