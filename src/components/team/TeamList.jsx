@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
 	Box,
 	Button,
@@ -23,11 +23,11 @@ import { useTeamMemberStore } from "../../stores/teamMemberStore";
 import { useUserCompanyStore } from "../../stores/userCompanyStore";
 
 export function TeamList() {
-	const [searchTerm, setSearchTerm] = useState("");
-	const [teamDialogOpen, setTeamDialogOpen] = useState(false);
-	const [memberDialogOpen, setMemberDialogOpen] = useState(false);
-	const [selectedTeam, setSelectedTeam] = useState(null);
-	const [expandedTeamId, setExpandedTeamId] = useState(null);
+	const [searchTerm, setSearchTerm] = React.useState("");
+	const [teamDialogOpen, setTeamDialogOpen] = React.useState(false);
+	const [memberDialogOpen, setMemberDialogOpen] = React.useState(false);
+	const [selectedTeam, setSelectedTeam] = React.useState(null);
+	const [expandedTeamId, setExpandedTeamId] = React.useState(null);
 
 	const { teams, removeTeam, loading, error, fetchTeams } = useTeamStore();
 	const { getActiveCompany } = useUserCompanyStore();
@@ -35,14 +35,9 @@ export function TeamList() {
 
 	useEffect(() => {
 		if (activeCompany?.id) {
-			console.log("TeamList: Fetching teams for company:", activeCompany.id);
 			fetchTeams(activeCompany.id);
 		}
 	}, [activeCompany?.id, fetchTeams]);
-
-	useEffect(() => {
-		console.log("TeamList: Current teams state:", teams);
-	}, [teams]);
 
 	const filteredTeams =
 		teams?.filter(
@@ -52,13 +47,11 @@ export function TeamList() {
 		) || [];
 
 	const handleEditTeam = (team) => {
-		console.log("TeamList: Editing team:", team);
 		setSelectedTeam(team);
 		setTeamDialogOpen(true);
 	};
 
 	const handleAddMembers = (team) => {
-		console.log("TeamList: Adding members to team:", team);
 		setSelectedTeam(team);
 		setMemberDialogOpen(true);
 	};
@@ -75,6 +68,15 @@ export function TeamList() {
 
 	const handleExpandTeam = (teamId) => {
 		setExpandedTeamId(expandedTeamId === teamId ? null : teamId);
+	};
+
+	const handleDialogClose = () => {
+		setTeamDialogOpen(false);
+		setMemberDialogOpen(false);
+		setSelectedTeam(null);
+		if (activeCompany?.id) {
+			fetchTeams(activeCompany.id);
+		}
 	};
 
 	if (!activeCompany) {
@@ -203,10 +205,10 @@ export function TeamList() {
 												>
 													<Box>
 														<Typography variant='body2'>
-															{member.contact.firstName} {member.contact.lastName}
+															{member.contact?.firstName} {member.contact?.lastName}
 														</Typography>
 														<Typography variant='caption' color='text.secondary'>
-															{member.contact.contactEmail}
+															{member.contact?.contactEmail}
 														</Typography>
 													</Box>
 													<Chip label={member.role} size='small' variant='outlined' color='primary' />
@@ -229,23 +231,9 @@ export function TeamList() {
 				)}
 			</Box>
 
-			<TeamDialog
-				open={teamDialogOpen}
-				onClose={() => {
-					setTeamDialogOpen(false);
-					setSelectedTeam(null);
-				}}
-				team={selectedTeam}
-			/>
+			<TeamDialog open={teamDialogOpen} onClose={handleDialogClose} team={selectedTeam} />
 
-			<TeamMemberDialog
-				open={memberDialogOpen}
-				onClose={() => {
-					setMemberDialogOpen(false);
-					setSelectedTeam(null);
-				}}
-				team={selectedTeam} // Pass the entire team object
-			/>
+			<TeamMemberDialog open={memberDialogOpen} onClose={handleDialogClose} team={selectedTeam} />
 		</Box>
 	);
 }
