@@ -2,7 +2,7 @@ import React from "react";
 import { Grid, Typography, Box, CircularProgress } from "@mui/material";
 import { OpportunityCard } from "./OpportunityCard";
 
-export function OpportunityList({ opportunities = [] }) {
+export function OpportunityList({ opportunities = [], type = "new" }) {
 	if (!opportunities.length) {
 		return (
 			<Typography color='text.secondary' align='center' sx={{ py: 4 }}>
@@ -15,7 +15,7 @@ export function OpportunityList({ opportunities = [] }) {
 		<Grid container spacing={3}>
 			{opportunities.map((opportunity) => (
 				<Grid item xs={12} md={6} lg={4} key={opportunity.noticeId}>
-					<OpportunityCard opportunity={opportunity} />
+					<OpportunityCard opportunity={opportunity} type={type} />
 				</Grid>
 			))}
 		</Grid>

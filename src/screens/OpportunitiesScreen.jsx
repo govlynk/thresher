@@ -7,7 +7,7 @@ import { useUserCompanyStore } from "../stores/userCompanyStore";
 
 export default function OpportunitiesScreen() {
 	const [activeTab, setActiveTab] = React.useState(0);
-	const { opportunities, savedOpportunities, rejectedOpportunities } = useOpportunityStore();
+	const { opportunities, savedOpportunities, rejectedOpportunities, loading, error } = useOpportunityStore();
 	const { getActiveCompany } = useUserCompanyStore();
 	const activeCompany = getActiveCompany();
 
@@ -19,6 +19,22 @@ export default function OpportunitiesScreen() {
 		return (
 			<Box sx={{ p: 3 }}>
 				<Alert severity='warning'>Please select a company to view opportunities</Alert>
+			</Box>
+		);
+	}
+
+	if (loading) {
+		return (
+			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+				<CircularProgress />
+			</Box>
+		);
+	}
+
+	if (error) {
+		return (
+			<Box sx={{ p: 3 }}>
+				<Alert severity='error'>{error}</Alert>
 			</Box>
 		);
 	}
@@ -38,15 +54,15 @@ export default function OpportunitiesScreen() {
 			</Tabs>
 
 			<Box role='tabpanel' hidden={activeTab !== 0}>
-				{activeTab === 0 && <OpportunityList opportunities={opportunities} />}
+				{activeTab === 0 && <OpportunityList opportunities={opportunities} type='new' />}
 			</Box>
 
 			<Box role='tabpanel' hidden={activeTab !== 1}>
-				{activeTab === 1 && <OpportunityList opportunities={savedOpportunities} />}
+				{activeTab === 1 && <OpportunityList opportunities={savedOpportunities} type='saved' />}
 			</Box>
 
 			<Box role='tabpanel' hidden={activeTab !== 2}>
-				{activeTab === 2 && <OpportunityList opportunities={rejectedOpportunities} />}
+				{activeTab === 2 && <OpportunityList opportunities={rejectedOpportunities} type='rejected' />}
 			</Box>
 		</Box>
 	);

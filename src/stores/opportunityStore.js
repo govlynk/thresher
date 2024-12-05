@@ -20,10 +20,12 @@ export const useOpportunityStore = create(
 				try {
 					const response = await getOpportunity(params);
 
-					console.log("Opportunities:", response);
-					// Filter out previously rejected opportunities
+					// Filter out previously saved and rejected opportunities
+					const savedIds = get().savedOpportunities.map((opp) => opp.noticeId);
 					const rejectedIds = get().rejectedOpportunities.map((opp) => opp.noticeId);
-					const filteredOpportunities = response.filter((opp) => !rejectedIds.includes(opp.noticeId));
+					const filteredOpportunities = response.filter(
+						(opp) => !savedIds.includes(opp.noticeId) && !rejectedIds.includes(opp.noticeId)
+					);
 
 					set({
 						opportunities: filteredOpportunities,
@@ -40,25 +42,75 @@ export const useOpportunityStore = create(
 			},
 
 			saveOpportunity: async (opportunity) => {
+				set({ loading: true, error: null });
 				try {
+					// If opportunity was previously rejected, remove it from rejected list
+					if (get().rejectedOpportunities.some((opp) => opp.noticeId === opportunity.noticeId)) {
+						set((state) => ({
+							rejectedOpportunities: state.rejectedOpportunities.filter(
+								(opp) => opp.noticeId !== opportunity.noticeId
+							),
+						}));
+					}
+
 					const savedOpp = {
 						...opportunity,
 						savedAt: new Date().toISOString(),
 						status: "saved",
 					};
 
+					// Save to database
+					const response = await client.models.Opportunity.create({
+						opportunityId: opportunity.noticeId,
+						title: opportunity.title,
+						description: opportunity.description || "",
+						agency: opportunity.department,
+						dueDate: opportunity.responseDeadLine,
+						status: "SAVED",
+						bidProgress: 0,
+						notes: "",
+						attachments: [],
+					});
+
+					if (!response?.data) {
+						throw new Error("Failed to save opportunity to database");
+					}
+
 					set((state) => ({
 						savedOpportunities: [...state.savedOpportunities, savedOpp],
 						opportunities: state.opportunities.filter((opp) => opp.noticeId !== opportunity.noticeId),
+						loading: false,
+						error: null,
 					}));
+
+					return response.data;
 				} catch (err) {
 					console.error("Error saving opportunity:", err);
+					set({ error: err.message, loading: false });
 					throw err;
 				}
 			},
 
 			rejectOpportunity: async (opportunity) => {
+				set({ loading: true, error: null });
 				try {
+					// If opportunity was previously saved, remove it from database and saved list
+					if (get().savedOpportunities.some((opp) => opp.noticeId === opportunity.noticeId)) {
+						const savedOpp = await client.models.Opportunity.list({
+							filter: { opportunityId: { eq: opportunity.noticeId } },
+						});
+
+						if (savedOpp?.data?.[0]) {
+							await client.models.Opportunity.delete({ id: savedOpp.data[0].id });
+						}
+
+						set((state) => ({
+							savedOpportunities: state.savedOpportunities.filter(
+								(opp) => opp.noticeId !== opportunity.noticeId
+							),
+						}));
+					}
+
 					const rejectedOpp = {
 						...opportunity,
 						rejectedAt: new Date().toISOString(),
@@ -68,9 +120,59 @@ export const useOpportunityStore = create(
 					set((state) => ({
 						rejectedOpportunities: [...state.rejectedOpportunities, rejectedOpp],
 						opportunities: state.opportunities.filter((opp) => opp.noticeId !== opportunity.noticeId),
+						loading: false,
+						error: null,
 					}));
 				} catch (err) {
 					console.error("Error rejecting opportunity:", err);
+					set({ error: err.message, loading: false });
+					throw err;
+				}
+			},
+
+			moveToSaved: async (opportunity) => {
+				set({ loading: true, error: null });
+				try {
+					// Remove from rejected list
+					set((state) => ({
+						rejectedOpportunities: state.rejectedOpportunities.filter(
+							(opp) => opp.noticeId !== opportunity.noticeId
+						),
+					}));
+
+					// Save to database
+					const response = await client.models.Opportunity.create({
+						opportunityId: opportunity.noticeId,
+						title: opportunity.title,
+						description: opportunity.description || "",
+						agency: opportunity.department,
+						dueDate: opportunity.responseDeadLine,
+						status: "SAVED",
+						bidProgress: 0,
+						notes: "",
+						attachments: [],
+					});
+
+					if (!response?.data) {
+						throw new Error("Failed to save opportunity to database");
+					}
+
+					const savedOpp = {
+						...opportunity,
+						savedAt: new Date().toISOString(),
+						status: "saved",
+					};
+
+					set((state) => ({
+						savedOpportunities: [...state.savedOpportunities, savedOpp],
+						loading: false,
+						error: null,
+					}));
+
+					return response.data;
+				} catch (err) {
+					console.error("Error moving opportunity to saved:", err);
+					set({ error: err.message, loading: false });
 					throw err;
 				}
 			},

@@ -1,19 +1,18 @@
 import axios from "axios";
 
-const sanitizeData = (data) => {
-	if (!data) return null;
-
-	// Convert data to plain object, removing any Symbol or non-serializable content
-	return JSON.parse(JSON.stringify(data));
-};
-
 const formatQueryParams = (params) => {
+	if (!params || Object.keys(params).length === 0) {
+		return "";
+	}
+
 	return Object.entries(params)
 		.map(([key, value]) => `${value}`)
 		.join("&");
 };
 
 const processOpportunityData = (opportunity) => {
+	if (!opportunity) return null;
+
 	return {
 		...opportunity,
 		department: opportunity.department?.name || opportunity.departmentName || "N/A",
@@ -23,50 +22,52 @@ const processOpportunityData = (opportunity) => {
 };
 
 export async function getOpportunity(searchParams) {
-	const api_key = `&api_key=${import.meta.env.VITE_SAM_API_KEY}`;
+	if (!import.meta.env.VITE_SAM_API_KEY) {
+		throw new Error("SAM API key is not configured");
+	}
 
+	const api_key = `api_key=${import.meta.env.VITE_SAM_API_KEY}`;
 	const queryString = formatQueryParams(searchParams);
-	const apiUrl = `https://api.sam.gov/opportunities/v2/search?${api_key}&${queryString}`;
+	const apiUrl = `https://api.sam.gov/opportunities/v2/search?${api_key}${queryString ? "&" + queryString : ""}`;
 	console.log(apiUrl);
 
-	try {
-		const response = await axios.get(apiUrl);
-		if (response.status !== 200) {
-			throw new Error("Network response was not ok");
-		}
+	const maxRetries = 3;
+	let lastError;
 
-		// Process each opportunity to ensure department, subtier, and office info is available
-		const processedData = response.data.opportunitiesData.map(processOpportunityData);
+	for (let i = 0; i < maxRetries; i++) {
+		try {
+			const response = await axios.get(apiUrl, {
+				headers: {
+					Accept: "application/json",
+					"Content-Type": "application/json",
+				},
+			});
 
-		// Sanitize the processed data before returning
-		const sanitizedData = sanitizeData(processedData);
-		return sanitizedData;
-	} catch (error) {
-		// Handle errors
-		const serializedError = new Error(error.message || "Failed to fetch opportunity data");
-		throw serializedError;
-	}
-}
-
-//*******************    Fetch notice   ***************** */
-export const fetchNotice = (url, setNotice) => {
-	const apiUrl = `${url}` + api_key;
-
-	axios
-		.get(apiUrl)
-		.then((response) => {
-			if (response.status === 404) {
-				//****   There was no description available
-				setNotice("No description available");
-				return;
+			if (!response.data?.opportunitiesData) {
+				return [];
 			}
 
-			let noticeText = convertSentenceCase(response.data.description);
-			noticeText ? setNotice(noticeText) : setNotice("empty");
-		})
-		.catch((error) => {
-			// Handle errors
-			setNotice("error");
-			console.error("There was an error fetching the notice:", error);
-		});
-};
+			// Process and sanitize each opportunity
+			const processedData = response.data.opportunitiesData
+				.filter(Boolean)
+				.map(processOpportunityData)
+				.filter(Boolean);
+			return processedData;
+		} catch (error) {
+			if (error.response?.status !== 429) {
+				throw error;
+			}
+			lastError = error;
+
+			// Check for "Retry-After" header
+			const retryAfter = error.response.headers["retry-after"];
+			const delay = retryAfter ? parseInt(retryAfter, 10) * 1000 : Math.pow(2, i) * 1000;
+			console.log(`Retrying after ${delay}ms`, retryAfter);
+
+			// Exponential backoff or wait for "Retry-After" duration
+			await new Promise((resolve) => setTimeout(resolve, delay));
+		}
+	}
+
+	throw lastError;
+}

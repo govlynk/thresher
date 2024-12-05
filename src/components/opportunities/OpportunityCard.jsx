@@ -14,16 +14,28 @@ import {
 import { useOpportunityStore } from "../../stores/opportunityStore";
 import { OpportunityDetailsSidebar } from "./OpportunityDetailsSidebar";
 
-export function OpportunityCard({ opportunity }) {
-	const { saveOpportunity, rejectOpportunity } = useOpportunityStore();
+export function OpportunityCard({ opportunity, type = "new" }) {
+	const { saveOpportunity, rejectOpportunity, moveToSaved, loading, error } = useOpportunityStore();
 	const [detailsOpen, setDetailsOpen] = useState(false);
 
-	const handleSave = () => {
-		saveOpportunity(opportunity);
+	const handleSave = async () => {
+		try {
+			if (type === "rejected") {
+				await moveToSaved(opportunity);
+			} else {
+				await saveOpportunity(opportunity);
+			}
+		} catch (err) {
+			console.error("Error saving opportunity:", err);
+		}
 	};
 
-	const handleReject = () => {
-		rejectOpportunity(opportunity);
+	const handleReject = async () => {
+		try {
+			await rejectOpportunity(opportunity);
+		} catch (err) {
+			console.error("Error rejecting opportunity:", err);
+		}
 	};
 
 	const formatDate = (dateString) => {
@@ -106,15 +118,19 @@ export function OpportunityCard({ opportunity }) {
 
 				<CardActions sx={{ justifyContent: "space-between", p: 2 }}>
 					<Box>
-						<Tooltip title='Save Opportunity'>
-							<IconButton onClick={handleSave} color='primary'>
-								<ThumbsUp size={20} />
-							</IconButton>
+						<Tooltip title={type === "saved" ? "Already Saved" : "Save Opportunity"}>
+							<span>
+								<IconButton onClick={handleSave} color='primary' disabled={loading || type === "saved"}>
+									<ThumbsUp size={20} />
+								</IconButton>
+							</span>
 						</Tooltip>
-						<Tooltip title='Reject Opportunity'>
-							<IconButton onClick={handleReject} color='error'>
-								<ThumbsDown size={20} />
-							</IconButton>
+						<Tooltip title={type === "rejected" ? "Already Rejected" : "Reject Opportunity"}>
+							<span>
+								<IconButton onClick={handleReject} color='error' disabled={loading || type === "rejected"}>
+									<ThumbsDown size={20} />
+								</IconButton>
+							</span>
 						</Tooltip>
 						<Tooltip title='View Details'>
 							<IconButton onClick={() => setDetailsOpen(true)} color='info'>
