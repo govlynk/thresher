@@ -18,26 +18,6 @@ const COMPANY_ROLES = [
 ] as const;
 
 const schema = a.schema({
-	Opportunity: a
-		.model({
-			opportunityId: a.string(),
-			title: a.string(),
-			description: a.string(),
-			agency: a.string(),
-			dueDate: a.datetime(),
-			status: a.enum(["BACKLOG", "BID", "REVIEW", "SUBMITTED", "WON", "LOST"]),
-			bidProgress: a.integer(),
-			notes: a.string(),
-			attachments: a.string().array(),
-			userId: a.string(),
-			companyId: a.string(),
-			teamId: a.string(),
-			user: a.belongsTo("User", "userId"),
-			company: a.belongsTo("Company", "companyId"),
-			team: a.belongsTo("Team", "teamId"),
-		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
-
 	User: a
 		.model({
 			cognitoId: a.string().required(),
@@ -47,7 +27,6 @@ const schema = a.schema({
 			status: a.enum(["ACTIVE", "INACTIVE"]),
 			lastLogin: a.datetime(),
 			avatar: a.url(),
-			opportunities: a.hasMany("Opportunity", "userId"),
 			companies: a.hasMany("UserCompanyRole", "userId"),
 			todos: a.hasMany("Todo", "assigneeId"),
 		})
@@ -105,7 +84,6 @@ const schema = a.schema({
 			pscCode: a.string().array(),
 			sbaBusinessTypeDesc: a.string().array(),
 			entityURL: a.url(),
-			opportunities: a.hasMany("Opportunity", "companyId"),
 			users: a.hasMany("UserCompanyRole", "companyId"),
 			teams: a.hasMany("Team", "companyId"),
 		})
@@ -118,7 +96,6 @@ const schema = a.schema({
 			companyId: a.string().required(),
 			company: a.belongsTo("Company", "companyId"),
 			members: a.hasMany("TeamMember", "teamId"),
-			opportunities: a.hasMany("Opportunity", "teamId"),
 			todos: a.hasMany("Todo", "teamId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
