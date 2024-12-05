@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Box, Typography, Alert } from "@mui/material";
 import { OpportunityBoard } from "../components/pipeline/PipelineBoard";
-import { useOpportunityStore } from "../stores/opportunityStore";
+import { useOpportunityStore } from "../stores/opportunityStore-save";
 import { useUserCompanyStore } from "../stores/userCompanyStore";
 
 export default function PipelineScreen() {

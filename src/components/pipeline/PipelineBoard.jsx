@@ -3,7 +3,7 @@ import { Box, Typography, CircularProgress, Alert } from "@mui/material";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortable";
 import { OpportunityColumn } from "./OpportunityColumn";
-import { useOpportunityStore } from "../../stores/opportunityStore";
+import { useOpportunityStore } from "../../stores/opportunityStore-save";
 
 const COLUMN_COLORS = {
 	BACKLOG: "#D671AE",
