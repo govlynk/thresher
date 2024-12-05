@@ -1,27 +1,36 @@
-import { FormControl, FormLabel, TextField, Typography } from '@mui/material'
+import React from 'react';
+import { TextField, Box, Typography } from '@mui/material';
 
-export function TextQuestion({ question, value, onChange }) {
+export function TextQuestion({ question, value, onChange, error }) {
+  const isLongText = question.type === 'longText';
+
   return (
-    <FormControl component="fieldset" fullWidth>
-      <FormLabel component="legend">
-        <Typography variant="h6" gutterBottom>
-          {question.title}
-        </Typography>
-      </FormLabel>
-
-      <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-        {question.description}
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="h6" gutterBottom>
+        {question.title}
+        {question.required && <span style={{ color: 'error.main' }}> *</span>}
       </Typography>
+      
+      {question.description && (
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {question.description}
+        </Typography>
+      )}
 
       <TextField
-        multiline
-        rows={4}
-        value={value || ''}
-        onChange={(e) => onChange(question.id, e.target.value)}
-        inputProps={{ maxLength: question.maxLength }}
-        helperText={`${value?.length || 0}/${question.maxLength} characters`}
         fullWidth
+        multiline={isLongText}
+        rows={isLongText ? 4 : 1}
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        error={Boolean(error)}
+        helperText={error || (question.maxLength ? `${value?.length || 0}/${question.maxLength} characters` : '')}
+        inputProps={{
+          maxLength: question.maxLength,
+          minLength: question.minLength,
+        }}
+        placeholder={question.placeholder}
       />
-    </FormControl>
-  )
+    </Box>
+  );
 }

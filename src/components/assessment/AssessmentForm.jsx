@@ -10,6 +10,7 @@ import { YesNoQuestion } from "./QuestionTypes/YesNoQuestion";
 import { MultipleChoiceQuestion } from "./QuestionTypes/MultipleChoiceQuestion";
 import { TextQuestion } from "./QuestionTypes/TextQuestion";
 import { CodeListQuestion } from "./QuestionTypes/CodeListQuestion";
+import { ChoiceQuestion } from "./QuestionTypes/ChoiceQuestion";
 import { InfoSidebar } from "./InfoSidebar";
 import { IntroScreen } from "./IntroScreen";
 
@@ -46,6 +47,30 @@ export function AssessmentForm() {
 				return <TextQuestion {...props} />;
 			case QUESTION_TYPES.CODE_LIST:
 				return <CodeListQuestion {...props} />;
+			case QUESTION_TYPES.SINGLE_CHOICE:
+				return <ChoiceQuestion {...props} />;
+			case QUESTION_TYPES.TEXT:
+				return <CodeListQuestion {...props} />;
+			case QUESTION_TYPES.LONG_TEXT:
+				return <TextQuestion {...props} />;
+			case QUESTION_TYPES.SINGLE_CHOICE:
+				return <ChoiceQuestion {...props} />;
+			case QUESTION_TYPES.RATING:
+				return <RatingQuestion {...props} />;
+			// case QUESTION_TYPES.DROPDOWN: return <CodeListQuestion {...props} />;
+			case QUESTION_TYPES.LIKERT:
+				return <LikertQuestion {...props} />;
+			case QUESTION_TYPES.SLIDER:
+				return <SliderQuestion {...props} />;
+			case QUESTION_TYPES.DEMOGRAPHIC:
+				return <DemographicQuestion {...props} />;
+			case QUESTION_TYPES.FILE_UPLOAD:
+				return <FileUploadQuestion {...props} />;
+			case QUESTION_TYPES.SECTION:
+				return <SectionQuestion {...props} />;
+			case QUESTION_TYPES.AUTHORIZATION:
+				return <AuthorizationQuestion {...props} />;
+
 			default:
 				return null;
 		}
@@ -59,8 +84,17 @@ export function AssessmentForm() {
 		return Boolean(answer);
 	};
 
+	const handleKeyPress = useCallback(
+		(e, value) => {
+			if (e.key === "Enter" && value.trim()) {
+				handleNext(value);
+			}
+		},
+		[handleNext]
+	);
+
 	return (
-		<Box sx={{ maxWidth: 800, mx: "auto" }}>
+		<Box sx={{ mx: "auto" }}>
 			<LinearProgress variant='determinate' value={progress} sx={{ mb: 4, height: 8, borderRadius: 5 }} />
 
 			<Stepper activeStep={currentStep} sx={{ mb: 4 }}>
