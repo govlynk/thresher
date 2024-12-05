@@ -2,63 +2,56 @@ import React from 'react';
 import { Box, Typography, Rating, FormHelperText } from '@mui/material';
 import { Star } from 'lucide-react';
 
-export function RatingQuestion({ question, value, onChange, error }) {
-  const StarIcon = () => (
-    <Star 
-      size={24}
-      style={{
-        fill: 'currentColor',
-        stroke: 'currentColor',
-        strokeWidth: 1
-      }}
-    />
-  );
-
-  const EmptyStarIcon = () => (
-    <Star 
-      size={24}
-      style={{
-        fill: 'transparent',
-        stroke: 'currentColor',
-        strokeWidth: 1
-      }}
-    />
-  );
+export function RatingQuestion({ question, value = {}, onChange }) {
+  const handleRatingChange = (category, newValue) => {
+    onChange(question.id, {
+      ...value,
+      [category]: newValue
+    });
+  };
 
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ width: '100%' }}>
       <Typography variant="h6" gutterBottom>
         {question.title}
         {question.required && <span style={{ color: 'error.main' }}> *</span>}
       </Typography>
 
-      {question.description && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {question.description}
-        </Typography>
-      )}
+      <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+        {question.question}
+      </Typography>
 
-      <Rating
-        value={Number(value) || 0}
-        onChange={(event, newValue) => onChange(newValue)}
-        max={question.maxRating || 5}
-        icon={<StarIcon />}
-        emptyIcon={<EmptyStarIcon />}
-        sx={{
-          '& .MuiRating-icon': {
-            color: 'primary.main'
-          }
-        }}
-      />
+      {question.categories.map((category) => (
+        <Box key={category} sx={{ mb: 2 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            {category}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Rating
+              value={value[category] || 0}
+              onChange={(_, newValue) => handleRatingChange(category, newValue)}
+              max={question.maxRating || 5}
+              icon={<Star fill="currentColor" />}
+              emptyIcon={<Star />}
+              sx={{
+                '& .MuiRating-icon': {
+                  color: 'primary.main'
+                }
+              }}
+            />
+            {value[category] && question.labels && (
+              <Typography variant="body2" color="text.secondary">
+                {question.labels[value[category]]}
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      ))}
 
-      {question.labels && value && (
-        <Typography variant="body2" sx={{ mt: 1 }}>
-          {question.labels[value]}
-        </Typography>
-      )}
-
-      {error && (
-        <FormHelperText error>{error}</FormHelperText>
+      {question.helpText && (
+        <FormHelperText>
+          {question.helpText}
+        </FormHelperText>
       )}
     </Box>
   );

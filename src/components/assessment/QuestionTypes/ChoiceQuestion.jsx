@@ -1,36 +1,61 @@
 import React from "react";
-import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Typography } from "@mui/material";
+import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Typography, Box } from "@mui/material";
+import { QUESTION_TYPES } from '../../../config/questionTypes';
 
 export function ChoiceQuestion({ question, value, onChange }) {
-	const values = value ? (Array.isArray(value) ? value : [value]) : [];
+  const handleChange = (e) => {
+    onChange(question.id, e.target.value);
+  };
 
-	return (
-		<FormControl component='fieldset' fullWidth>
-			<FormLabel component='legend'>
-				<Typography variant='h6' gutterBottom>
-					{question.title}
-				</Typography>
-			</FormLabel>
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Typography variant="h6" gutterBottom>
+        {question.title}
+        {question.required && <span style={{ color: 'error.main' }}> *</span>}
+      </Typography>
 
-			<Typography variant='body1' sx={{ mb: 3, color: "text.secondary" }}>
-				{question.question}
-			</Typography>
+      <Typography variant="body1" sx={{ mb: 2, color: 'text.secondary' }}>
+        {question.question}
+      </Typography>
 
-			{/* <RadioGroup value={value || ""} onChange={(e) => onChange(question.id, e.target.value)}>
-				{question.options.map((option) => (
-					<FormControlLabel key={option.value} value={option.value} control={<Radio />} label={option.label} />
-				))}
-			</RadioGroup> */}
+      <FormControl component="fieldset" fullWidth>
+        <RadioGroup 
+          value={value || ""}
+          onChange={handleChange}
+          sx={{
+            '& .MuiFormControlLabel-root': {
+              marginY: 1
+            }
+          }}
+        >
+          {question.options.map((option) => (
+            <FormControlLabel
+              key={option}
+              value={option}
+              control={
+                <Radio 
+                  sx={{
+                    '&.Mui-checked': {
+                      color: 'primary.main'
+                    }
+                  }}
+                />
+              }
+              label={
+                <Typography variant="body1">
+                  {option}
+                </Typography>
+              }
+            />
+          ))}
+        </RadioGroup>
+      </FormControl>
 
-			<RadioGroup onChange={(e) => onChange(question.id, e.target.value)}>
-				{question.options.map((option) => (
-					<FormControlLabel
-						key={option}
-						control={<Radio checked={values.includes(option)} onChange={() => handleChange(option)} />}
-						label={option}
-					/>
-				))}
-			</RadioGroup>
-		</FormControl>
-	);
+      {question.helpText && (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+          {question.helpText}
+        </Typography>
+      )}
+    </Box>
+  );
 }

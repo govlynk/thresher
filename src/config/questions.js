@@ -1,106 +1,191 @@
 import { QUESTION_TYPES } from "./questionTypes";
 
 export const questions = [
-	// Yes/No Questions
-	{
-		id: "registration",
-		title: "SAM.gov Registration",
-		question: "Is your entity registration active in SAM.gov?",
-		placeholder: "Type your name...",
-		type: QUESTION_TYPES.YES_NO,
-		options: ["Yes", "No"],
-		required: true,
-	},
-	{
-		id: "security",
-		title: "Security Clearances",
-		question: "Do you have required facility or personnel security clearances?",
-		placeholder: "Type your name...",
-		type: QUESTION_TYPES.YES_NO,
-		options: ["Yes", "No"],
-		required: true,
-	},
+  // Basic Yes/No Questions
+  {
+    id: "registration",
+    title: "SAM.gov Registration",
+    question: "Is your entity registration active in SAM.gov?",
+    type: QUESTION_TYPES.YES_NO,
+    required: true,
+  },
+  
+  // Single Choice Questions with Validation
+  {
+    id: "businessSize",
+    title: "Business Size Classification",
+    question: "What is your business size classification? This can vary by NAICS code.",
+    type: QUESTION_TYPES.SINGLE_CHOICE,
+    options: ["Small Business", "Large Business", "Not Sure"],
+    required: true,
+    helpText: "Select the classification that best matches your company size",
+  },
 
-	// Multiple Choice Questions
-	{
-		id: "businessSize",
-		title: "Business Size",
-		question: "What is your business size classification? This can vary by NAICS code.",
-		placeholder: "Select Business Type...",
-		type: QUESTION_TYPES.SINGLE_CHOICE,
-		options: ["Small Business", "Large Business", "Not Sure"],
-		required: true,
-	},
-	{
-		id: "socioeconomic",
-		title: "Socioeconomic Status",
-		question: "Select all socioeconomic categories that apply:",
-		placeholder: "Type your name...",
-		type: QUESTION_TYPES.MULTIPLE_CHOICE,
-		options: ["8(a)", "WOSB", "HUBZone", "SDVOSB", "None"],
-		multiple: true,
-		required: true,
-	},
+  // Multiple Choice with Complex Options
+  {
+    id: "socioeconomic",
+    title: "Socioeconomic Categories",
+    question: "Select all socioeconomic categories that apply to your business:",
+    type: QUESTION_TYPES.MULTIPLE_CHOICE,
+    options: [
+      "8(a) Business Development",
+      "Woman-Owned Small Business (WOSB)",
+      "HUBZone Certified",
+      "Service-Disabled Veteran-Owned Small Business",
+      "Economically Disadvantaged Women-Owned Small Business",
+      "None of the above"
+    ],
+    multiple: true,
+    required: true,
+    validation: (values) => {
+      if (values?.includes("None of the above") && values.length > 1) {
+        return "Cannot select 'None of the above' with other options";
+      }
+      return null;
+    }
+  },
 
-	// Text Response Questions
-	{
-		id: "capabilities",
-		title: "Core Capabilities",
-		question: "Describe your company's core capabilities and differentiators (max 500 characters)",
-		placeholder: "Type your name...",
-		type: QUESTION_TYPES.TEXT,
-		maxLength: 500,
-		required: true,
-	},
-	{
-		id: "pastPerformance",
-		title: "Past Performance",
-		question: "Describe your most relevant past performance example",
-		placeholder: "Type your name...",
-		type: QUESTION_TYPES.TEXT,
-		maxLength: 1000,
-		required: true,
-	},
+  // Text Input with Validation
+  {
+    id: "capabilities",
+    title: "Core Capabilities",
+    question: "Describe your company's core capabilities and differentiators",
+    type: QUESTION_TYPES.TEXT,
+    required: true,
+    minLength: 50,
+    maxLength: 500,
+    placeholder: "Enter at least 50 characters describing your capabilities...",
+    validation: (value) => {
+      if (value && value.length < 5) {
+        return "Description must be at least 50 characters";
+      }
+      return null;
+    }
+  },
 
-	// Code List Questions
-	{
-		id: "primaryNaics",
-		title: "Primary NAICS Code",
-		question: "Enter your primary NAICS code",
-		placeholder: "Type your name...",
-		type: QUESTION_TYPES.CODE_LIST,
-		// validation: /^\d{6}$/,
-		required: true,
-	},
-	{
-		id: "secondaryNaics",
-		title: "Secondary NAICS Codes",
-		question: "Enter up to 5 secondary NAICS codes (comma separated)",
-		placeholder: "Type your name...",
-		type: QUESTION_TYPES.CODE_LIST,
-		validation: /^(\d{6},?\s*){1,5}$/,
-		required: false,
-	},
+  // Long Text with Special Characters
+  {
+    id: "pastPerformance",
+    title: "Past Performance",
+    question: "Provide details of your most relevant past performance example",
+    type: QUESTION_TYPES.LONG_TEXT,
+    required: true,
+    minLength: 10,
+    maxLength: 2000,
+    placeholder: "Include: contract number, customer, value, period of performance, and description",
+    allowSpecialChars: true,
+  },
 
-	// Multiple Choice with Status
-	{
-		id: "contractVehicles",
-		title: "Contract Vehicles",
-		question: "What is the status of your contract vehicles?",
-		placeholder: "Type your name...",
-		type: QUESTION_TYPES.MULTIPLE_CHOICE,
-		options: ["Have GSA Schedule", "Have GWACs", "In Process", "None", "Need Assistance"],
-		multiple: true,
-		required: true,
-	},
-	{
-		id: "complianceSystems",
-		title: "Compliance Systems",
-		question: "Which compliance systems do you have in place?",
-		placeholder: "Type your name...",
-		type: QUESTION_TYPES.MULTIPLE_CHOICE,
-		options: ["Accounting System", "Quality Control", "Project Management", "Cybersecurity", "None"],
-		multiple: true,
-		required: true,
-	},
+  // Code List with Pattern Validation
+  {
+    id: "naicsCodes",
+    title: "NAICS Codes",
+    question: "Enter your primary and secondary NAICS codes (comma-separated)",
+    type: QUESTION_TYPES.CODE_LIST,
+    required: true,
+    pattern: "^\\d{6}(,\\s*\\d{6})*$",
+    validation: (value) => {
+      if (!value) return null;
+      const codes = value.split(",").map(code => code.trim());
+      if (codes.some(code => !/^\d{6}$/.test(code))) {
+        return "Each NAICS code must be exactly 6 digits";
+      }
+      return null;
+    },
+    maxItems: 5,
+    helpText: "Enter up to 5 NAICS codes in format: 123456, 234567",
+  },
+
+  // Rating Question
+  {
+    id: "contractReadiness",
+    title: "Contract Readiness Assessment",
+    question: "Rate your readiness in the following areas:",
+    type: QUESTION_TYPES.RATING,
+    required: true,
+    maxRating: 5,
+    categories: [
+      "Financial Systems",
+      "Project Management",
+      "Quality Control",
+      "Cybersecurity"
+    ],
+    labels: {
+      1: "Not Ready",
+      2: "Beginning",
+      3: "Developing",
+      4: "Advanced",
+      5: "Fully Ready"
+    }
+  },
+
+  // Demographic Information
+  {
+    id: "companyDemographics",
+    title: "Company Demographics",
+    type: QUESTION_TYPES.DEMOGRAPHIC,
+    required: true,
+    fields: [
+      {
+        name: "yearFounded",
+        label: "Year Founded",
+        type: "number",
+        min: 1800,
+        max: new Date().getFullYear(),
+        required: true
+      },
+      {
+        name: "employeeCount",
+        label: "Number of Employees",
+        type: "select",
+        options: [
+          { value: "1-10", label: "1-10 employees" },
+          { value: "11-50", label: "11-50 employees" },
+          { value: "51-200", label: "51-200 employees" },
+          { value: "201+", label: "201+ employees" }
+        ],
+        required: true
+      }
+    ]
+  },
+
+  // File Upload with Validation
+  {
+    id: "certifications",
+    title: "Business Certifications",
+    question: "Upload relevant business certifications",
+    type: QUESTION_TYPES.FILE_UPLOAD,
+    required: false,
+    acceptedTypes: [".pdf", ".jpg", ".png"],
+    maxSize: 5 * 1024 * 1024, // 5MB
+    maxFiles: 3,
+    validation: (files) => {
+      if (files && files.length > 3) {
+        return "Maximum 3 files allowed";
+      }
+      return null;
+    }
+  },
+
+  // Authorization Question
+  {
+    id: "termsAndConditions",
+    title: "Terms and Conditions",
+    type: QUESTION_TYPES.AUTHORIZATION,
+    required: true,
+    agreementText: `By proceeding, you certify that:
+    1. All information provided is accurate and complete
+    2. You are authorized to represent your company
+    3. You understand that false statements may result in disqualification`,
+    signatureRequired: true,
+    validation: (value) => {
+      if (!value.agreed) {
+        return "You must agree to the terms to continue";
+      }
+      if (value.signatureRequired && !value.signature) {
+        return "Signature is required";
+      }
+      return null;
+    }
+  }
 ];

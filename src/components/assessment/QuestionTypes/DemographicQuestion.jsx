@@ -1,5 +1,5 @@
 import React from 'react';
-import {
+import { 
   Box,
   Typography,
   TextField,
@@ -7,41 +7,60 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  FormHelperText,
-  Grid
+  Grid,
+  FormHelperText
 } from '@mui/material';
 
-export function DemographicQuestion({ question, value = {}, onChange, error }) {
-  const handleChange = (field, newValue) => {
-    onChange({
+export function DemographicQuestion({ question, value = {}, onChange }) {
+  const handleFieldChange = (fieldName, fieldValue) => {
+    onChange(question.id, {
       ...value,
-      [field]: newValue
+      [fieldName]: fieldValue
     });
   };
 
+  const validateField = (field, fieldValue) => {
+    if (field.required && !fieldValue) {
+      return `${field.label} is required`;
+    }
+    if (field.type === 'number') {
+      const num = Number(fieldValue);
+      if (field.min && num < field.min) {
+        return `${field.label} must be at least ${field.min}`;
+      }
+      if (field.max && num > field.max) {
+        return `${field.label} must be no more than ${field.max}`;
+      }
+    }
+    return '';
+  };
+
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ width: '100%' }}>
       <Typography variant="h6" gutterBottom>
         {question.title}
         {question.required && <span style={{ color: 'error.main' }}> *</span>}
       </Typography>
 
-      {question.description && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {question.description}
+      {question.question && (
+        <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+          {question.question}
         </Typography>
       )}
 
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         {question.fields.map((field) => (
           <Grid item xs={12} sm={6} key={field.name}>
             {field.type === 'select' ? (
-              <FormControl fullWidth error={Boolean(error?.[field.name])}>
-                <InputLabel>{field.label}</InputLabel>
+              <FormControl fullWidth>
+                <InputLabel required={field.required}>
+                  {field.label}
+                </InputLabel>
                 <Select
                   value={value[field.name] || ''}
-                  onChange={(e) => handleChange(field.name, e.target.value)}
+                  onChange={(e) => handleFieldChange(field.name, e.target.value)}
                   label={field.label}
+                  error={Boolean(validateField(field, value[field.name]))}
                 >
                   {field.options.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
@@ -49,24 +68,37 @@ export function DemographicQuestion({ question, value = {}, onChange, error }) {
                     </MenuItem>
                   ))}
                 </Select>
-                {error?.[field.name] && (
-                  <FormHelperText>{error[field.name]}</FormHelperText>
+                {validateField(field, value[field.name]) && (
+                  <FormHelperText error>
+                    {validateField(field, value[field.name])}
+                  </FormHelperText>
                 )}
               </FormControl>
             ) : (
               <TextField
                 fullWidth
                 label={field.label}
-                value={value[field.name] || ''}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-                error={Boolean(error?.[field.name])}
-                helperText={error?.[field.name]}
                 type={field.type}
+                value={value[field.name] || ''}
+                onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                required={field.required}
+                error={Boolean(validateField(field, value[field.name]))}
+                helperText={validateField(field, value[field.name])}
+                inputProps={{
+                  min: field.min,
+                  max: field.max
+                }}
               />
             )}
           </Grid>
         ))}
       </Grid>
+
+      {question.helpText && (
+        <FormHelperText sx={{ mt: 2 }}>
+          {question.helpText}
+        </FormHelperText>
+      )}
     </Box>
   );
 }

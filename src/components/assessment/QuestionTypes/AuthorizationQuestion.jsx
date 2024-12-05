@@ -6,27 +6,50 @@ import {
   FormControlLabel,
   Checkbox,
   FormHelperText,
-  Paper
+  Paper,
+  Alert
 } from '@mui/material';
 
-export function AuthorizationQuestion({ question, value = {}, onChange, error }) {
+export function AuthorizationQuestion({ question, value = {}, onChange }) {
   const handleChange = (field, newValue) => {
-    onChange({
+    const updatedValue = {
       ...value,
       [field]: newValue,
       timestamp: new Date().toISOString()
-    });
+    };
+
+    // Run validation
+    const validationError = question.validation?.(updatedValue);
+    
+    onChange(question.id, updatedValue);
   };
 
+  const error = question.validation?.(value);
+
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ width: '100%' }}>
       <Typography variant="h6" gutterBottom>
         {question.title}
         {question.required && <span style={{ color: 'error.main' }}> *</span>}
       </Typography>
 
-      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+      <Paper 
+        variant="outlined" 
+        sx={{ 
+          p: 3, 
+          mb: 3,
+          bgcolor: 'background.default',
+          maxHeight: '300px',
+          overflowY: 'auto'
+        }}
+      >
+        <Typography 
+          variant="body1" 
+          sx={{ 
+            whiteSpace: 'pre-wrap',
+            fontFamily: 'monospace'
+          }}
+        >
           {question.agreementText}
         </Typography>
       </Paper>
@@ -35,34 +58,48 @@ export function AuthorizationQuestion({ question, value = {}, onChange, error })
         <FormControlLabel
           control={
             <Checkbox
-              checked={Boolean(value.agreed)}
+              checked={Boolean(value?.agreed)}
               onChange={(e) => handleChange('agreed', e.target.checked)}
+              color="primary"
             />
           }
-          label="I agree to the terms above"
+          label={
+            <Typography variant="body1">
+              I agree to the terms above
+              {question.required && <span style={{ color: 'error.main' }}> *</span>}
+            </Typography>
+          }
         />
 
         {question.signatureRequired && (
           <TextField
             label="Electronic Signature"
-            value={value.signature || ''}
+            value={value?.signature || ''}
             onChange={(e) => handleChange('signature', e.target.value)}
             fullWidth
-            error={Boolean(error?.signature)}
-            helperText={error?.signature}
+            required={question.required}
             placeholder="Type your full name"
+            helperText="Please type your full name as your electronic signature"
           />
         )}
 
-        {value.timestamp && (
+        {value?.timestamp && (
           <Typography variant="caption" color="text.secondary">
             Agreed on: {new Date(value.timestamp).toLocaleString()}
           </Typography>
         )}
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 1 }}>
+            {error}
+          </Alert>
+        )}
       </Box>
 
-      {error?.general && (
-        <FormHelperText error>{error.general}</FormHelperText>
+      {question.helpText && (
+        <FormHelperText sx={{ mt: 2 }}>
+          {question.helpText}
+        </FormHelperText>
       )}
     </Box>
   );

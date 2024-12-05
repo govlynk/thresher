@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Button, Card, CardContent, LinearProgress, Stepper, Step, StepLabel, IconButton } from "@mui/material";
 import { ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { useAssessmentStore } from "../../stores/assessmentStore";
@@ -11,132 +11,178 @@ import { MultipleChoiceQuestion } from "./QuestionTypes/MultipleChoiceQuestion";
 import { TextQuestion } from "./QuestionTypes/TextQuestion";
 import { CodeListQuestion } from "./QuestionTypes/CodeListQuestion";
 import { ChoiceQuestion } from "./QuestionTypes/ChoiceQuestion";
+import { RatingQuestion } from "./QuestionTypes/RatingQuestion";
+import { DemographicQuestion } from "./QuestionTypes/DemographicQuestion";
+import { FileUploadQuestion } from "./QuestionTypes/FileUploadQuestion";
+import { AuthorizationQuestion } from "./QuestionTypes/AuthorizationQuestion";
 import { InfoSidebar } from "./InfoSidebar";
 import { IntroScreen } from "./IntroScreen";
 
 export function AssessmentForm() {
-	const { currentStep, answers, setAnswer, nextStep, prevStep } = useAssessmentStore();
-	const [showIntro, setShowIntro] = useState(true);
-	const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { currentStep, answers, setAnswer, nextStep, prevStep } = useAssessmentStore();
+  const [showIntro, setShowIntro] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showResults, setShowResults] = useState(false);
 
-	const currentQuestion = questions[currentStep];
-	const progress = ((currentStep + 1) / questions.length) * 100;
-	const isComplete = currentStep === questions.length;
+  const currentQuestion = questions[currentStep];
+  const progress = ((currentStep + 1) / questions.length) * 100;
+  const isLastQuestion = currentStep === questions.length - 1;
 
-	if (showIntro) {
-		return <IntroScreen onStart={() => setShowIntro(false)} />;
-	}
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+      }
 
-	if (isComplete) {
-		return <ResultsSummary />;
-	}
+      if (e.key === 'ArrowRight' || e.key === 'Enter') {
+        if (isAnswered()) {
+          handleNext();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        if (currentStep > 0) {
+          prevStep();
+        }
+      }
+    };
 
-	const renderQuestion = () => {
-		const props = {
-			question: currentQuestion,
-			value: answers[currentQuestion.id],
-			onChange: setAnswer,
-		};
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentStep, nextStep, prevStep]);
 
-		switch (currentQuestion.type) {
-			case QUESTION_TYPES.YES_NO:
-				return <YesNoQuestion {...props} />;
-			case QUESTION_TYPES.MULTIPLE_CHOICE:
-				return <MultipleChoiceQuestion {...props} />;
-			case QUESTION_TYPES.TEXT:
-				return <TextQuestion {...props} />;
-			case QUESTION_TYPES.CODE_LIST:
-				return <CodeListQuestion {...props} />;
-			case QUESTION_TYPES.SINGLE_CHOICE:
-				return <ChoiceQuestion {...props} />;
-			case QUESTION_TYPES.TEXT:
-				return <CodeListQuestion {...props} />;
-			case QUESTION_TYPES.LONG_TEXT:
-				return <TextQuestion {...props} />;
-			case QUESTION_TYPES.SINGLE_CHOICE:
-				return <ChoiceQuestion {...props} />;
-			case QUESTION_TYPES.RATING:
-				return <RatingQuestion {...props} />;
-			// case QUESTION_TYPES.DROPDOWN: return <CodeListQuestion {...props} />;
-			case QUESTION_TYPES.LIKERT:
-				return <LikertQuestion {...props} />;
-			case QUESTION_TYPES.SLIDER:
-				return <SliderQuestion {...props} />;
-			case QUESTION_TYPES.DEMOGRAPHIC:
-				return <DemographicQuestion {...props} />;
-			case QUESTION_TYPES.FILE_UPLOAD:
-				return <FileUploadQuestion {...props} />;
-			case QUESTION_TYPES.SECTION:
-				return <SectionQuestion {...props} />;
-			case QUESTION_TYPES.AUTHORIZATION:
-				return <AuthorizationQuestion {...props} />;
+  if (showIntro) {
+    return <IntroScreen onStart={() => setShowIntro(false)} />;
+  }
 
-			default:
-				return null;
-		}
-	};
+  if (showResults) {
+    return <ResultsSummary />;
+  }
 
-	const isAnswered = () => {
-		const answer = answers[currentQuestion.id];
-		if (!currentQuestion.required) return true;
-		if (!answer) return false;
-		if (Array.isArray(answer)) return answer.length > 0;
-		return Boolean(answer);
-	};
+  const handleNext = () => {
+    if (isLastQuestion) {
+      setShowResults(true);
+    } else {
+      nextStep();
+    }
+  };
 
-	const handleKeyPress = useCallback(
-		(e, value) => {
-			if (e.key === "Enter" && value.trim()) {
-				handleNext(value);
-			}
-		},
-		[handleNext]
-	);
+  const renderQuestion = () => {
+    const props = {
+      question: currentQuestion,
+      value: answers[currentQuestion.id],
+      onChange: (id, value) => setAnswer(id, value)
+    };
 
-	return (
-		<Box sx={{ mx: "auto" }}>
-			<LinearProgress variant='determinate' value={progress} sx={{ mb: 4, height: 8, borderRadius: 5 }} />
+    switch (currentQuestion.type) {
+      case QUESTION_TYPES.YES_NO:
+        return <YesNoQuestion {...props} />;
+      case QUESTION_TYPES.MULTIPLE_CHOICE:
+        return <MultipleChoiceQuestion {...props} />;
+      case QUESTION_TYPES.TEXT:
+      case QUESTION_TYPES.LONG_TEXT:
+        return <TextQuestion {...props} />;
+      case QUESTION_TYPES.CODE_LIST:
+        return <CodeListQuestion {...props} />;
+      case QUESTION_TYPES.SINGLE_CHOICE:
+        return <ChoiceQuestion {...props} />;
+      case QUESTION_TYPES.RATING:
+        return <RatingQuestion {...props} />;
+      case QUESTION_TYPES.DEMOGRAPHIC:
+        return <DemographicQuestion {...props} />;
+      case QUESTION_TYPES.FILE_UPLOAD:
+        return <FileUploadQuestion {...props} />;
+      case QUESTION_TYPES.AUTHORIZATION:
+        return <AuthorizationQuestion {...props} />;
+      default:
+        return null;
+    }
+  };
 
-			<Stepper activeStep={currentStep} sx={{ mb: 4 }}>
-				{questions.map((q, index) => (
-					<Step key={index}>
-						<StepLabel></StepLabel>
-					</Step>
-				))}
-			</Stepper>
+  const isAnswered = () => {
+    const answer = answers[currentQuestion.id];
+    if (!currentQuestion.required) return true;
+    if (!answer) return false;
+    
+    switch (currentQuestion.type) {
+      case QUESTION_TYPES.AUTHORIZATION:
+        return answer.agreed && (!currentQuestion.signatureRequired || answer.signature);
+      case QUESTION_TYPES.RATING:
+        return currentQuestion.categories.every(category => answer[category]);
+      case QUESTION_TYPES.DEMOGRAPHIC:
+        return currentQuestion.fields
+          .filter(field => field.required)
+          .every(field => answer[field.name]);
+      case QUESTION_TYPES.FILE_UPLOAD:
+        return !currentQuestion.required || (answer && answer.length > 0);
+      default:
+        return Array.isArray(answer) ? answer.length > 0 : Boolean(answer);
+    }
+  };
 
-			<Card elevation={3}>
-				<CardContent>
-					<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start", mb: 2 }}>
-						{renderQuestion()}
-						<IconButton onClick={() => setSidebarOpen(true)} sx={{ ml: 2 }} color='primary'>
-							<Info />
-						</IconButton>
-					</Box>
-				</CardContent>
-			</Card>
+  return (
+    <Box sx={{ mx: "auto", maxWidth: "800px" }}>
+      <LinearProgress 
+        variant="determinate" 
+        value={progress} 
+        sx={{ 
+          mb: 4, 
+          height: 8, 
+          borderRadius: 5,
+          backgroundColor: 'grey.200',
+          '& .MuiLinearProgress-bar': {
+            borderRadius: 5
+          }
+        }} 
+      />
 
-			<Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
-				<Button startIcon={<ArrowLeft />} onClick={prevStep} disabled={currentStep === 0} variant='outlined'>
-					Previous
-				</Button>
+      <Stepper activeStep={currentStep} sx={{ mb: 4 }}>
+        {questions.map((q, index) => (
+          <Step key={index}>
+            <StepLabel>{}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
 
-				<Button
-					endIcon={<ArrowRight />}
-					onClick={nextStep}
-					disabled={!isAnswered()}
-					variant='contained'
-					color='primary'
-				>
-					{currentStep === questions.length - 1 ? "Finish" : "Next"}
-				</Button>
-			</Box>
+      <Card elevation={3}>
+        <CardContent sx={{ p: 4 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start", mb: 2 }}>
+            {renderQuestion()}
+            <IconButton 
+              onClick={() => setSidebarOpen(true)} 
+              sx={{ ml: 2 }} 
+              color="primary"
+            >
+              <Info />
+            </IconButton>
+          </Box>
+        </CardContent>
+      </Card>
 
-			<InfoSidebar
-				open={sidebarOpen}
-				onClose={() => setSidebarOpen(false)}
-				questionInfo={questionInfo[currentQuestion.id]}
-			/>
-		</Box>
-	);
+      <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
+        <Button 
+          startIcon={<ArrowLeft />} 
+          onClick={prevStep} 
+          disabled={currentStep === 0} 
+          variant="outlined"
+        >
+          Previous
+        </Button>
+
+        <Button
+          endIcon={isLastQuestion ? null : <ArrowRight />}
+          onClick={handleNext}
+          disabled={!isAnswered()}
+          variant="contained"
+          color="primary"
+        >
+          {isLastQuestion ? "Finish Assessment" : "Next"}
+        </Button>
+      </Box>
+
+      <InfoSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        questionInfo={questionInfo[currentQuestion.id]}
+      />
+    </Box>
+  );
 }
