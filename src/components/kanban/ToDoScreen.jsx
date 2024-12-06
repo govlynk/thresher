@@ -62,7 +62,7 @@ function TodoScreen() {
 				<TodoHeader onAddClick={handleAddClick} />
 				<KanbanBoard
 					items={todos}
-					type={BOARD_TYPES.PIPELINE}
+					type={BOARD_TYPES.TODO}
 					loading={loading}
 					error={error}
 					onItemMove={handleTodoMove}
