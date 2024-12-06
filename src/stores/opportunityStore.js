@@ -14,15 +14,22 @@ export const useOpportunityStore = create(
 			lastRetrievedDate: null,
 			loading: false,
 			error: null,
+			isInitialized: false,
 
 			fetchOpportunities: async (params) => {
+				const state = get();
+				// Return early if already loading or initialized
+				if (state.loading || (state.isInitialized && state.opportunities.length > 0)) {
+					return;
+				}
+
 				set({ loading: true, error: null });
 				try {
 					const response = await getOpportunity(params);
 
 					// Filter out previously saved and rejected opportunities
-					const savedIds = get().savedOpportunities.map((opp) => opp.noticeId);
-					const rejectedIds = get().rejectedOpportunities.map((opp) => opp.noticeId);
+					const savedIds = state.savedOpportunities.map((opp) => opp.noticeId);
+					const rejectedIds = state.rejectedOpportunities.map((opp) => opp.noticeId);
 					const filteredOpportunities = response.filter(
 						(opp) => !savedIds.includes(opp.noticeId) && !rejectedIds.includes(opp.noticeId)
 					);
@@ -31,6 +38,7 @@ export const useOpportunityStore = create(
 						opportunities: filteredOpportunities,
 						lastRetrievedDate: new Date().toISOString(),
 						loading: false,
+						isInitialized: true,
 					});
 
 					return filteredOpportunities;
@@ -178,7 +186,20 @@ export const useOpportunityStore = create(
 			},
 
 			clearOpportunities: () => {
-				set({ opportunities: [], error: null });
+				set({
+					opportunities: [],
+					error: null,
+					isInitialized: false,
+				});
+			},
+
+			resetStore: () => {
+				set({
+					opportunities: [],
+					loading: false,
+					error: null,
+					isInitialized: false,
+				});
 			},
 		}),
 		{

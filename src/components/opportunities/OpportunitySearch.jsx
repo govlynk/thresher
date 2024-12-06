@@ -9,41 +9,41 @@ export function OpportunitySearch() {
 	const activeCompany = getActiveCompany();
 
 	React.useEffect(() => {
-		if (activeCompany?.naicsCode) {
-			const NAICS = activeCompany?.naicsCode;
-			const ncode = Array.isArray(NAICS) && NAICS.length > 1 ? NAICS.join(",") : NAICS;
-			const date = new Date();
-			const endDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-			const startDate = lastRetrievedDate
-				? new Date(lastRetrievedDate).toLocaleDateString()
-				: `${date.getMonth() - 2}/01/${date.getFullYear()}`;
-			const limit = 10;
+		const fetchData = async () => {
+			if (activeCompany?.naicsCode) {
+				const NAICS = activeCompany?.naicsCode;
+				const ncode = Array.isArray(NAICS) && NAICS.length > 1 ? NAICS.join(",") : NAICS;
+				const date = new Date();
+				const endDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+				const startDate = lastRetrievedDate
+					? new Date(lastRetrievedDate).toLocaleDateString()
+					: `${date.getMonth() - 2}/01/${date.getFullYear()}`;
+				const limit = 10;
 
-			const searchParams = {
-				ncode: `naics=${ncode}`,
-				postedFrom: `postedFrom=${startDate}`,
-				postedTo: `postedTo=${endDate}`,
-				ptype: `ptype=${["p", "o", "k"]}`,
-				limit: `limit=${limit}`,
-			};
+				const searchParams = {
+					ncode: `naics=${ncode}`,
+					postedFrom: `postedFrom=${startDate}`,
+					postedTo: `postedTo=${endDate}`,
+					ptype: `ptype=${["p", "o", "k"]}`,
+					limit: `limit=${limit}`,
+				};
 
-			fetchOpportunities(searchParams);
-		}
-	}, [activeCompany?.naicsCode, fetchOpportunities]);
+				try {
+					await fetchOpportunities(searchParams);
+				} catch (err) {
+					console.error("Error in opportunity search:", err);
+				}
+			}
+		};
 
-	if (!activeCompany) {
+		fetchData();
+	}, [activeCompany?.naicsCode]);
+
+	if (!activeCompany?.naicsCode?.length) {
 		return (
-			<Alert severity='warning' sx={{ mt: 2 }}>
-				Please select a company to search for opportunities
+			<Alert severity='info' sx={{ mt: 2 }}>
+				No NAICS codes found for this company. NAICS codes are required to search for opportunities.
 			</Alert>
-		);
-	}
-
-	if (loading) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-				<CircularProgress />
-			</Box>
 		);
 	}
 

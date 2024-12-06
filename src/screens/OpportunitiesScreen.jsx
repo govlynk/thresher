@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Tabs, Tab, Alert, CircularProgress } from "@mui/material";
+import { Box, Typography, Tabs, Tab, Alert } from "@mui/material";
 import { OpportunityList } from "../components/opportunities/OpportunityList";
 import { OpportunitySearch } from "../components/opportunities/OpportunitySearch";
 import { useOpportunityStore } from "../stores/opportunityStore";
@@ -7,9 +7,17 @@ import { useUserCompanyStore } from "../stores/userCompanyStore";
 
 export default function OpportunitiesScreen() {
 	const [activeTab, setActiveTab] = React.useState(0);
-	const { opportunities, savedOpportunities, rejectedOpportunities, loading, error } = useOpportunityStore();
+	const { opportunities, savedOpportunities, rejectedOpportunities, loading, error, resetStore } =
+		useOpportunityStore();
 	const { getActiveCompany } = useUserCompanyStore();
 	const activeCompany = getActiveCompany();
+
+	// Reset store when component unmounts
+	React.useEffect(() => {
+		return () => {
+			resetStore();
+		};
+	}, [resetStore]);
 
 	const handleTabChange = (event, newValue) => {
 		setActiveTab(newValue);
@@ -19,22 +27,6 @@ export default function OpportunitiesScreen() {
 		return (
 			<Box sx={{ p: 3 }}>
 				<Alert severity='warning'>Please select a company to view opportunities</Alert>
-			</Box>
-		);
-	}
-
-	if (loading) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-				<CircularProgress />
-			</Box>
-		);
-	}
-
-	if (error) {
-		return (
-			<Box sx={{ p: 3 }}>
-				<Alert severity='error'>{error}</Alert>
 			</Box>
 		);
 	}
