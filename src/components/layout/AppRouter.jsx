@@ -14,6 +14,7 @@ import SpendingAnalysisScreen from "../../screens/SpendingAnalysisScreen";
 import NotFoundPage from "../../screens/NotFoundPage";
 import MainLayout from "../layout/MainLayout";
 import TodoScreen from "../../screens/TodoScreen";
+import TestScreen from "../../screens/TestScreen";
 import AssessmentScreen from "../../screens/AssessmentScreen";
 
 const AppRouter = ({ signOut, user }) => {
@@ -35,6 +36,7 @@ const AppRouter = ({ signOut, user }) => {
 				<Route path='opportunities' element={<OpportunitiesScreen />} />
 				<Route path='assessment' element={<AssessmentScreen />} />
 				<Route path='spending-analysis' element={<SpendingAnalysisScreen />} />
+				<Route path='test' element={<TestScreen />} />
 				<Route path='*' element={<NotFoundPage />} />
 			</Route>
 		</Routes>

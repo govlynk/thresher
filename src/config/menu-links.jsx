@@ -132,6 +132,10 @@ export const menuLinks = [
 				path: "/user-company-roles",
 			},
 			{
+				title: "Test",
+				path: "/test",
+			},
+			{
 				title: "Color Sections",
 				path: "/color-sections",
 			},
