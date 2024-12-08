@@ -7,17 +7,23 @@ import { useUserCompanyStore } from "../stores/userCompanyStore";
 
 export default function OpportunitiesScreen() {
 	const [activeTab, setActiveTab] = React.useState(0);
-	const { opportunities, savedOpportunities, rejectedOpportunities, loading, error, resetStore } =
+	const { opportunities, savedOpportunities, rejectedOpportunities, loading, error, resetStore, initializeStore } =
 		useOpportunityStore();
 	const { getActiveCompany } = useUserCompanyStore();
 	const activeCompany = getActiveCompany();
 
-	// Reset store when component unmounts
+	// Initialize store when component mounts or company changes
 	React.useEffect(() => {
+		if (activeCompany?.id) {
+			initializeStore().catch((err) => {
+				console.error("OpportunitiesScreen: Error initializing store:", err);
+			});
+		}
+
 		return () => {
 			resetStore();
 		};
-	}, [resetStore]);
+	}, [activeCompany?.id, initializeStore, resetStore]);
 
 	const handleTabChange = (event, newValue) => {
 		setActiveTab(newValue);
@@ -44,6 +50,12 @@ export default function OpportunitiesScreen() {
 				<Tab label={`Saved (${savedOpportunities.length})`} id='opportunities-tab-1' />
 				<Tab label={`Rejected (${rejectedOpportunities.length})`} id='opportunities-tab-2' />
 			</Tabs>
+
+			{error && (
+				<Alert severity='error' sx={{ mb: 3 }}>
+					{error}
+				</Alert>
+			)}
 
 			<Box role='tabpanel' hidden={activeTab !== 0}>
 				{activeTab === 0 && <OpportunityList opportunities={opportunities} type='new' />}

@@ -1,214 +1,247 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { generateClient } from "aws-amplify/data";
 import { getOpportunity } from "../utils/opportunityApi";
+import { useUserCompanyStore } from "./userCompanyStore";
+import { useTeamTodoStore } from "./teamTodoStore";
 
-const client = generateClient();
+// Initialize client with explicit auth mode
+const client = generateClient({
+	authMode: "userPool",
+});
 
-export const useOpportunityStore = create(
-	persist(
-		(set, get) => ({
+export const useOpportunityStore = create((set, get) => ({
+	opportunities: [],
+	savedOpportunities: [],
+	rejectedOpportunities: [],
+	lastRetrievedDate: null,
+	loading: false,
+	error: null,
+
+	initializeStore: async () => {
+		const activeCompany = useUserCompanyStore.getState().getActiveCompany();
+		if (!activeCompany?.id) {
+			return;
+		}
+		// const activeTeam = useTeamTodoStore.getState().getSelectedTeamId();
+
+		set({ loading: true, error: null });
+		try {
+			// Fetch saved opportunities
+			const savedResponse = await client.models.Opportunity.list({
+				filter: {
+					companyId: { eq: activeCompany.id },
+					status: { eq: "BACKLOG" },
+				},
+			});
+
+			// Fetch rejected opportunities
+			const rejectedResponse = await client.models.Opportunity.list({
+				filter: {
+					companyId: { eq: activeCompany.id },
+					status: { eq: "REJECTED" },
+				},
+			});
+
+			set({
+				savedOpportunities: savedResponse.data || [],
+				rejectedOpportunities: rejectedResponse.data || [],
+				loading: false,
+				error: null,
+			});
+		} catch (err) {
+			console.error("Error initializing opportunity store:", err);
+			set({
+				error: err.message || "Failed to initialize opportunities",
+				loading: false,
+			});
+		}
+	},
+
+	fetchOpportunities: async (params) => {
+		set({ loading: true, error: null });
+		try {
+			const response = await getOpportunity(params);
+			const state = get();
+
+			// Filter out previously saved and rejected opportunities
+			const savedIds = state.savedOpportunities.map((opp) => opp.opportunityId);
+			const rejectedIds = state.rejectedOpportunities.map((opp) => opp.opportunityId);
+			const filteredOpportunities = response.filter(
+				(opp) => !savedIds.includes(opp.noticeId) && !rejectedIds.includes(opp.noticeId)
+			);
+
+			set({
+				opportunities: filteredOpportunities,
+				lastRetrievedDate: new Date().toISOString(),
+				loading: false,
+			});
+
+			return filteredOpportunities;
+		} catch (err) {
+			console.error("Error fetching opportunities:", err);
+			set({ error: err.message, loading: false });
+			throw err;
+		}
+	},
+
+	saveOpportunity: async (opportunity) => {
+		const activeCompany = useUserCompanyStore.getState().getActiveCompany();
+		if (!activeCompany?.id) {
+			throw new Error("No active company selected");
+		}
+
+		set({ loading: true, error: null });
+		try {
+			console.log("Creating opportunity with data:", {
+				opportunityId: opportunity.noticeId,
+				title: opportunity.title,
+				companyId: activeCompany.id,
+			});
+
+			const response = await client.models.Opportunity.create({
+				opportunityId: opportunity.noticeId,
+				title: opportunity.title,
+				description: opportunity.description || "",
+				agency: opportunity.department,
+				dueDate: opportunity.responseDeadLine,
+				status: "BACKLOG",
+				bidProgress: 0,
+				notes: "",
+				attachments: [],
+				companyId: activeCompany.id,
+				teamId: null,
+			});
+
+			if (!response?.data) {
+				throw new Error("Failed to save opportunity - no response data");
+			}
+
+			const savedOpp = response.data;
+			console.log("Successfully saved opportunity:", savedOpp);
+
+			set((state) => ({
+				savedOpportunities: [...state.savedOpportunities, savedOpp],
+				opportunities: state.opportunities.filter((opp) => opp.noticeId !== opportunity.noticeId),
+				loading: false,
+				error: null,
+			}));
+
+			return savedOpp;
+		} catch (err) {
+			console.error("Error saving opportunity:", err);
+			set({ error: err.message || "Failed to save opportunity", loading: false });
+			throw err;
+		}
+	},
+
+	rejectOpportunity: async (opportunity) => {
+		const activeCompany = useUserCompanyStore.getState().getActiveCompany();
+		if (!activeCompany?.id) {
+			throw new Error("No active company selected");
+		}
+
+		set({ loading: true, error: null });
+		try {
+			const response = await client.models.Opportunity.create({
+				opportunityId: opportunity.noticeId,
+				title: opportunity.title,
+				description: opportunity.description || "",
+				agency: opportunity.department,
+				dueDate: opportunity.responseDeadLine,
+				status: "REJECTED",
+				companyId: activeCompany.id,
+				teamId: null,
+			});
+
+			if (!response?.data) {
+				throw new Error("Failed to reject opportunity - no response data");
+			}
+
+			const rejectedOpp = response.data;
+
+			set((state) => ({
+				rejectedOpportunities: [...state.rejectedOpportunities, rejectedOpp],
+				opportunities: state.opportunities.filter((opp) => opp.noticeId !== opportunity.noticeId),
+				loading: false,
+				error: null,
+			}));
+
+			return rejectedOpp;
+		} catch (err) {
+			console.error("Error rejecting opportunity:", err);
+			set({ error: err.message || "Failed to reject opportunity", loading: false });
+			throw err;
+		}
+	},
+
+	moveToSaved: async (opportunity) => {
+		const activeCompany = useUserCompanyStore.getState().getActiveCompany();
+		if (!activeCompany?.id) {
+			throw new Error("No active company selected");
+		}
+
+		set({ loading: true, error: null });
+		try {
+			// First, delete the rejected opportunity
+			const rejectedOpp = await client.models.Opportunity.list({
+				filter: {
+					opportunityId: { eq: opportunity.noticeId },
+					status: { eq: "REJECTED" },
+				},
+			});
+
+			if (rejectedOpp.data?.[0]) {
+				await client.models.Opportunity.delete({
+					id: rejectedOpp.data[0].id,
+				});
+			}
+
+			// Then create a new saved opportunity
+			const response = await client.models.Opportunity.create({
+				opportunityId: opportunity.noticeId,
+				title: opportunity.title,
+				description: opportunity.description || "",
+				agency: opportunity.department,
+				dueDate: opportunity.responseDeadLine,
+				status: "BACKLOG",
+				bidProgress: 0,
+				notes: "",
+				attachments: [],
+				companyId: activeCompany.id,
+				teamId: null,
+			});
+
+			if (!response?.data) {
+				throw new Error("Failed to move opportunity to saved - no response data");
+			}
+
+			const savedOpp = response.data;
+
+			set((state) => ({
+				savedOpportunities: [...state.savedOpportunities, savedOpp],
+				rejectedOpportunities: state.rejectedOpportunities.filter(
+					(opp) => opp.opportunityId !== opportunity.noticeId
+				),
+				loading: false,
+				error: null,
+			}));
+
+			return savedOpp;
+		} catch (err) {
+			console.error("Error moving opportunity to saved:", err);
+			set({ error: err.message || "Failed to move opportunity to saved", loading: false });
+			throw err;
+		}
+	},
+
+	resetStore: () => {
+		set({
 			opportunities: [],
 			savedOpportunities: [],
 			rejectedOpportunities: [],
 			lastRetrievedDate: null,
 			loading: false,
 			error: null,
-			isInitialized: false,
-
-			fetchOpportunities: async (params) => {
-				const state = get();
-				// Return early if already loading or initialized
-				if (state.loading || (state.isInitialized && state.opportunities.length > 0)) {
-					return;
-				}
-
-				set({ loading: true, error: null });
-				try {
-					const response = await getOpportunity(params);
-
-					// Filter out previously saved and rejected opportunities
-					const savedIds = state.savedOpportunities.map((opp) => opp.noticeId);
-					const rejectedIds = state.rejectedOpportunities.map((opp) => opp.noticeId);
-					const filteredOpportunities = response.filter(
-						(opp) => !savedIds.includes(opp.noticeId) && !rejectedIds.includes(opp.noticeId)
-					);
-
-					set({
-						opportunities: filteredOpportunities,
-						lastRetrievedDate: new Date().toISOString(),
-						loading: false,
-						isInitialized: true,
-					});
-
-					return filteredOpportunities;
-				} catch (err) {
-					console.error("Error fetching opportunities:", err);
-					set({ error: err.message, loading: false });
-					throw err;
-				}
-			},
-
-			saveOpportunity: async (opportunity) => {
-				set({ loading: true, error: null });
-				try {
-					// If opportunity was previously rejected, remove it from rejected list
-					if (get().rejectedOpportunities.some((opp) => opp.noticeId === opportunity.noticeId)) {
-						set((state) => ({
-							rejectedOpportunities: state.rejectedOpportunities.filter(
-								(opp) => opp.noticeId !== opportunity.noticeId
-							),
-						}));
-					}
-
-					const savedOpp = {
-						...opportunity,
-						savedAt: new Date().toISOString(),
-						status: "saved",
-					};
-
-					// Save to database
-					const response = await client.models.Opportunity.create({
-						opportunityId: opportunity.noticeId,
-						title: opportunity.title,
-						description: opportunity.description || "",
-						agency: opportunity.department,
-						dueDate: opportunity.responseDeadLine,
-						status: "SAVED",
-						bidProgress: 0,
-						notes: "",
-						attachments: [],
-					});
-
-					if (!response?.data) {
-						throw new Error("Failed to save opportunity to database");
-					}
-
-					set((state) => ({
-						savedOpportunities: [...state.savedOpportunities, savedOpp],
-						opportunities: state.opportunities.filter((opp) => opp.noticeId !== opportunity.noticeId),
-						loading: false,
-						error: null,
-					}));
-
-					return response.data;
-				} catch (err) {
-					console.error("Error saving opportunity:", err);
-					set({ error: err.message, loading: false });
-					throw err;
-				}
-			},
-
-			rejectOpportunity: async (opportunity) => {
-				set({ loading: true, error: null });
-				try {
-					// If opportunity was previously saved, remove it from database and saved list
-					if (get().savedOpportunities.some((opp) => opp.noticeId === opportunity.noticeId)) {
-						const savedOpp = await client.models.Opportunity.list({
-							filter: { opportunityId: { eq: opportunity.noticeId } },
-						});
-
-						if (savedOpp?.data?.[0]) {
-							await client.models.Opportunity.delete({ id: savedOpp.data[0].id });
-						}
-
-						set((state) => ({
-							savedOpportunities: state.savedOpportunities.filter(
-								(opp) => opp.noticeId !== opportunity.noticeId
-							),
-						}));
-					}
-
-					const rejectedOpp = {
-						...opportunity,
-						rejectedAt: new Date().toISOString(),
-						status: "rejected",
-					};
-
-					set((state) => ({
-						rejectedOpportunities: [...state.rejectedOpportunities, rejectedOpp],
-						opportunities: state.opportunities.filter((opp) => opp.noticeId !== opportunity.noticeId),
-						loading: false,
-						error: null,
-					}));
-				} catch (err) {
-					console.error("Error rejecting opportunity:", err);
-					set({ error: err.message, loading: false });
-					throw err;
-				}
-			},
-
-			moveToSaved: async (opportunity) => {
-				set({ loading: true, error: null });
-				try {
-					// Remove from rejected list
-					set((state) => ({
-						rejectedOpportunities: state.rejectedOpportunities.filter(
-							(opp) => opp.noticeId !== opportunity.noticeId
-						),
-					}));
-
-					// Save to database
-					const response = await client.models.Opportunity.create({
-						opportunityId: opportunity.noticeId,
-						title: opportunity.title,
-						description: opportunity.description || "",
-						agency: opportunity.department,
-						dueDate: opportunity.responseDeadLine,
-						status: "SAVED",
-						bidProgress: 0,
-						notes: "",
-						attachments: [],
-					});
-
-					if (!response?.data) {
-						throw new Error("Failed to save opportunity to database");
-					}
-
-					const savedOpp = {
-						...opportunity,
-						savedAt: new Date().toISOString(),
-						status: "saved",
-					};
-
-					set((state) => ({
-						savedOpportunities: [...state.savedOpportunities, savedOpp],
-						loading: false,
-						error: null,
-					}));
-
-					return response.data;
-				} catch (err) {
-					console.error("Error moving opportunity to saved:", err);
-					set({ error: err.message, loading: false });
-					throw err;
-				}
-			},
-
-			clearOpportunities: () => {
-				set({
-					opportunities: [],
-					error: null,
-					isInitialized: false,
-				});
-			},
-
-			resetStore: () => {
-				set({
-					opportunities: [],
-					loading: false,
-					error: null,
-					isInitialized: false,
-				});
-			},
-		}),
-		{
-			name: "opportunity-storage",
-			partialize: (state) => ({
-				savedOpportunities: state.savedOpportunities,
-				rejectedOpportunities: state.rejectedOpportunities,
-				lastRetrievedDate: state.lastRetrievedDate,
-			}),
-		}
-	)
-);
+		});
+	},
+}));

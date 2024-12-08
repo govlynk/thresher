@@ -13,48 +13,55 @@ import {
 } from "lucide-react";
 import { useOpportunityStore } from "../../stores/opportunityStore";
 import { OpportunityDetailsSidebar } from "./OpportunityDetailsSidebar";
+import { formatDate, formatCurrency } from "../../utils/formatters";
 
 export function OpportunityCard({ opportunity, type = "new" }) {
 	const { saveOpportunity, rejectOpportunity, moveToSaved, loading, error } = useOpportunityStore();
 	const [detailsOpen, setDetailsOpen] = useState(false);
 
 	const handleSave = async () => {
+		console.log("OpportunityCard: Attempting to save opportunity:", {
+			noticeId: opportunity.noticeId,
+			title: opportunity.title,
+			type,
+		});
+
 		try {
 			if (type === "rejected") {
+				console.log("OpportunityCard: Moving rejected opportunity to saved");
 				await moveToSaved(opportunity);
 			} else {
+				console.log("OpportunityCard: Saving new opportunity");
 				await saveOpportunity(opportunity);
 			}
+			console.log("OpportunityCard: Successfully saved opportunity");
 		} catch (err) {
-			console.error("Error saving opportunity:", err);
+			console.error("OpportunityCard: Error saving opportunity:", {
+				error: err,
+				errorMessage: err.message,
+				stack: err.stack,
+				opportunity,
+			});
 		}
 	};
 
 	const handleReject = async () => {
+		console.log("OpportunityCard: Attempting to reject opportunity:", {
+			noticeId: opportunity.noticeId,
+			title: opportunity.title,
+		});
+
 		try {
 			await rejectOpportunity(opportunity);
+			console.log("OpportunityCard: Successfully rejected opportunity");
 		} catch (err) {
-			console.error("Error rejecting opportunity:", err);
+			console.error("OpportunityCard: Error rejecting opportunity:", {
+				error: err,
+				errorMessage: err.message,
+				stack: err.stack,
+				opportunity,
+			});
 		}
-	};
-
-	const formatDate = (dateString) => {
-		if (!dateString) return "N/A";
-		return new Date(dateString).toLocaleDateString("en-US", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-	};
-
-	const formatCurrency = (amount) => {
-		if (!amount) return "N/A";
-		return new Intl.NumberFormat("en-US", {
-			style: "currency",
-			currency: "USD",
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 0,
-		}).format(amount);
 	};
 
 	return (

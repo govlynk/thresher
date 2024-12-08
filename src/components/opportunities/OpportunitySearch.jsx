@@ -7,37 +7,49 @@ export function OpportunitySearch() {
 	const { fetchOpportunities, loading, error, lastRetrievedDate } = useOpportunityStore();
 	const { getActiveCompany } = useUserCompanyStore();
 	const activeCompany = getActiveCompany();
+	const [localError, setLocalError] = React.useState(null);
+	const [lastFetchTime, setLastFetchTime] = React.useState(null);
 
 	React.useEffect(() => {
 		const fetchData = async () => {
-			if (activeCompany?.naicsCode) {
-				const NAICS = activeCompany?.naicsCode;
+			// Prevent fetching if we've fetched in the last 5 minutes
+			const now = Date.now();
+			if (lastFetchTime && now - lastFetchTime < 5 * 60 * 1000) {
+				return;
+			}
+
+			if (!activeCompany?.naicsCode?.length) {
+				return;
+			}
+
+			try {
+				const NAICS = activeCompany.naicsCode;
 				const ncode = Array.isArray(NAICS) && NAICS.length > 1 ? NAICS.join(",") : NAICS;
 				const date = new Date();
 				const endDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
 				const startDate = lastRetrievedDate
 					? new Date(lastRetrievedDate).toLocaleDateString()
 					: `${date.getMonth() - 2}/01/${date.getFullYear()}`;
-				const limit = 10;
 
 				const searchParams = {
 					ncode: `naics=${ncode}`,
 					postedFrom: `postedFrom=${startDate}`,
 					postedTo: `postedTo=${endDate}`,
 					ptype: `ptype=${["p", "o", "k"]}`,
-					limit: `limit=${limit}`,
+					limit: `limit=10`,
 				};
 
-				try {
-					await fetchOpportunities(searchParams);
-				} catch (err) {
-					console.error("Error in opportunity search:", err);
-				}
+				await fetchOpportunities(searchParams);
+				setLastFetchTime(now);
+				setLocalError(null);
+			} catch (err) {
+				console.error("Error fetching opportunities:", err);
+				setLocalError(err.message || "Failed to fetch opportunities");
 			}
 		};
 
 		fetchData();
-	}, [activeCompany?.naicsCode]);
+	}, [activeCompany?.id]); // Only depend on company ID change
 
 	if (!activeCompany?.naicsCode?.length) {
 		return (
@@ -47,10 +59,18 @@ export function OpportunitySearch() {
 		);
 	}
 
-	if (error) {
+	if (loading) {
+		return (
+			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+				<CircularProgress size={24} />
+			</Box>
+		);
+	}
+
+	if (error || localError) {
 		return (
 			<Alert severity='error' sx={{ mt: 2 }}>
-				{error}
+				{error || localError}
 			</Alert>
 		);
 	}
