@@ -2,20 +2,20 @@ import React, { useEffect } from "react";
 import { Box, Select, MenuItem, FormControl, Typography, Chip, CircularProgress } from "@mui/material";
 import { Building2 } from "lucide-react";
 import { useUserCompanyStore } from "../../stores/userCompanyStore";
+import { useGlobalStore } from "../../stores/globalStore";
 import { useAuthStore } from "../../stores/authStore";
 
-export function CompanySwitcher() {
-	const { userCompanies, activeCompanyId, setActiveCompany, fetchUserCompanies, loading } = useUserCompanyStore();
+export function CompanySelector() {
+	const { userCompanies, fetchUserCompanies, loading } = useUserCompanyStore();
+	const { activeCompanyId, setActiveCompany } = useGlobalStore();
 	const { user } = useAuthStore();
 
-	// Fetch companies when component mounts or user changes
 	useEffect(() => {
 		if (user?.id) {
 			fetchUserCompanies();
 		}
 	}, [user?.id, fetchUserCompanies]);
 
-	// Set initial active company if none is selected
 	useEffect(() => {
 		if (userCompanies.length > 0 && !activeCompanyId) {
 			setActiveCompany(userCompanies[0].id);
@@ -53,15 +53,7 @@ export function CompanySwitcher() {
 	};
 
 	return (
-		<Box
-			sx={{
-				display: "flex",
-				alignItems: "center",
-				gap: 2,
-				minWidth: 300,
-				maxWidth: 400,
-			}}
-		>
+		<Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 300, maxWidth: 400 }}>
 			<Building2 size={20} />
 			<FormControl fullWidth size='small'>
 				<Select

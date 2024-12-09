@@ -1,5 +1,7 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { type DefaultAuthorizationMode } from "@aws-amplify/backend-data";
+import { sortCollisionsAsc } from "@dnd-kit/core/dist/utilities/algorithms/helpers";
+import { notStrictEqual } from "assert";
 
 const COMPANY_ROLES = [
 	"Executive",
@@ -18,20 +20,57 @@ const COMPANY_ROLES = [
 ] as const;
 
 const schema = a.schema({
-	Opportunity: a
+	Opportuunity: a
 		.model({
-			opportunityId: a.string(),
-			title: a.string(),
+			opportunityId: a.string().required(),
+			title: a.string().required(),
+			solicitationNumber: a.string(),
+			fullParentPathName: a.string(),
+			fullParentPathCode: a.string(),
+			postedDate: a.string(),
+			type: a.string(),
+			baseType: a.string(),
+			archiveType: a.string(),
+			archiveDate: a.string(),
+			typeOfSetAsideDescription: a.string(),
+			typeOfSetAside: a.string(),
+			responseDeadLine: a.string(),
+			naicsCode: a.string(),
+			naicsCodes: a.string().array(),
+			classificationCode: a.string(),
+			active: a.string(),
 			description: a.string(),
-			agency: a.string(),
-			dueDate: a.datetime(),
-			status: a.enum(["BACKLOG", "BID", "REVIEW", "SUBMITTED", "WON", "LOST"]),
+			organizationType: a.string(),
+			status: a.enum(["BACKLOG", "BID", "REVIEW", "SUBMITTED", "WON", "LOST", "REJECTED"]),
 			bidProgress: a.integer(),
 			notes: a.string(),
-			attachments: a.string().array(),
+			resourceLinks: a.string().array(),
+			uiLink: a.string(),
+
+			// Office Address as embedded fields
+			officeZipcode: a.string(),
+			officeCity: a.string(),
+			officeCountryCode: a.string(),
+			officeState: a.string(),
+
+			// Point of Contact as embedded fields
+			pocName: a.string(),
+			pocEmail: a.string(),
+			pocPhone: a.string(),
+			pocType: a.string(),
+
+			// Award fields
+			awardAmount: a.float(),
+			awardeeName: a.string(),
+			awardeeUEI: a.string(),
+			awardeeLocation: a.string(),
+
+			// Foreign key relationships
+			companyId: a.string().required(),
+			teamId: a.string().required(),
 			userId: a.string(),
-			companyId: a.string(),
-			teamId: a.string(),
+
+			// Relationships
 			user: a.belongsTo("User", "userId"),
 			company: a.belongsTo("Company", "companyId"),
 			team: a.belongsTo("Team", "teamId"),

@@ -29,7 +29,6 @@ export async function getOpportunity(searchParams) {
 	const api_key = `api_key=${import.meta.env.VITE_SAM_API_KEY}`;
 	const queryString = formatQueryParams(searchParams);
 	const apiUrl = `https://api.sam.gov/opportunities/v2/search?${api_key}${queryString ? "&" + queryString : ""}`;
-	console.log(apiUrl);
 
 	const maxRetries = 3;
 	let lastError;

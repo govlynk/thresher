@@ -1,23 +1,35 @@
 import React from "react";
-import { FormControl, Select, MenuItem, Box } from "@mui/material";
+import { FormControl, Select, MenuItem, Box, CircularProgress } from "@mui/material";
 import { Users } from "lucide-react";
-import { useTeamTodoStore } from "../../stores/teamTodoStore";
 import { useTeamStore } from "../../stores/teamStore";
-import { useUserCompanyStore } from "../../stores/userCompanyStore";
+import { useGlobalStore } from "../../stores/globalStore";
 
 export function TeamSelector() {
-	const { teams, fetchTeams } = useTeamStore();
-	const { selectedTeamId, setSelectedTeamId } = useTeamTodoStore();
-	const { getActiveCompany } = useUserCompanyStore();
-	const activeCompany = getActiveCompany();
+	const { teams, loading, fetchTeams } = useTeamStore();
+	const { activeCompanyId, activeTeamId, setActiveTeam } = useGlobalStore();
 
 	React.useEffect(() => {
-		if (activeCompany?.id) {
-			fetchTeams(activeCompany.id);
+		if (activeCompanyId) {
+			fetchTeams(activeCompanyId);
 		}
-	}, [activeCompany?.id, fetchTeams]);
+	}, [activeCompanyId, fetchTeams]);
 
-	if (!teams?.length || !activeCompany) {
+	// Set first team as default when teams load and no team is selected
+	React.useEffect(() => {
+		if (teams.length > 0 && !activeTeamId) {
+			setActiveTeam(teams[0].id);
+		}
+	}, [teams, activeTeamId, setActiveTeam]);
+
+	if (loading) {
+		return (
+			<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+				<CircularProgress size={20} />
+			</Box>
+		);
+	}
+
+	if (!teams?.length) {
 		return null;
 	}
 
@@ -26,8 +38,8 @@ export function TeamSelector() {
 			<Users size={20} />
 			<FormControl size='small' sx={{ minWidth: 200 }}>
 				<Select
-					value={selectedTeamId || "all"}
-					onChange={(e) => setSelectedTeamId(e.target.value)}
+					value={activeTeamId || ""}
+					onChange={(e) => setActiveTeam(e.target.value)}
 					displayEmpty
 					sx={{
 						bgcolor: "background.paper",
@@ -36,7 +48,6 @@ export function TeamSelector() {
 						},
 					}}
 				>
-					<MenuItem value='all'>All Teams</MenuItem>
 					{teams.map((team) => (
 						<MenuItem key={team.id} value={team.id}>
 							{team.name}

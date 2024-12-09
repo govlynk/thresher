@@ -15,7 +15,7 @@ import {
 import { LogOut, User, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "aws-amplify/auth";
-import { CompanySwitcher } from "./CompanySwitcher";
+import { CompanySelector } from "./CompanySelector";
 import { TeamSelector } from "./TeamSelector";
 import ThemeToggle from "./ThemeToggle";
 import { useAuthStore } from "../../stores/authStore";
@@ -98,7 +98,7 @@ export default function TopBar() {
 			<Toolbar sx={{ gap: 2 }}>
 				{user && (
 					<>
-						<CompanySwitcher />
+						<CompanySelector />
 						<TeamSelector />
 						<Divider orientation='vertical' flexItem />
 					</>
