@@ -19,7 +19,7 @@ export const useOpportunityStore = create((set, get) => ({
 
 	initializeStore: async () => {
 		const { activeCompanyId } = useGlobalStore.getState();
-		debug("fetchSavedOpportunities", { activeCompanyId });
+		console.log("fetchSavedOpportunities", { activeCompanyId });
 		if (!activeCompanyId) {
 			set({
 				error: "No active company selected",
@@ -86,7 +86,7 @@ export const useOpportunityStore = create((set, get) => ({
 	},
 
 	setOpportunities: (opportunities) => {
-		debug("setOpportunities", { count: opportunities.length });
+		console.log("setOpportunities", { count: opportunities.length });
 		set({ opportunities });
 	},
 
@@ -142,7 +142,7 @@ export const useOpportunityStore = create((set, get) => ({
 		}
 
 		const { activeCompanyId, activeTeamId, activeUserId } = useGlobalStore.getState();
-		debug("saveOpportunity", { opportunity, activeCompanyId, activeTeamId });
+		console.log("saveOpportunity", { opportunity, activeCompanyId, activeTeamId });
 
 		if (!activeCompanyId) {
 			throw new Error("No active company selected");
@@ -220,7 +220,7 @@ export const useOpportunityStore = create((set, get) => ({
 
 	rejectOpportunity: async (opportunity) => {
 		const { activeCompanyId, activeTeamId, activeUserId } = useGlobalStore.getState();
-		debug("rejectOpportunity", { opportunity, activeCompanyId, activeTeamId });
+		console.log("rejectOpportunity", { opportunity, activeCompanyId, activeTeamId });
 
 		if (!activeCompanyId) {
 			throw new Error("No active company selected");
@@ -231,12 +231,45 @@ export const useOpportunityStore = create((set, get) => ({
 			// Create rejected opportunity using Gen 2 syntax
 			const response = await client.models.Opportunity.create({
 				data: {
+					status: "REJECTED",
 					opportunityId: opportunity.noticeId,
 					title: opportunity.title,
 					description: opportunity.description || "",
 					agency: opportunity.department,
 					dueDate: opportunity.responseDeadLine,
-					status: "REJECTED",
+					notes: "",
+
+					solicitationNumber: opportunity.solicitationNumber || "",
+					fullParentPathName: opportunity.fullParentPathName || "",
+					fullParentPathCode: opportunity.fullParentPathCode || "",
+					postedDate: opportunity.postedDate,
+					type: opportunity.type || "",
+					typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
+					typeOfSetAside: opportunity.typeOfSetAside || "",
+					responseDeadLine: opportunity.responseDeadLine,
+					naicsCode: opportunity.naicsCode || "",
+					naicsCodes: opportunity.naicsCodes,
+					classificationCode: opportunity.classificationCode || "",
+					active: opportunity.active || "Yes",
+					description: opportunity.description || "",
+					organizationType: opportunity.organizationType || "",
+					resourceLinks: opportunity.resourceLinks,
+					uiLink: opportunity.uiLink,
+
+					// Office Address as embedded fields
+					officeZipcode: opportunity.officeAddress.officeZipcode || "",
+					officeCity: opportunity.officeAddress.officeCity || "",
+					officeCountryCode: opportunity.officeAddress.officeCountryCode || "",
+					officeState: opportunity.officeAddress.officeState || "",
+
+					// Point of Contact as embedded fields
+					pocName: opportunity.pointOfContact.pocName || "",
+					pocEmail: opportunity.pointOfContact.pocEmail || "",
+					pocPhone: opportunity.pointOfContact.pocPhone || "",
+					pocType: opportunity.pointOfContact.pocType || "",
+
+					// Foreign key relationships
+					userId: activeUserId,
 					companyId: activeCompanyId,
 					teamId: activeTeamId,
 				},
@@ -265,7 +298,7 @@ export const useOpportunityStore = create((set, get) => ({
 
 	moveToSaved: async (opportunity) => {
 		const { activeCompanyId, activeTeamId, activeUserId } = useGlobalStore.getState();
-		debug("rejectOpportunity", { opportunity, activeCompanyId, activeTeamId });
+		console.log("rejectOpportunity", { opportunity, activeCompanyId, activeTeamId });
 
 		if (!activeCompanyId) {
 			throw new Error("No active company selected");
@@ -288,15 +321,45 @@ export const useOpportunityStore = create((set, get) => ({
 			// Then create a new saved opportunity using Gen 2 syntax
 			const response = await client.models.Opportunity.create({
 				data: {
+					status: "BACKLOG",
 					opportunityId: opportunity.noticeId,
 					title: opportunity.title,
 					description: opportunity.description || "",
 					agency: opportunity.department,
 					dueDate: opportunity.responseDeadLine,
-					status: "BACKLOG",
-					bidProgress: 0,
 					notes: "",
-					attachments: [],
+
+					solicitationNumber: opportunity.solicitationNumber || "",
+					fullParentPathName: opportunity.fullParentPathName || "",
+					fullParentPathCode: opportunity.fullParentPathCode || "",
+					postedDate: opportunity.postedDate,
+					type: opportunity.type || "",
+					typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
+					typeOfSetAside: opportunity.typeOfSetAside || "",
+					responseDeadLine: opportunity.responseDeadLine,
+					naicsCode: opportunity.naicsCode || "",
+					naicsCodes: opportunity.naicsCodes,
+					classificationCode: opportunity.classificationCode || "",
+					active: opportunity.active || "Yes",
+					description: opportunity.description || "",
+					organizationType: opportunity.organizationType || "",
+					resourceLinks: opportunity.resourceLinks,
+					uiLink: opportunity.uiLink,
+
+					// Office Address as embedded fields
+					officeZipcode: opportunity.officeAddress.officeZipcode || "",
+					officeCity: opportunity.officeAddress.officeCity || "",
+					officeCountryCode: opportunity.officeAddress.officeCountryCode || "",
+					officeState: opportunity.officeAddress.officeState || "",
+
+					// Point of Contact as embedded fields
+					pocName: opportunity.pointOfContact.pocName || "",
+					pocEmail: opportunity.pointOfContact.pocEmail || "",
+					pocPhone: opportunity.pointOfContact.pocPhone || "",
+					pocType: opportunity.pointOfContact.pocType || "",
+
+					// Foreign key relationships
+					userId: activeUserId,
 					companyId: activeCompanyId,
 					teamId: activeTeamId,
 				},
