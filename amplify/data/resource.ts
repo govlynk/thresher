@@ -20,7 +20,7 @@ const COMPANY_ROLES = [
 ] as const;
 
 const schema = a.schema({
-	Opportuunity: a
+	Opportunity: a
 		.model({
 			opportunityId: a.string().required(),
 			title: a.string().required(),
