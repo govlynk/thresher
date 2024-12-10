@@ -66,14 +66,12 @@ export const useOpportunityStore = create((set, get) => ({
 	},
 
 	setOpportunities: (opportunities) => {
-		console.log("setOpportunities", { count: opportunities.length });
 		set({ opportunities });
 	},
 
 	fetchOpportunities: async (params) => {
 		const state = get();
 		if (!state.isInitialized) {
-			console.log("Initializing store before fetching opportunities...");
 			await state.initializeStore();
 		}
 
@@ -83,6 +81,14 @@ export const useOpportunityStore = create((set, get) => ({
 		if (!activeCompany?.id) {
 			set({
 				error: "No active company selected",
+				loading: false,
+			});
+			return;
+		}
+
+		if (!params || !Object.keys(params).length) {
+			set({
+				error: "Invalid search parameters",
 				loading: false,
 			});
 			return;
@@ -117,7 +123,6 @@ export const useOpportunityStore = create((set, get) => ({
 		}
 	},
 
-	// Rest of the store implementation remains unchanged...
 	saveOpportunity: async (opportunity) => {
 		const state = get();
 		if (!state.isInitialized) {
@@ -144,7 +149,6 @@ export const useOpportunityStore = create((set, get) => ({
 				notes: "",
 				companyId: activeCompany.id,
 				teamId: activeTeamId,
-				// ... rest of opportunity data
 			});
 
 			if (!response?.data) {
@@ -190,7 +194,6 @@ export const useOpportunityStore = create((set, get) => ({
 				notes: "",
 				companyId: activeCompany.id,
 				teamId: activeTeamId,
-				// ... rest of opportunity data
 			});
 
 			if (!response?.data) {
@@ -248,7 +251,6 @@ export const useOpportunityStore = create((set, get) => ({
 				notes: "",
 				companyId: activeCompany.id,
 				teamId: activeTeamId,
-				// ... rest of opportunity data
 			});
 
 			if (!response?.data) {

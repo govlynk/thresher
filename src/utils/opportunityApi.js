@@ -49,11 +49,15 @@ export async function getOpportunity(searchParams) {
 		throw new Error("SAM API key is not configured");
 	}
 
+	console.log("getOpportunity called with params:", searchParams);
+
 	const api_key = import.meta.env.VITE_SAM_API_KEY;
 	const queryString = formatQueryParams(searchParams);
 	const apiUrl = `https://api.sam.gov/opportunities/v2/search?api_key=${api_key}${
 		queryString ? "&" + queryString : ""
 	}`;
+
+	console.log("Constructed API URL:", apiUrl);
 
 	const maxRetries = 3;
 	let lastError;
@@ -67,6 +71,8 @@ export async function getOpportunity(searchParams) {
 				},
 			});
 
+			console.log("API Response:", response.data);
+
 			if (!response.data?.opportunitiesData) {
 				return [];
 			}
@@ -75,8 +81,11 @@ export async function getOpportunity(searchParams) {
 				.filter(Boolean)
 				.map(processOpportunityData)
 				.filter(Boolean);
+
+			console.log("Processed opportunities:", processedData.length);
 			return processedData;
 		} catch (error) {
+			console.error("API request error:", error);
 			if (error.response?.status !== 429) {
 				throw error;
 			}
@@ -84,6 +93,7 @@ export async function getOpportunity(searchParams) {
 
 			const retryAfter = error.response.headers["retry-after"];
 			const delay = retryAfter ? parseInt(retryAfter, 10) * 1000 : Math.pow(2, i) * 1000;
+			console.log(`Retrying after ${delay}ms (attempt ${i + 1}/${maxRetries})`);
 			await new Promise((resolve) => setTimeout(resolve, delay));
 		}
 	}
@@ -92,10 +102,16 @@ export async function getOpportunity(searchParams) {
 }
 
 export function useOpportunityQuery(searchParams) {
-	console.log("************* useOpportunityQuery: Fetching opportunities with search params:", searchParams);
 	return useQuery({
 		queryKey: ["opportunities", searchParams],
-		queryFn: () => (searchParams ? getOpportunity(searchParams) : Promise.resolve([])),
+		queryFn: async () => {
+			console.log("Query function executing with params:", searchParams);
+			if (!searchParams) {
+				console.log("No search params provided, returning empty array");
+				return [];
+			}
+			return getOpportunity(searchParams);
+		},
 		staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
 		cacheTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
 		retry: 3,
