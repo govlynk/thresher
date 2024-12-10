@@ -60,6 +60,22 @@
               "isRequired": true,
               "attributes": []
             },
+            "description": {
+              "name": "description",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "status": {
+              "name": "status",
+              "isArray": false,
+              "type": {
+                "enum": "OpportunityStatus"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
             "solicitationNumber": {
               "name": "solicitationNumber",
               "isArray": false,
@@ -74,43 +90,15 @@
               "isRequired": false,
               "attributes": []
             },
-            "fullParentPathCode": {
-              "name": "fullParentPathCode",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
             "postedDate": {
               "name": "postedDate",
               "isArray": false,
-              "type": "String",
+              "type": "AWSDateTime",
               "isRequired": false,
               "attributes": []
             },
             "type": {
               "name": "type",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "baseType": {
-              "name": "baseType",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "archiveType": {
-              "name": "archiveType",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "archiveDate": {
-              "name": "archiveDate",
               "isArray": false,
               "type": "String",
               "isRequired": false,
@@ -133,7 +121,7 @@
             "responseDeadLine": {
               "name": "responseDeadLine",
               "isArray": false,
-              "type": "String",
+              "type": "AWSDateTime",
               "isRequired": false,
               "attributes": []
             },
@@ -166,38 +154,8 @@
               "isRequired": false,
               "attributes": []
             },
-            "description": {
-              "name": "description",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
             "organizationType": {
               "name": "organizationType",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "status": {
-              "name": "status",
-              "isArray": false,
-              "type": {
-                "enum": "OpportunityStatus"
-              },
-              "isRequired": false,
-              "attributes": []
-            },
-            "bidProgress": {
-              "name": "bidProgress",
-              "isArray": false,
-              "type": "Int",
-              "isRequired": false,
-              "attributes": []
-            },
-            "notes": {
-              "name": "notes",
               "isArray": false,
               "type": "String",
               "isRequired": false,
@@ -274,29 +232,67 @@
               "isRequired": false,
               "attributes": []
             },
-            "awardAmount": {
-              "name": "awardAmount",
+            "position": {
+              "name": "position",
               "isArray": false,
-              "type": "Float",
+              "type": "Int",
               "isRequired": false,
               "attributes": []
             },
-            "awardeeName": {
-              "name": "awardeeName",
+            "priority": {
+              "name": "priority",
+              "isArray": false,
+              "type": {
+                "enum": "OpportunityPriority"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "estimatedEffort": {
+              "name": "estimatedEffort",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "actualEffort": {
+              "name": "actualEffort",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "tags": {
+              "name": "tags",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "notes": {
+              "name": "notes",
               "isArray": false,
               "type": "String",
               "isRequired": false,
               "attributes": []
             },
-            "awardeeUEI": {
-              "name": "awardeeUEI",
+            "assigneeId": {
+              "name": "assigneeId",
               "isArray": false,
               "type": "String",
               "isRequired": false,
               "attributes": []
             },
-            "awardeeLocation": {
-              "name": "awardeeLocation",
+            "dueDate": {
+              "name": "dueDate",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "userId": {
+              "name": "userId",
               "isArray": false,
               "type": "String",
               "isRequired": false,
@@ -314,13 +310,6 @@
               "isArray": false,
               "type": "String",
               "isRequired": true,
-              "attributes": []
-            },
-            "userId": {
-              "name": "userId",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
               "attributes": []
             },
             "user": {
@@ -1903,6 +1892,14 @@
             "WON",
             "LOST",
             "REJECTED"
+          ]
+        },
+        "OpportunityPriority": {
+          "name": "OpportunityPriority",
+          "values": [
+            "HIGH",
+            "MEDIUM",
+            "LOW"
           ]
         },
         "UserStatus": {

@@ -22,7 +22,7 @@ const COMPANY_ROLES = [
 const schema = a.schema({
 	Opportunity: a
 		.model({
-			opportunityId: a.string().required(),
+			noticeId: a.string().required(),
 			title: a.string().required(),
 			description: a.string(),
 			status: a.enum(["BACKLOG", "BID", "REVIEW", "SUBMITTED", "WON", "LOST", "REJECTED"]),

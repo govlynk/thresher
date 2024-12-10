@@ -31,7 +31,7 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 				await moveToSaved(opportunity);
 			} else {
 				await saveOpportunity({
-					opportunityId: opportunity.noticeId,
+					noticeId: opportunity.noticeId,
 					title: opportunity.title,
 					description: opportunity.description || "",
 					agency: opportunity.department,
