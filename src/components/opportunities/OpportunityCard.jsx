@@ -14,53 +14,79 @@ import {
 import { useOpportunityStore } from "../../stores/opportunityStore";
 import { OpportunityDetailsSidebar } from "./OpportunityDetailsSidebar";
 import { formatDate, formatCurrency } from "../../utils/formatters";
+import { useGlobalStore } from "../../stores/globalStore";
 
 export function OpportunityCard({ opportunity, type = "new" }) {
 	const { saveOpportunity, rejectOpportunity, moveToSaved, loading, error } = useOpportunityStore();
 	const [detailsOpen, setDetailsOpen] = useState(false);
+	const [localLoading, setLocalLoading] = useState(false);
+	const [localError, setLocalError] = useState(null);
+	const { activeCompanyId, activeTeamId, activeUserId } = useGlobalStore();
 
 	const handleSave = async () => {
-		console.log("OpportunityCard: Attempting to save opportunity:", {
-			noticeId: opportunity.noticeId,
-			title: opportunity.title,
-			type,
-		});
-
+		setLocalLoading(true);
+		setLocalError(null);
 		try {
 			if (type === "rejected") {
-				console.log("OpportunityCard: Moving rejected opportunity to saved");
 				await moveToSaved(opportunity);
 			} else {
-				console.log("OpportunityCard: Saving new opportunity");
-				await saveOpportunity(opportunity);
+				await saveOpportunity({
+					opportunityId: opportunity.noticeId,
+					title: opportunity.title,
+					description: opportunity.description || "",
+					agency: opportunity.department,
+					dueDate: opportunity.responseDeadLine,
+					status: "BACKLOG",
+					notes: "",
+					solicitationNumber: opportunity.solicitationNumber || "",
+					fullParentPathName: opportunity.fullParentPathName || "",
+					fullParentPathCode: opportunity.fullParentPathCode || "",
+					postedDate: opportunity.postedDate,
+					type: opportunity.type || "",
+					typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
+					typeOfSetAside: opportunity.typeOfSetAside || "",
+					responseDeadLine: opportunity.responseDeadLine,
+					naicsCode: opportunity.naicsCode || "",
+					naicsCodes: opportunity.naicsCodes,
+					classificationCode: opportunity.classificationCode || "",
+					active: opportunity.active || "Yes",
+					organizationType: opportunity.organizationType || "",
+					resourceLinks: opportunity.resourceLinks,
+					uiLink: opportunity.uiLink,
+					// Office Address as embedded fields
+					officeZipcode: opportunity.officeAddress.officeZipcode || "",
+					officeCity: opportunity.officeAddress.officeCity || "",
+					officeCountryCode: opportunity.officeAddress.officeCountryCode || "",
+					officeState: opportunity.officeAddress.officeState || "",
+					// Point of Contact as embedded fields
+					pocName: opportunity.pointOfContact.pocName || "",
+					pocEmail: opportunity.pointOfContact.pocEmail || "",
+					pocPhone: opportunity.pointOfContact.pocPhone || "",
+					pocType: opportunity.pointOfContact.pocType || "",
+					// Foreign key relationships
+					userId: activeUserId,
+					companyId: activeCompanyId,
+					teamId: activeTeamId,
+				});
 			}
-			console.log("OpportunityCard: Successfully saved opportunity");
 		} catch (err) {
-			console.error("OpportunityCard: Error saving opportunity:", {
-				error: err,
-				errorMessage: err.message,
-				stack: err.stack,
-				opportunity,
-			});
+			console.error("Error saving opportunity:", err);
+			setLocalError(err.message || "Failed to save opportunity");
+		} finally {
+			setLocalLoading(false);
 		}
 	};
 
 	const handleReject = async () => {
-		console.log("OpportunityCard: Attempting to reject opportunity:", {
-			noticeId: opportunity.noticeId,
-			title: opportunity.title,
-		});
-
+		setLocalLoading(true);
+		setLocalError(null);
 		try {
 			await rejectOpportunity(opportunity);
-			console.log("OpportunityCard: Successfully rejected opportunity");
 		} catch (err) {
-			console.error("OpportunityCard: Error rejecting opportunity:", {
-				error: err,
-				errorMessage: err.message,
-				stack: err.stack,
-				opportunity,
-			});
+			console.error("Error rejecting opportunity:", err);
+			setLocalError(err.message || "Failed to reject opportunity");
+		} finally {
+			setLocalLoading(false);
 		}
 	};
 
@@ -74,7 +100,9 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 
 					<Box sx={{ mb: 2 }}>
 						<Chip size='small' label={opportunity.type} color='primary' sx={{ mr: 1 }} />
-						{opportunity.setAside && <Chip size='small' label={opportunity.setAside} color='secondary' />}
+						{opportunity.typeOfSetAside && (
+							<Chip size='small' label={opportunity.typeOfSetAside} color='secondary' />
+						)}
 					</Box>
 
 					<Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
@@ -121,20 +149,34 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 							</Box>
 						)}
 					</Box>
+
+					{localError && (
+						<Typography color='error' variant='body2' sx={{ mt: 1 }}>
+							{localError}
+						</Typography>
+					)}
 				</CardContent>
 
 				<CardActions sx={{ justifyContent: "space-between", p: 2 }}>
 					<Box>
 						<Tooltip title={type === "saved" ? "Already Saved" : "Save Opportunity"}>
 							<span>
-								<IconButton onClick={handleSave} color='primary' disabled={loading || type === "saved"}>
+								<IconButton
+									onClick={handleSave}
+									color='primary'
+									disabled={localLoading || loading || type === "saved"}
+								>
 									<ThumbsUp size={20} />
 								</IconButton>
 							</span>
 						</Tooltip>
 						<Tooltip title={type === "rejected" ? "Already Rejected" : "Reject Opportunity"}>
 							<span>
-								<IconButton onClick={handleReject} color='error' disabled={loading || type === "rejected"}>
+								<IconButton
+									onClick={handleReject}
+									color='error'
+									disabled={localLoading || loading || type === "rejected"}
+								>
 									<ThumbsDown size={20} />
 								</IconButton>
 							</span>

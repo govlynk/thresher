@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
 import { useGlobalStore } from "./globalStore";
-import { useUserCompanyStore } from "./userCompanyStore";
 import { getOpportunity } from "../utils/opportunityApi";
 
 const client = generateClient({
@@ -18,10 +17,7 @@ export const useOpportunityStore = create((set, get) => ({
 	isInitialized: false,
 
 	initializeStore: async () => {
-		const { getActiveCompany } = useUserCompanyStore.getState();
-		const activeCompany = getActiveCompany();
-
-		if (!activeCompany?.id) {
+		if (!activeCompanyId) {
 			set({
 				error: "No active company selected",
 				loading: false,
@@ -139,6 +135,8 @@ export const useOpportunityStore = create((set, get) => ({
 
 		set({ loading: true, error: null });
 		try {
+			console.log("OpportunityStore: Saving opportunity:", opportunity);
+
 			const response = await client.models.Opportunity.create({
 				opportunityId: opportunity.noticeId,
 				title: opportunity.title,
@@ -147,10 +145,37 @@ export const useOpportunityStore = create((set, get) => ({
 				dueDate: opportunity.responseDeadLine,
 				status: "BACKLOG",
 				notes: "",
-				companyId: activeCompany.id,
+				solicitationNumber: opportunity.solicitationNumber || "",
+				fullParentPathName: opportunity.fullParentPathName || "",
+				fullParentPathCode: opportunity.fullParentPathCode || "",
+				postedDate: opportunity.postedDate,
+				type: opportunity.type || "",
+				typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
+				typeOfSetAside: opportunity.typeOfSetAside || "",
+				responseDeadLine: opportunity.responseDeadLine,
+				naicsCode: opportunity.naicsCode || "",
+				naicsCodes: opportunity.naicsCodes,
+				classificationCode: opportunity.classificationCode || "",
+				active: opportunity.active || "Yes",
+				organizationType: opportunity.organizationType || "",
+				resourceLinks: opportunity.resourceLinks,
+				uiLink: opportunity.uiLink,
+				// Office Address as embedded fields
+				officeZipcode: opportunity.officeZipcode || "",
+				officeCity: opportunity.officeCity || "",
+				officeCountryCode: opportunity.officeCountryCode || "",
+				officeState: opportunity.officeState || "",
+				// Point of Contact as embedded fields
+				pocName: opportunity.pocName || "",
+				pocEmail: opportunity.pocEmail || "",
+				pocPhone: opportunity.pocPhone || "",
+				pocType: opportunity.pocType || "",
+				// Foreign key relationships
+				userId: activeUserId,
+				companyId: activeCompanyId,
 				teamId: activeTeamId,
 			});
-
+			console.log("OpportunityStore: Saved opportunity response:", response);
 			if (!response?.data) {
 				throw new Error("Failed to save opportunity");
 			}
@@ -192,7 +217,34 @@ export const useOpportunityStore = create((set, get) => ({
 				agency: opportunity.department,
 				dueDate: opportunity.responseDeadLine,
 				notes: "",
-				companyId: activeCompany.id,
+				solicitationNumber: opportunity.solicitationNumber || "",
+				fullParentPathName: opportunity.fullParentPathName || "",
+				fullParentPathCode: opportunity.fullParentPathCode || "",
+				postedDate: opportunity.postedDate,
+				type: opportunity.type || "",
+				typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
+				typeOfSetAside: opportunity.typeOfSetAside || "",
+				responseDeadLine: opportunity.responseDeadLine,
+				naicsCode: opportunity.naicsCode || "",
+				naicsCodes: opportunity.naicsCodes,
+				classificationCode: opportunity.classificationCode || "",
+				active: opportunity.active || "Yes",
+				organizationType: opportunity.organizationType || "",
+				resourceLinks: opportunity.resourceLinks,
+				uiLink: opportunity.uiLink,
+				// Office Address as embedded fields
+				officeZipcode: opportunity.officeZipcode || "",
+				officeCity: opportunity.officeCity || "",
+				officeCountryCode: opportunity.officeCountryCode || "",
+				officeState: opportunity.officeState || "",
+				// Point of Contact as embedded fields
+				pocName: opportunity.pocName || "",
+				pocEmail: opportunity.pocEmail || "",
+				pocPhone: opportunity.pocPhone || "",
+				pocType: opportunity.pocType || "",
+				// Foreign key relationships
+				userId: activeUserId,
+				companyId: activeCompanyId,
 				teamId: activeTeamId,
 			});
 
@@ -249,7 +301,34 @@ export const useOpportunityStore = create((set, get) => ({
 				agency: opportunity.department,
 				dueDate: opportunity.responseDeadLine,
 				notes: "",
-				companyId: activeCompany.id,
+				solicitationNumber: opportunity.solicitationNumber || "",
+				fullParentPathName: opportunity.fullParentPathName || "",
+				fullParentPathCode: opportunity.fullParentPathCode || "",
+				postedDate: opportunity.postedDate,
+				type: opportunity.type || "",
+				typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
+				typeOfSetAside: opportunity.typeOfSetAside || "",
+				responseDeadLine: opportunity.responseDeadLine,
+				naicsCode: opportunity.naicsCode || "",
+				naicsCodes: opportunity.naicsCodes,
+				classificationCode: opportunity.classificationCode || "",
+				active: opportunity.active || "Yes",
+				organizationType: opportunity.organizationType || "",
+				resourceLinks: opportunity.resourceLinks,
+				uiLink: opportunity.uiLink,
+				// Office Address as embedded fields
+				officeZipcode: opportunity.officeZipcode || "",
+				officeCity: opportunity.officeCity || "",
+				officeCountryCode: opportunity.officeCountryCode || "",
+				officeState: opportunity.officeState || "",
+				// Point of Contact as embedded fields
+				pocName: opportunity.pocName || "",
+				pocEmail: opportunity.pocEmail || "",
+				pocPhone: opportunity.pocPhone || "",
+				pocType: opportunity.pocType || "",
+				// Foreign key relationships
+				userId: activeUserId,
+				companyId: activeCompanyId,
 				teamId: activeTeamId,
 			});
 

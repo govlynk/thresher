@@ -11,15 +11,11 @@ export function OpportunitySearch() {
 	const { setOpportunities, fetchOpportunities } = useOpportunityStore();
 	const activeCompany = userCompanies.find((c) => c.id === activeCompanyId);
 
-	// Fetch saved opportunities when component mounts or company changes
-	React.useEffect(() => {
-		if (activeCompanyId) {
-			fetchOpportunities();
-		}
-	}, [activeCompanyId, fetchOpportunities]);
-
+	// Construct search parameters
 	const searchParams = React.useMemo(() => {
-		if (!activeCompany?.naicsCode?.length) return null;
+		if (!activeCompany?.naicsCode?.length) {
+			return null;
+		}
 
 		const date = new Date();
 		const endDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
@@ -52,7 +48,7 @@ export function OpportunitySearch() {
 	if (!activeCompany?.naicsCode?.length) {
 		return (
 			<Alert severity='info' sx={{ mt: 2 }}>
-				No NAICS codes found for this company
+				No NAICS codes found for this company. NAICS codes are required to search for opportunities.
 			</Alert>
 		);
 	}

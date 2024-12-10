@@ -2,18 +2,8 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 
 const formatQueryParams = (params) => {
-	if (!params || Object.keys(params).length === 0) {
-		return "";
-	}
-
 	const queryParams = [];
 
-	// Format NAICS codes
-	if (params.naicsCode) {
-		queryParams.push(`naics=${params.naicsCode}`);
-	}
-
-	// Format dates
 	if (params.postedFrom) {
 		queryParams.push(`postedFrom=${params.postedFrom}`);
 	}
@@ -36,12 +26,36 @@ const formatQueryParams = (params) => {
 const processOpportunityData = (opportunity) => {
 	if (!opportunity) return null;
 
+	const flattenedOfficeAddress = opportunity.officeAddress
+		? {
+				officeZipcode: opportunity.officeAddress.zipcode,
+				officeCity: opportunity.officeAddress.city,
+				officeCountryCode: opportunity.officeAddress.countryCode,
+				officeState: opportunity.officeAddress.state,
+		  }
+		: {};
+
+	const flattenedPointOfContact = opportunity.pointOfContact?.length
+		? opportunity.pointOfContact.map((contact) => ({
+				pocType: contact.type,
+				pocEmail: contact.email,
+				pocPhone: contact.phone,
+				pocName: contact.fullName,
+		  }))
+		: [];
+
 	return {
 		...opportunity,
 		department: opportunity.department?.name || opportunity.departmentName || "N/A",
 		subtier: opportunity.subtierAgency?.name || opportunity.subtierAgencyName || "N/A",
 		office: opportunity.office?.name || opportunity.officeName || "N/A",
+		...flattenedOfficeAddress,
+		pointOfContact: flattenedPointOfContact,
 	};
+};
+
+const processData = (opportunities) => {
+	return opportunities.map(processOpportunityData).filter(Boolean);
 };
 
 export async function getOpportunity(searchParams) {
@@ -77,11 +91,7 @@ export async function getOpportunity(searchParams) {
 				return [];
 			}
 
-			const processedData = response.data.opportunitiesData
-				.filter(Boolean)
-				.map(processOpportunityData)
-				.filter(Boolean);
-
+			const processedData = processData(response.data.opportunitiesData);
 			console.log("Processed opportunities:", processedData.length);
 			return processedData;
 		} catch (error) {
