@@ -17,6 +17,8 @@ export const useOpportunityStore = create((set, get) => ({
 	isInitialized: false,
 
 	initializeStore: async () => {
+		const { activeCompanyId } = useGlobalStore.getState();
+
 		if (!activeCompanyId) {
 			set({
 				error: "No active company selected",
@@ -31,7 +33,7 @@ export const useOpportunityStore = create((set, get) => ({
 			// Fetch saved opportunities
 			const savedOpportunities = await client.models.Opportunity.list({
 				filter: {
-					companyId: { eq: activeCompany.id },
+					companyId: { eq: activeCompanyId },
 					status: { eq: "BACKLOG" },
 				},
 			});
@@ -39,7 +41,7 @@ export const useOpportunityStore = create((set, get) => ({
 			// Fetch rejected opportunities
 			const rejectedOpportunities = await client.models.Opportunity.list({
 				filter: {
-					companyId: { eq: activeCompany.id },
+					companyId: { eq: activeCompanyId },
 					status: { eq: "REJECTED" },
 				},
 			});
@@ -71,10 +73,9 @@ export const useOpportunityStore = create((set, get) => ({
 			await state.initializeStore();
 		}
 
-		const { getActiveCompany } = useUserCompanyStore.getState();
-		const activeCompany = getActiveCompany();
+		const { activeCompanyId } = useGlobalStore.getState();
 
-		if (!activeCompany?.id) {
+		if (!activeCompanyId) {
 			set({
 				error: "No active company selected",
 				loading: false,
@@ -125,11 +126,9 @@ export const useOpportunityStore = create((set, get) => ({
 			await state.initializeStore();
 		}
 
-		const { getActiveCompany } = useUserCompanyStore.getState();
-		const activeCompany = getActiveCompany();
-		const { activeTeamId } = useGlobalStore.getState();
+		const { activeCompanyId, activeTeamId, activeUserId } = useGlobalStore.getState();
 
-		if (!activeCompany?.id) {
+		if (!activeCompanyId) {
 			throw new Error("No active company selected");
 		}
 
@@ -137,17 +136,13 @@ export const useOpportunityStore = create((set, get) => ({
 		try {
 			console.log("OpportunityStore: Saving opportunity:", opportunity);
 
-			const response = await client.models.Opportunity.create({
+			const opportunityData = {
 				opportunityId: opportunity.noticeId,
 				title: opportunity.title,
 				description: opportunity.description || "",
-				agency: opportunity.department,
-				dueDate: opportunity.responseDeadLine,
 				status: "BACKLOG",
-				notes: "",
 				solicitationNumber: opportunity.solicitationNumber || "",
 				fullParentPathName: opportunity.fullParentPathName || "",
-				fullParentPathCode: opportunity.fullParentPathCode || "",
 				postedDate: opportunity.postedDate,
 				type: opportunity.type || "",
 				typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
@@ -170,12 +165,27 @@ export const useOpportunityStore = create((set, get) => ({
 				pocEmail: opportunity.pocEmail || "",
 				pocPhone: opportunity.pocPhone || "",
 				pocType: opportunity.pocType || "",
+				// Pipeline fields
+				position: 0,
+				priority: "MEDIUM",
+				estimatedEffort: 0,
+				actualEffort: 0,
+				tags: "",
+				notes: "",
+				assigneeId: activeUserId,
+				dueDate: opportunity.responseDeadLine,
+
+				notes: "",
+
 				// Foreign key relationships
 				userId: activeUserId,
 				companyId: activeCompanyId,
 				teamId: activeTeamId,
-			});
-			console.log("OpportunityStore: Saved opportunity response:", response);
+			};
+
+			const response = await client.models.Opportunity.create(opportunityData);
+			console.log("Saved opportunity response:", response);
+
 			if (!response?.data) {
 				throw new Error("Failed to save opportunity");
 			}
@@ -199,23 +209,21 @@ export const useOpportunityStore = create((set, get) => ({
 	},
 
 	rejectOpportunity: async (opportunity) => {
-		const { getActiveCompany } = useUserCompanyStore.getState();
-		const activeCompany = getActiveCompany();
-		const { activeTeamId } = useGlobalStore.getState();
+		const { activeCompanyId, activeTeamId, activeUserId } = useGlobalStore.getState();
 
-		if (!activeCompany?.id) {
+		if (!activeCompanyId) {
 			throw new Error("No active company selected");
 		}
 
 		set({ loading: true, error: null });
 		try {
-			const response = await client.models.Opportunity.create({
-				status: "REJECTED",
+			const opportunityData = {
 				opportunityId: opportunity.noticeId,
 				title: opportunity.title,
 				description: opportunity.description || "",
 				agency: opportunity.department,
 				dueDate: opportunity.responseDeadLine,
+				status: "REJECTED",
 				notes: "",
 				solicitationNumber: opportunity.solicitationNumber || "",
 				fullParentPathName: opportunity.fullParentPathName || "",
@@ -246,7 +254,11 @@ export const useOpportunityStore = create((set, get) => ({
 				userId: activeUserId,
 				companyId: activeCompanyId,
 				teamId: activeTeamId,
-			});
+			};
+
+			const response = await client.models.Opportunity.create(opportunityData);
+
+			console.log("Rejected opportunity response:", response);
 
 			if (!response?.data) {
 				throw new Error("Failed to reject opportunity");
@@ -268,11 +280,9 @@ export const useOpportunityStore = create((set, get) => ({
 	},
 
 	moveToSaved: async (opportunity) => {
-		const { getActiveCompany } = useUserCompanyStore.getState();
-		const activeCompany = getActiveCompany();
-		const { activeTeamId } = useGlobalStore.getState();
+		const { activeCompanyId, activeTeamId, activeUserId } = useGlobalStore.getState();
 
-		if (!activeCompany?.id) {
+		if (!activeCompanyId) {
 			throw new Error("No active company selected");
 		}
 
@@ -293,13 +303,13 @@ export const useOpportunityStore = create((set, get) => ({
 			}
 
 			// Then create a new saved opportunity
-			const response = await client.models.Opportunity.create({
-				status: "BACKLOG",
+			const opportunityData = {
 				opportunityId: opportunity.noticeId,
 				title: opportunity.title,
 				description: opportunity.description || "",
 				agency: opportunity.department,
 				dueDate: opportunity.responseDeadLine,
+				status: "BACKLOG",
 				notes: "",
 				solicitationNumber: opportunity.solicitationNumber || "",
 				fullParentPathName: opportunity.fullParentPathName || "",
@@ -330,7 +340,9 @@ export const useOpportunityStore = create((set, get) => ({
 				userId: activeUserId,
 				companyId: activeCompanyId,
 				teamId: activeTeamId,
-			});
+			};
+
+			const response = await client.models.Opportunity.create(opportunityData);
 
 			if (!response?.data) {
 				throw new Error("Failed to move opportunity to saved");

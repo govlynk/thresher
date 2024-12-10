@@ -24,26 +24,20 @@ const schema = a.schema({
 		.model({
 			opportunityId: a.string().required(),
 			title: a.string().required(),
+			description: a.string(),
+			status: a.enum(["BACKLOG", "BID", "REVIEW", "SUBMITTED", "WON", "LOST", "REJECTED"]),
 			solicitationNumber: a.string(),
 			fullParentPathName: a.string(),
-			fullParentPathCode: a.string(),
-			postedDate: a.string(),
+			postedDate: a.datetime(),
 			type: a.string(),
-			baseType: a.string(),
-			archiveType: a.string(),
-			archiveDate: a.string(),
 			typeOfSetAsideDescription: a.string(),
 			typeOfSetAside: a.string(),
-			responseDeadLine: a.string(),
+			responseDeadLine: a.datetime(),
 			naicsCode: a.string(),
 			naicsCodes: a.string().array(),
 			classificationCode: a.string(),
 			active: a.string(),
-			description: a.string(),
 			organizationType: a.string(),
-			status: a.enum(["BACKLOG", "BID", "REVIEW", "SUBMITTED", "WON", "LOST", "REJECTED"]),
-			bidProgress: a.integer(),
-			notes: a.string(),
 			resourceLinks: a.string().array(),
 			uiLink: a.string(),
 
@@ -59,16 +53,20 @@ const schema = a.schema({
 			pocPhone: a.string(),
 			pocType: a.string(),
 
-			// Award fields
-			awardAmount: a.float(),
-			awardeeName: a.string(),
-			awardeeUEI: a.string(),
-			awardeeLocation: a.string(),
+			// Pipeline fields
+			position: a.integer(),
+			priority: a.enum(["HIGH", "MEDIUM", "LOW"]),
+			estimatedEffort: a.integer(),
+			actualEffort: a.integer(),
+			tags: a.string().array(),
+			notes: a.string(),
+			assigneeId: a.string(),
+			dueDate: a.datetime(),
 
 			// Foreign key relationships
+			userId: a.string(),
 			companyId: a.string().required(),
 			teamId: a.string().required(),
-			userId: a.string(),
 
 			// Relationships
 			user: a.belongsTo("User", "userId"),
