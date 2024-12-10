@@ -5,6 +5,7 @@ import { generateClient } from "aws-amplify/data";
 import { useCompanyStore } from "../../stores/companyStore";
 import { useUserStore } from "../../stores/userStore";
 import { useTeamStore } from "../../stores/teamStore";
+import { useTeamMemberStore } from "../../stores/teamMemberStore";
 import { useUserCompanyRoleStore } from "../../stores/userCompanyRoleStore";
 import { useAuthStore } from "../../stores/authStore";
 
@@ -19,6 +20,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 	const { addCompany } = useCompanyStore();
 	const { addUser } = useUserStore();
 	const { addTeam } = useTeamStore();
+	const { addTeamMember } = useTeamMemberStore();
 	const { addUserCompanyRole } = useUserCompanyRoleStore();
 	const { user } = useAuthStore();
 
@@ -36,16 +38,14 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 				throw new Error("Missing required setup data");
 			}
 
+			// 1. Create Company
 			const companyData = {
-				// Basic Information
 				legalBusinessName: setupData.company.legalBusinessName,
 				dbaName: setupData.company.dbaName || null,
 				uei: setupData.company.uei,
 				cageCode: setupData.company.cageCode || null,
 				ein: setupData.company.ein || null,
 				status: "ACTIVE",
-
-				// Contact Information
 				companyEmail: setupData.company.companyEmail || setupData.user.contactEmail || null,
 				companyPhoneNumber: setupData.company.companyPhoneNumber || setupData.user.contactBusinessPhone || null,
 				companyWebsite: setupData.company.entityURL
@@ -53,70 +53,45 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 						? setupData.company.entityURL
 						: `https://${setupData.company.entityURL}`
 					: null,
-
-				// Physical Address (Shipping)
 				shippingAddressStreetLine1: setupData.company.shippingAddressStreetLine1 || null,
 				shippingAddressStreetLine2: setupData.company.shippingAddressStreetLine2 || null,
 				shippingAddressCity: setupData.company.shippingAddressCity || null,
 				shippingAddressStateCode: setupData.company.shippingAddressStateCode || null,
 				shippingAddressZipCode: setupData.company.shippingAddressZipCode || null,
 				shippingAddressCountryCode: setupData.company.shippingAddressCountryCode || null,
-
-				// Mailing Address (Billing)
 				billingAddressStreetLine1: setupData.company.billingAddressStreetLine1 || null,
 				billingAddressStreetLine2: setupData.company.billingAddressStreetLine2 || null,
 				billingAddressCity: setupData.company.billingAddressCity || null,
 				billingAddressStateCode: setupData.company.billingAddressStateCode || null,
 				billingAddressZipCode: setupData.company.billingAddressZipCode || null,
 				billingAddressCountryCode: setupData.company.billingAddressCountryCode || null,
-
-				// Business Information
-				companyStartDate: new Date(setupData.company.companyStartDate).toISOString() || null,
-				entityStartDate: new Date(setupData.company.entityStartDate).toISOString() || null,
+				companyStartDate: setupData.company.companyStartDate || null,
+				entityStartDate: setupData.company.entityStartDate || null,
 				entityDivisionName: setupData.company.entityDivisionName || null,
 				entityStructureDesc: setupData.company.entityStructureDesc || null,
 				entityTypeDesc: setupData.company.entityTypeDesc || null,
 				organizationStructureDesc: setupData.company.organizationStructureDesc || null,
 				profitStructureDesc: setupData.company.profitStructureDesc || null,
-
-				// Registration Information
-				registrationDate: new Date(setupData.company.registrationDate).toISOString() || null,
-				registrationExpirationDate: new Date(setupData.company.registrationExpirationDate).toISOString() || null,
+				registrationDate: setupData.company.registrationDate || null,
+				registrationExpirationDate: setupData.company.registrationExpirationDate || null,
 				registrationStatus: setupData.company.registrationStatus || null,
 				purposeOfRegistrationDesc: setupData.company.purposeOfRegistrationDesc || null,
-				submissionDate: new Date(setupData.company.submissionDate).toISOString() || null,
-				lastUpdateDate: new Date(setupData.company.lastUpdateDate).toISOString() || null,
+				submissionDate: setupData.company.submissionDate || null,
+				lastUpdateDate: setupData.company.lastUpdateDate || null,
 				SAMPullDate: new Date().toISOString(),
-
-				// Location Information
-				congressionalDistrict: setupData.company.congressionalDistrict || null,
-				coreCongressionalDistrict: setupData.company.coreCongressionalDistrict || null,
-				stateOfIncorporationCode: setupData.company.stateOfIncorporationCode || null,
-				countryOfIncorporationCode: setupData.company.countryOfIncorporationCode || null,
-
-				// Business Classifications
-				primaryNaics: setupData.company.primaryNaics || null,
 				naicsCode: setupData.company.naicsCode || [],
-				pscCode: setupData.company.pscCode || [],
-				sbaBusinessTypeDesc: setupData.company.sbaBusinessTypeDesc || [],
-				// certificationEntryDate: new Date(setupData.company.certificationEntryDate).toISOString() || [],
-
-				// Additional Information
-				fiscalYearEndCloseDate: new Date(setupData.company.fiscalYearEndCloseDate).toISOString() || null,
-				exclusionStatusFlag: setupData.company.exclusionStatusFlag || null,
-				expirationDate: new Date(setupData.company.expirationDate).toISOString() || null,
-				activationDate: new Date(setupData.company.activationDate).toISOString() || null,
+				primaryNaics: setupData.company.primaryNaics || null,
 			};
 
 			console.log("Creating company with data:", companyData);
-			const companyResponse = await client.models.Company.create(companyData);
-			console.log("Company created:", companyResponse);
+			const company = await addCompany(companyData);
+			console.log("Company created:", company);
 
-			if (!companyResponse?.data?.id) {
+			if (!company?.id) {
 				throw new Error("Failed to create company");
 			}
-			const companyId = companyResponse.data.id;
-			// 2. Create contact
+
+			// 2. Create Contact
 			const contactData = {
 				firstName: setupData.user.firstName,
 				lastName: setupData.user.lastName,
@@ -132,17 +107,19 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 				workAddressZipCode: setupData.user.workAddressZipCode || null,
 				workAddressCountryCode: setupData.user.workAddressCountryCode || "USA",
 				dateLastContacted: new Date().toISOString(),
-				notes: `Initial contact created during company setup. Role: ${setupData.user.role}`,
-				companyId: companyId,
+				notes: `Initial contact created during company setup. Role: ${setupData.user.roleId}`,
+				companyId: company.id,
 			};
 
 			console.log("Creating contact with data:", contactData);
-			const contactResponse = await client.models.Contact.create(contactData);
-			console.log("Created contact:", contactResponse);
+			const contact = await client.models.Contact.create(contactData);
+			console.log("Contact created:", contact);
 
-			const contactId = contactResponse.data.id;
+			if (!contact?.data?.id) {
+				throw new Error("Failed to create contact");
+			}
 
-			// 3. Create user
+			// 3. Create User
 			const userData = {
 				cognitoId: setupData.user.cognitoId || user.sub,
 				email: setupData.user.contactEmail,
@@ -153,34 +130,50 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 			};
 
 			console.log("Creating user with data:", userData);
-			const userResponse = await client.models.User.create(userData);
-			console.log("User created:", userResponse);
+			const newUser = await addUser(userData);
+			console.log("User created:", newUser);
 
-			const userId = userResponse.data.id;
+			if (!newUser?.id) {
+				throw new Error("Failed to create user");
+			}
 
-			// 4. Create team
-			console.log("Creating team with data:", setupData.team);
+			// 4. Create Team
 			const teamData = {
 				name: setupData.team.name,
 				description: setupData.team.description,
-				companyId: companyId,
+				companyId: company.id,
 			};
 
 			console.log("Creating team with data:", teamData);
-			const teamResponse = await client.models.Team.create(teamData);
-			console.log("Team created:", teamResponse);
+			const team = await addTeam(teamData);
+			console.log("Team created:", team);
 
-			// 5. Create user-company role
+			if (!team?.id) {
+				throw new Error("Failed to create team");
+			}
+
+			// 5. Create Team Member
+			const teamMemberData = {
+				teamId: team.id,
+				contactId: contact.data.id,
+				role: setupData.user.roleId,
+			};
+
+			console.log("Creating team member with data:", teamMemberData);
+			const teamMember = await addTeamMember(teamMemberData);
+			console.log("Team member created:", teamMember);
+
+			// 6. Create User Company Role
 			const userCompanyRoleData = {
-				userId: userId,
-				companyId: companyId,
+				userId: newUser.id,
+				companyId: company.id,
 				roleId: setupData.user.roleId,
 				status: "ACTIVE",
 			};
 
-			console.log("Creating user-company role with data:", userCompanyRoleData);
-			const userCompanyRole = await client.models.UserCompanyRole.create(userCompanyRoleData);
-			console.log("User-company role created:", userCompanyRole);
+			console.log("Creating user company role with data:", userCompanyRoleData);
+			const userCompanyRole = await addUserCompanyRole(userCompanyRoleData);
+			console.log("User company role created:", userCompanyRole);
 
 			setSuccess(true);
 			if (onComplete) {

@@ -76,7 +76,7 @@ export function TeamSetupScreen({ onSubmit, onBack, setupData }) {
 								<Typography variant='caption' display='block' color='text.secondary' gutterBottom>
 									Name
 								</Typography>
-								<Typography>
+								<Typography color='text.secondary'>
 									{setupData.user.firstName} {setupData.user.lastName}
 								</Typography>
 							</Box>
@@ -84,14 +84,14 @@ export function TeamSetupScreen({ onSubmit, onBack, setupData }) {
 								<Typography variant='caption' display='block' color='text.secondary' gutterBottom>
 									Email
 								</Typography>
-								<Typography>{setupData.user.contactEmail}</Typography>
+								<Typography color='text.secondary'>{setupData.user.contactEmail}</Typography>
 							</Box>
 							<Box>
 								<Typography variant='caption' display='block' color='text.secondary' gutterBottom>
 									Role
 								</Typography>
 								<Box sx={{ mt: 0.5 }}>
-									<Chip label={setupData.user.roleId} size='small' color='primary' />
+									<Chip label={setupData.user.roleId} size='small' color='secondary' />
 								</Box>
 							</Box>
 						</Stack>

@@ -92,6 +92,7 @@ export async function getOpportunity(searchParams) {
 }
 
 export function useOpportunityQuery(searchParams) {
+	console.log("************* useOpportunityQuery: Fetching opportunities with search params:", searchParams);
 	return useQuery({
 		queryKey: ["opportunities", searchParams],
 		queryFn: () => (searchParams ? getOpportunity(searchParams) : Promise.resolve([])),

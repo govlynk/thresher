@@ -1,9 +1,9 @@
 {
   "auth": {
-    "user_pool_id": "us-east-1_ugNieCVY2",
+    "user_pool_id": "us-east-1_BtsFC20rG",
     "aws_region": "us-east-1",
-    "user_pool_client_id": "3k08vjv1c5jjkt0s56ci1i36n7",
-    "identity_pool_id": "us-east-1:ce4b0f8f-0b42-4f6c-8805-ba9e65786b8c",
+    "user_pool_client_id": "3enl3ssg2papposose8q9q6m87",
+    "identity_pool_id": "us-east-1:d1e664b3-ac0d-4b48-b1a4-6ad46797eed8",
     "mfa_methods": [],
     "standard_required_attributes": [
       "email"
@@ -25,9 +25,9 @@
     "unauthenticated_identities_enabled": true
   },
   "data": {
-    "url": "https://lon4r3trajf6zjcg4arrwkemym.appsync-api.us-east-1.amazonaws.com/graphql",
+    "url": "https://hoeo34urnrfepjupzicfxonaey.appsync-api.us-east-1.amazonaws.com/graphql",
     "aws_region": "us-east-1",
-    "api_key": "da2-zb6fclphxzc4ndubwpmiilf5si",
+    "api_key": "da2-6icigakx45f7rinu4nrw252fhq",
     "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
     "authorization_types": [
       "API_KEY",
@@ -36,402 +36,6 @@
     "model_introspection": {
       "version": 1,
       "models": {
-        "Opportunity": {
-          "name": "Opportunity",
-          "fields": {
-            "id": {
-              "name": "id",
-              "isArray": false,
-              "type": "ID",
-              "isRequired": true,
-              "attributes": []
-            },
-            "opportunityId": {
-              "name": "opportunityId",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true,
-              "attributes": []
-            },
-            "title": {
-              "name": "title",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true,
-              "attributes": []
-            },
-            "solicitationNumber": {
-              "name": "solicitationNumber",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "fullParentPathName": {
-              "name": "fullParentPathName",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "fullParentPathCode": {
-              "name": "fullParentPathCode",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "postedDate": {
-              "name": "postedDate",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "type": {
-              "name": "type",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "baseType": {
-              "name": "baseType",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "archiveType": {
-              "name": "archiveType",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "archiveDate": {
-              "name": "archiveDate",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "typeOfSetAsideDescription": {
-              "name": "typeOfSetAsideDescription",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "typeOfSetAside": {
-              "name": "typeOfSetAside",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "responseDeadLine": {
-              "name": "responseDeadLine",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "naicsCode": {
-              "name": "naicsCode",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "naicsCodes": {
-              "name": "naicsCodes",
-              "isArray": true,
-              "type": "String",
-              "isRequired": false,
-              "attributes": [],
-              "isArrayNullable": true
-            },
-            "classificationCode": {
-              "name": "classificationCode",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "active": {
-              "name": "active",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "description": {
-              "name": "description",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "organizationType": {
-              "name": "organizationType",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "status": {
-              "name": "status",
-              "isArray": false,
-              "type": {
-                "enum": "OpportunityStatus"
-              },
-              "isRequired": false,
-              "attributes": []
-            },
-            "bidProgress": {
-              "name": "bidProgress",
-              "isArray": false,
-              "type": "Int",
-              "isRequired": false,
-              "attributes": []
-            },
-            "notes": {
-              "name": "notes",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "resourceLinks": {
-              "name": "resourceLinks",
-              "isArray": true,
-              "type": "String",
-              "isRequired": false,
-              "attributes": [],
-              "isArrayNullable": true
-            },
-            "uiLink": {
-              "name": "uiLink",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "officeZipcode": {
-              "name": "officeZipcode",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "officeCity": {
-              "name": "officeCity",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "officeCountryCode": {
-              "name": "officeCountryCode",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "officeState": {
-              "name": "officeState",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "pocName": {
-              "name": "pocName",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "pocEmail": {
-              "name": "pocEmail",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "pocPhone": {
-              "name": "pocPhone",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "pocType": {
-              "name": "pocType",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "awardAmount": {
-              "name": "awardAmount",
-              "isArray": false,
-              "type": "Float",
-              "isRequired": false,
-              "attributes": []
-            },
-            "awardeeName": {
-              "name": "awardeeName",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "awardeeUEI": {
-              "name": "awardeeUEI",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "awardeeLocation": {
-              "name": "awardeeLocation",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "companyId": {
-              "name": "companyId",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true,
-              "attributes": []
-            },
-            "teamId": {
-              "name": "teamId",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true,
-              "attributes": []
-            },
-            "userId": {
-              "name": "userId",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "user": {
-              "name": "user",
-              "isArray": false,
-              "type": {
-                "model": "User"
-              },
-              "isRequired": false,
-              "attributes": [],
-              "association": {
-                "connectionType": "BELONGS_TO",
-                "targetNames": [
-                  "userId"
-                ]
-              }
-            },
-            "company": {
-              "name": "company",
-              "isArray": false,
-              "type": {
-                "model": "Company"
-              },
-              "isRequired": false,
-              "attributes": [],
-              "association": {
-                "connectionType": "BELONGS_TO",
-                "targetNames": [
-                  "companyId"
-                ]
-              }
-            },
-            "team": {
-              "name": "team",
-              "isArray": false,
-              "type": {
-                "model": "Team"
-              },
-              "isRequired": false,
-              "attributes": [],
-              "association": {
-                "connectionType": "BELONGS_TO",
-                "targetNames": [
-                  "teamId"
-                ]
-              }
-            },
-            "createdAt": {
-              "name": "createdAt",
-              "isArray": false,
-              "type": "AWSDateTime",
-              "isRequired": false,
-              "attributes": [],
-              "isReadOnly": true
-            },
-            "updatedAt": {
-              "name": "updatedAt",
-              "isArray": false,
-              "type": "AWSDateTime",
-              "isRequired": false,
-              "attributes": [],
-              "isReadOnly": true
-            }
-          },
-          "syncable": true,
-          "pluralName": "Opportunities",
-          "attributes": [
-            {
-              "type": "model",
-              "properties": {}
-            },
-            {
-              "type": "auth",
-              "properties": {
-                "rules": [
-                  {
-                    "provider": "userPools",
-                    "ownerField": "owner",
-                    "allow": "owner",
-                    "identityClaim": "cognito:username",
-                    "operations": [
-                      "create",
-                      "update",
-                      "delete",
-                      "read"
-                    ]
-                  },
-                  {
-                    "groupClaim": "cognito:groups",
-                    "provider": "userPools",
-                    "allow": "groups",
-                    "operations": [
-                      "create",
-                      "read",
-                      "update",
-                      "delete"
-                    ],
-                    "groups": [
-                      "Admin"
-                    ]
-                  }
-                ]
-              }
-            }
-          ],
-          "primaryKeyInfo": {
-            "isCustomPrimaryKey": false,
-            "primaryKeyFieldName": "id",
-            "sortKeyFieldNames": []
-          }
-        },
         "User": {
           "name": "User",
           "fields": {
@@ -492,22 +96,6 @@
               "type": "AWSURL",
               "isRequired": false,
               "attributes": []
-            },
-            "opportunities": {
-              "name": "opportunities",
-              "isArray": true,
-              "type": {
-                "model": "Opportunity"
-              },
-              "isRequired": false,
-              "attributes": [],
-              "isArrayNullable": true,
-              "association": {
-                "connectionType": "HAS_MANY",
-                "associatedWith": [
-                  "userId"
-                ]
-              }
             },
             "companies": {
               "name": "companies",
@@ -972,22 +560,6 @@
               "isRequired": false,
               "attributes": []
             },
-            "opportunities": {
-              "name": "opportunities",
-              "isArray": true,
-              "type": {
-                "model": "Opportunity"
-              },
-              "isRequired": false,
-              "attributes": [],
-              "isArrayNullable": true,
-              "association": {
-                "connectionType": "HAS_MANY",
-                "associatedWith": [
-                  "companyId"
-                ]
-              }
-            },
             "users": {
               "name": "users",
               "isArray": true,
@@ -1135,22 +707,6 @@
               "isArray": true,
               "type": {
                 "model": "TeamMember"
-              },
-              "isRequired": false,
-              "attributes": [],
-              "isArrayNullable": true,
-              "association": {
-                "connectionType": "HAS_MANY",
-                "associatedWith": [
-                  "teamId"
-                ]
-              }
-            },
-            "opportunities": {
-              "name": "opportunities",
-              "isArray": true,
-              "type": {
-                "model": "Opportunity"
               },
               "isRequired": false,
               "attributes": [],
@@ -1893,18 +1449,6 @@
         }
       },
       "enums": {
-        "OpportunityStatus": {
-          "name": "OpportunityStatus",
-          "values": [
-            "BACKLOG",
-            "BID",
-            "REVIEW",
-            "SUBMITTED",
-            "WON",
-            "LOST",
-            "REJECTED"
-          ]
-        },
         "UserStatus": {
           "name": "UserStatus",
           "values": [

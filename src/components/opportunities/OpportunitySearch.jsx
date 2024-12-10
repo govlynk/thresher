@@ -29,7 +29,7 @@ export function OpportunitySearch() {
 			naicsCode: activeCompany.naicsCode.join(","),
 			postedFrom: startDate,
 			postedTo: endDate,
-			limit: "100",
+			limit: "10",
 		};
 	}, [activeCompany]);
 
