@@ -1,6 +1,8 @@
+// src/stores/userStore.js
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
 import { useGlobalStore } from "./globalStore";
+import { getUsersByCompany, createUserWithCompanyRole, deleteUserAndRoles } from "../utils/userUtils";
 
 const client = generateClient();
 
@@ -11,89 +13,68 @@ export const useUserStore = create((set, get) => ({
 	subscription: null,
 
 	fetchUsers: async () => {
-		set({ loading: true });
+		const { activeCompanyId } = useGlobalStore.getState();
 
-		// Clean up existing subscription
-		const currentSub = get().subscription;
-		if (currentSub) {
-			currentSub.unsubscribe();
-			set({ subscription: null });
+		if (!activeCompanyId) {
+			set({
+				users: [],
+				loading: false,
+				error: "No active company selected",
+			});
+			return;
 		}
 
+		set({ loading: true, error: null });
+
 		try {
-			// Get active company from global store state
-			const activeCompany = useGlobalStore.getState().activeCompany;
-
-			if (!activeCompany?.id) {
-				set({
-					users: [],
-					loading: false,
-					error: "No active company selected",
-				});
-				return;
-			}
-
-			// Fetch users for the active company
-			const response = await client.models.User.list({
-				filter: {
-					companyId: { eq: activeCompany.id },
-				},
-			});
-
+			const users = await getUsersByCompany(activeCompanyId);
 			set({
-				users: response.data,
+				users,
 				loading: false,
 				error: null,
 			});
 		} catch (err) {
-			console.error("Fetch users error:", err);
+			console.error("Error fetching users:", err);
 			set({
-				users: [],
-				loading: false,
 				error: err.message || "Failed to fetch users",
+				loading: false,
 			});
 		}
 	},
 
 	addUser: async (userData) => {
-		set({ loading: true });
+		const { activeCompanyId } = useGlobalStore.getState();
+
+		if (!activeCompanyId) {
+			throw new Error("No active company selected");
+		}
+
+		set({ loading: true, error: null });
 
 		try {
-			const activeCompany = useGlobalStore.getState().activeCompanyId;
-			console.log("Active company:", activeCompany);
-
-			if (!activeCompany) {
-				throw new Error("No active company selected");
-			}
-
-			const response = await client.models.User.create({
-				...userData,
-				companyId: activeCompany.id,
-			});
-
-			if (!response.data?.id) {
-				throw new Error("User creation failed - invalid response");
-			}
-
-			const newUser = response.data;
-
+			const newUser = await createUserWithCompanyRole(userData, activeCompanyId);
 			set((state) => ({
 				users: [...state.users, newUser],
 				loading: false,
 				error: null,
 			}));
-
 			return newUser;
 		} catch (err) {
-			console.error("Add user error:", err);
-			const errorMessage = err.message || "Failed to add user";
-			set({ error: errorMessage, loading: false });
-			throw new Error(errorMessage);
+			console.error("Error adding user:", err);
+			set({
+				error: err.message || "Failed to add user",
+				loading: false,
+			});
+			throw err;
 		}
 	},
 
 	updateUser: async (id, updates) => {
-		set({ loading: true });
+		if (!id) {
+			throw new Error("User ID is required");
+		}
+
+		set({ loading: true, error: null });
 
 		try {
 			const response = await client.models.User.update({
@@ -101,49 +82,56 @@ export const useUserStore = create((set, get) => ({
 				...updates,
 			});
 
-			if (!response.data?.id) {
-				throw new Error("User update failed - invalid response");
+			if (!response?.data) {
+				throw new Error("Failed to update user");
 			}
 
-			const updatedUser = response.data;
-
 			set((state) => ({
-				users: state.users.map((user) => (user.id === id ? updatedUser : user)),
+				users: state.users.map((user) => (user.id === id ? { ...user, ...response.data } : user)),
 				loading: false,
 				error: null,
 			}));
 
-			return updatedUser;
+			return response.data;
 		} catch (err) {
-			console.error("Update user error:", err);
-			const errorMessage = err.message || "Failed to update user";
-			set({ error: errorMessage, loading: false });
-			throw new Error(errorMessage);
+			console.error("Error updating user:", err);
+			set({
+				error: err.message || "Failed to update user",
+				loading: false,
+			});
+			throw err;
 		}
 	},
 
-	deleteUser: async (id) => {
-		set({ loading: true });
+	removeUser: async (id) => {
+		if (!id) {
+			throw new Error("User ID is required");
+		}
+
+		set({ loading: true, error: null });
 
 		try {
-			await client.models.User.delete({ id });
-
+			await deleteUserAndRoles(id);
 			set((state) => ({
 				users: state.users.filter((user) => user.id !== id),
 				loading: false,
 				error: null,
 			}));
 		} catch (err) {
-			console.error("Delete user error:", err);
-			const errorMessage = err.message || "Failed to delete user";
-			set({ error: errorMessage, loading: false });
-			throw new Error(errorMessage);
+			console.error("Error removing user:", err);
+			set({
+				error: err.message || "Failed to remove user",
+				loading: false,
+			});
+			throw err;
 		}
 	},
+
 	cleanup: () => {
-		const { subscription } = get();
-		if (subscription) {
-			subscription.unsubscribe();
-		}
+		set({
+			users: [],
+			loading: false,
+			error: null,
+		});
 	},
 }));
