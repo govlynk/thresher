@@ -22,6 +22,7 @@ const AuthenticatedApp = ({ signOut, user }) => {
 	React.useEffect(() => {
 		if (user) {
 			initializeAuth(user);
+			console.log("User authenticated", user);
 		}
 	}, [user, initializeAuth]);
 
