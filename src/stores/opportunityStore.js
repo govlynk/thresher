@@ -224,11 +224,13 @@ export const useOpportunityStore = create((set, get) => ({
 				description: opportunity.description || "",
 				solicitationNumber: opportunity.solicitationNumber || "",
 				fullParentPathName: opportunity.fullParentPathName || "",
-				postedDate: opportunity.postedDate || "",
+				postedDate: opportunity.postedDate ? new Date(opportunity.postedDate).toISOString() : null,
 				type: opportunity.type || "",
 				typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
 				typeOfSetAside: opportunity.typeOfSetAside || "",
-				responseDeadLine: opportunity.responseDeadLine || "",
+				responseDeadLine: opportunity.responseDeadLine
+					? new Date(opportunity.responseDeadLine).toISOString()
+					: null,
 				naicsCode: opportunity.naicsCode || "",
 				naicsCodes: opportunity.naicsCodes || "",
 				classificationCode: opportunity.classificationCode || "",
@@ -246,7 +248,7 @@ export const useOpportunityStore = create((set, get) => ({
 				pocEmail: opportunity.pocEmail || "",
 				pocPhone: opportunity.pocPhone || "",
 				pocType: opportunity.pocType || "",
-				// Pipeline fields
+				// Default Pipeline fields
 				position: 0,
 				priority: "MEDIUM",
 				estimatedEffort: 0,
@@ -254,7 +256,8 @@ export const useOpportunityStore = create((set, get) => ({
 				tags: "",
 				notes: "",
 				assigneeId: activeUserId,
-				dueDate: opportunity.responseDeadLine,
+				// set initial due date to response deadline
+				dueDate: opportunity.responseDeadLine ? new Date(opportunity.responseDeadLine).toISOString() : null,
 
 				notes: "",
 

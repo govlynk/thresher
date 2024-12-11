@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
-import { useUserCompanyStore } from "./userCompanyStore";
+import { useGlobalStore } from "./globalStore";
 
 const client = generateClient();
 
@@ -21,8 +21,8 @@ export const useUserStore = create((set, get) => ({
 		}
 
 		try {
-			// Get active company
-			const activeCompany = useUserCompanyStore.getState().getActiveCompany();
+			// Get active company from global store state
+			const activeCompany = useGlobalStore.getState().activeCompany;
 
 			if (!activeCompany?.id) {
 				set({
@@ -33,129 +33,87 @@ export const useUserStore = create((set, get) => ({
 				return;
 			}
 
-			// Fetch user-company roles for active company
-			const userCompanyRoles = await client.models.UserCompanyRole.list({
-				filter: { companyId: { eq: activeCompany.id } },
+			// Fetch users for the active company
+			const response = await client.models.User.list({
+				filter: {
+					companyId: { eq: activeCompany.id },
+				},
 			});
 
-			if (!userCompanyRoles?.data) {
-				throw new Error("Failed to fetch user company roles");
-			}
-
-			// Get unique user IDs
-			const userIds = [...new Set(userCompanyRoles.data.map((role) => role.userId))];
-
-			// Fetch user details for each ID
-			const userPromises = userIds.map((id) => client.models.User.get({ id }));
-
-			const userResponses = await Promise.all(userPromises);
-			const users = userResponses.filter((response) => response?.data).map((response) => response.data);
-
 			set({
-				users,
+				users: response.data,
 				loading: false,
 				error: null,
 			});
 		} catch (err) {
 			console.error("Fetch users error:", err);
 			set({
-				error: "Failed to fetch users",
-				loading: false,
 				users: [],
+				loading: false,
+				error: err.message || "Failed to fetch users",
 			});
 		}
 	},
 
 	addUser: async (userData) => {
-		if (!userData.email?.trim() || !userData.name?.trim()) {
-			throw new Error("Email and name are required");
-		}
+		set({ loading: true });
 
-		const activeCompany = useUserCompanyStore.getState().getActiveCompany();
-		if (!activeCompany?.id) {
-			throw new Error("No active company selected");
-		}
-
-		set({ loading: true, error: null });
 		try {
-			// Create user
-			const userResponse = await client.models.User.create({
-				cognitoId: userData.cognitoId || null,
-				email: userData.email.trim(),
-				name: userData.name.trim(),
-				phone: userData.phone?.trim() || null,
-				status: userData.status || "ACTIVE",
-				lastLogin: new Date().toISOString(),
-			});
+			const activeCompany = useGlobalStore.getState().activeCompanyId;
+			console.log("Active company:", activeCompany);
 
-			if (!userResponse?.data) {
-				throw new Error("Failed to create user");
+			if (!activeCompany) {
+				throw new Error("No active company selected");
 			}
 
-			// Create user-company role
-			await client.models.UserCompanyRole.create({
-				userId: userResponse.data.id,
+			const response = await client.models.User.create({
+				...userData,
 				companyId: activeCompany.id,
-				roleId: userData.roleId || "MEMBER",
-				status: "ACTIVE",
 			});
 
-			// Refresh users list
-			await get().fetchUsers();
+			if (!response.data?.id) {
+				throw new Error("User creation failed - invalid response");
+			}
 
-			return userResponse.data;
+			const newUser = response.data;
+
+			set((state) => ({
+				users: [...state.users, newUser],
+				loading: false,
+				error: null,
+			}));
+
+			return newUser;
 		} catch (err) {
-			console.error("Create user error:", err);
-			const errorMessage = err.message || "Failed to create user";
+			console.error("Add user error:", err);
+			const errorMessage = err.message || "Failed to add user";
 			set({ error: errorMessage, loading: false });
 			throw new Error(errorMessage);
 		}
 	},
 
 	updateUser: async (id, updates) => {
-		if (!id) {
-			throw new Error("User ID is required for update");
-		}
+		set({ loading: true });
 
-		const activeCompany = useUserCompanyStore.getState().getActiveCompany();
-		if (!activeCompany?.id) {
-			throw new Error("No active company selected");
-		}
-
-		set({ loading: true, error: null });
 		try {
-			// Update user details
 			const response = await client.models.User.update({
 				id,
 				...updates,
 			});
 
-			if (!response?.data) {
-				throw new Error("Failed to update user");
+			if (!response.data?.id) {
+				throw new Error("User update failed - invalid response");
 			}
 
-			// Update user-company role if roleId is provided
-			if (updates.roleId) {
-				const roles = await client.models.UserCompanyRole.list({
-					filter: {
-						userId: { eq: id },
-						companyId: { eq: activeCompany.id },
-					},
-				});
+			const updatedUser = response.data;
 
-				if (roles?.data?.[0]) {
-					await client.models.UserCompanyRole.update({
-						id: roles.data[0].id,
-						roleId: updates.roleId,
-						status: updates.status || roles.data[0].status,
-					});
-				}
-			}
+			set((state) => ({
+				users: state.users.map((user) => (user.id === id ? updatedUser : user)),
+				loading: false,
+				error: null,
+			}));
 
-			// Refresh users list
-			await get().fetchUsers();
-
-			return response.data;
+			return updatedUser;
 		} catch (err) {
 			console.error("Update user error:", err);
 			const errorMessage = err.message || "Failed to update user";
@@ -164,59 +122,28 @@ export const useUserStore = create((set, get) => ({
 		}
 	},
 
-	removeUser: async (id) => {
-		if (!id) {
-			throw new Error("User ID is required for deletion");
-		}
+	deleteUser: async (id) => {
+		set({ loading: true });
 
-		const activeCompany = useUserCompanyStore.getState().getActiveCompany();
-		if (!activeCompany?.id) {
-			throw new Error("No active company selected");
-		}
-
-		set({ loading: true, error: null });
 		try {
-			// Remove user-company role first
-			const roles = await client.models.UserCompanyRole.list({
-				filter: {
-					userId: { eq: id },
-					companyId: { eq: activeCompany.id },
-				},
-			});
+			await client.models.User.delete({ id });
 
-			for (const role of roles.data) {
-				await client.models.UserCompanyRole.delete({ id: role.id });
-			}
-
-			// Only delete user if they have no other company associations
-			const otherRoles = await client.models.UserCompanyRole.list({
-				filter: { userId: { eq: id } },
-			});
-
-			if (otherRoles.data.length === 0) {
-				await client.models.User.delete({ id });
-			}
-
-			// Refresh users list
-			await get().fetchUsers();
+			set((state) => ({
+				users: state.users.filter((user) => user.id !== id),
+				loading: false,
+				error: null,
+			}));
 		} catch (err) {
-			console.error("Remove user error:", err);
-			const errorMessage = err.message || "Failed to remove user";
+			console.error("Delete user error:", err);
+			const errorMessage = err.message || "Failed to delete user";
 			set({ error: errorMessage, loading: false });
 			throw new Error(errorMessage);
 		}
 	},
-
 	cleanup: () => {
 		const { subscription } = get();
 		if (subscription) {
 			subscription.unsubscribe();
 		}
-		set({
-			users: [],
-			subscription: null,
-			loading: false,
-			error: null,
-		});
 	},
 }));

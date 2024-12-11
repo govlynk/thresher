@@ -30,12 +30,42 @@ export const mapGoodsAndServices = (goodsAndServices) => {
 	};
 };
 
+export const mapPointsOfContact = (POC) => {
+	if (!POC) return {};
+	console.log(POC);
+
+	return {
+		EBfirstName: POC.electronicBusinessPOC.firstName || null,
+		EBlastName: POC.electronicBusinessPOC.lastName || null,
+		EBtitle: POC.electronicBusinessPOC.title || null,
+		EBaddressLine1: POC.electronicBusinessPOC.addressLine1 || null,
+		EBaddressLine2: POC.electronicBusinessPOC.addressLine2 || null,
+		EBcity: POC.electronicBusinessPOC.city || null,
+		EBcountryCode: POC.electronicBusinessPOC.countryCode || null,
+		EBstateOrProvinceCode: POC.electronicBusinessPOC.stateOrProvinceCode || null,
+		EBzipCode: POC.electronicBusinessPOC.zipCode || null,
+		//
+		GBfirstName: POC.governmentBusinessPOC.firstName || null,
+		GBlastName: POC.governmentBusinessPOC.lastName || null,
+		GBtitle: POC.governmentBusinessPOC.title || null,
+		GBaddressLine1: POC.governmentBusinessPOC.addressLine1 || null,
+		GBaddressLine2: POC.governmentBusinessPOC.addressLine2 || null,
+		GBcity: POC.governmentBusinessPOC.city || null,
+		GBcountryCode: POC.governmentBusinessPOC.countryCode || null,
+		GBstateOrProvinceCode: POC.governmentBusinessPOC.stateOrProvinceCode || null,
+		GBzipCode: POC.governmentBusinessPOC.zipCode || null,
+	};
+};
+
 export const formatCompanyData = (entityData) => {
 	if (!entityData) return null;
 
 	const entityRegistrationData = entityData.entityRegistration || {};
 	const assertionsData = entityData.assertions || {};
 	const coreData = entityData.coreData || {};
+	const pointsOfContact = entityData.pointsOfContact || {};
+	console.log("ED", entityData);
+	console.log("poc", pointsOfContact);
 
 	const companyData = {
 		// Entity Registration Data
@@ -44,26 +74,30 @@ export const formatCompanyData = (entityData) => {
 		companyEmail: entityRegistrationData.companyEmail || null,
 		companyPhoneNumber: entityRegistrationData.companyPhoneNumber || null,
 		companyStartDate: entityRegistrationData.companyStartDate || null,
-		companyWebsite: entityRegistrationData.companyWebsite || null,
-		congressionalDistrict: entityRegistrationData.congressionalDistrict || null,
-		countryOfIncorporationCode: entityRegistrationData.countryOfIncorporationCode || null,
+
 		dbaName: entityRegistrationData.dbaName || null,
 		exclusionStatusFlag: entityRegistrationData.exclusionStatusFlag || null,
-		expirationDate: entityRegistrationData.expirationDate || null,
+
 		keyWords: entityRegistrationData.keyWords || null,
 		lastUpdateDate: entityRegistrationData.lastUpdateDate || null,
 		legalBusinessName: entityRegistrationData.legalBusinessName || null,
 		purposeOfRegistrationDesc: entityRegistrationData.purposeOfRegistrationDesc || null,
 		registrationStatus: entityRegistrationData.registrationStatus || null,
 		registrationDate: entityRegistrationData.registrationDate || null,
+		// Dups
 		registrationExpirationDate: entityRegistrationData.registrationExpirationDate || null,
-		SAMPullDate: entityRegistrationData.SAMPullDate || null,
+		expirationDate: entityRegistrationData.registrationExpirationDate || null,
+		//
+		SAMPullDate: new Date().toISOString(),
 		uei: entityRegistrationData.ueiSAM || null,
 
 		// Core Data - Entity Information
 		entityDivisionName: coreData.entityInformation?.entityDivisionName || null,
 		entityStartDate: coreData.entityInformation?.entityStartDate || null,
+		// Dups
 		entityURL: coreData.entityInformation?.entityURL || null,
+		companyWebsite: coreData.entityInformation?.entityURL || null,
+		//
 		fiscalYearEndCloseDate: coreData.entityInformation?.fiscalYearEndCloseDate || null,
 		submissionDate: coreData.entityInformation?.submissionDate || null,
 
@@ -73,9 +107,11 @@ export const formatCompanyData = (entityData) => {
 		organizationStructureDesc: coreData.generalInformation?.organizationStructureDesc || null,
 		profitStructureDesc: coreData.generalInformation?.profitStructureDesc || null,
 		stateOfIncorporationCode: coreData.generalInformation?.stateOfIncorporationCode || null,
+		countryOfIncorporationCode: coreData.generalInformation?.countryOfIncorporationCode || null,
 
-		// Congressional District from Core Data
-		coreCongressionalDistrict: coreData.congressionalDistrict || null,
+		// Congressional District from Core Data - Dups
+		coreCongressionalDistrict: entityRegistrationData.congressionalDistrict || null,
+		congressionalDistrict: entityRegistrationData.congressionalDistrict || null,
 	};
 
 	// Map Address Data
@@ -88,6 +124,9 @@ export const formatCompanyData = (entityData) => {
 	// Map Goods and Services
 	const goodsAndServicesData = mapGoodsAndServices(assertionsData.goodsAndServices);
 
+	//Map POC
+	const pointsOfContactData = mapPointsOfContact(pointsOfContact);
+
 	// Combine all data
 	return {
 		...companyData,
@@ -95,5 +134,6 @@ export const formatCompanyData = (entityData) => {
 		...shippingAddressData,
 		...businessTypesData,
 		...goodsAndServicesData,
+		...pointsOfContactData,
 	};
 };

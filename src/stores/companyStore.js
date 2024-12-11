@@ -45,57 +45,15 @@ export const useCompanyStore = create((set, get) => ({
 			if (!companyData.uei?.trim()) {
 				throw new Error("UEI is required");
 			}
-
 			// Create company
 			const response = await client.models.Company.create({
-				legalBusinessName: companyData.legalBusinessName.trim(),
-				dbaName: companyData.dbaName?.trim() || null,
-				uei: companyData.uei.trim(),
-				cageCode: companyData.cageCode?.trim() || null,
-				ein: companyData.ein?.trim() || null,
-				companyEmail: companyData.companyEmail?.trim() || null,
-				companyPhoneNumber: companyData.companyPhoneNumber?.trim() || null,
-				companyWebsite: companyData.companyWebsite?.trim() || null,
-				status: companyData.status || "ACTIVE",
-				activationDate: companyData.activationDate || null,
-				billingAddressCity: companyData.billingAddressCity || null,
-				billingAddressCountryCode: companyData.billingAddressCountryCode || null,
-				billingAddressStateCode: companyData.billingAddressStateCode || null,
-				billingAddressStreetLine1: companyData.billingAddressStreetLine1 || null,
-				billingAddressStreetLine2: companyData.billingAddressStreetLine2 || null,
-				billingAddressZipCode: companyData.billingAddressZipCode || null,
-				companyStartDate: companyData.companyStartDate || null,
-				congressionalDistrict: companyData.congressionalDistrict || null,
-				coreCongressionalDistrict: companyData.coreCongressionalDistrict || null,
-				countryOfIncorporationCode: companyData.countryOfIncorporationCode || null,
-				entityDivisionName: companyData.entityDivisionName || null,
-				entityStartDate: companyData.entityStartDate || null,
-				entityStructureDesc: companyData.entityStructureDesc || null,
-				entityTypeDesc: companyData.entityTypeDesc || null,
-				exclusionStatusFlag: companyData.exclusionStatusFlag || null,
-				expirationDate: companyData.expirationDate || null,
-				fiscalYearEndCloseDate: companyData.fiscalYearEndCloseDate || null,
-				lastUpdateDate: companyData.lastUpdateDate || null,
-				organizationStructureDesc: companyData.organizationStructureDesc || null,
-				primaryNaics: companyData.primaryNaics || null,
-				profitStructureDesc: companyData.profitStructureDesc || null,
-				purposeOfRegistrationDesc: companyData.purposeOfRegistrationDesc || null,
-				registrationDate: companyData.registrationDate || null,
-				registrationExpirationDate: companyData.registrationExpirationDate || null,
-				registrationStatus: companyData.registrationStatus || null,
-				shippingAddressCity: companyData.shippingAddressCity || null,
-				shippingAddressCountryCode: companyData.shippingAddressCountryCode || null,
-				shippingAddressStateCode: companyData.shippingAddressStateCode || null,
-				shippingAddressStreetLine1: companyData.shippingAddressStreetLine1 || null,
-				shippingAddressStreetLine2: companyData.shippingAddressStreetLine2 || null,
-				shippingAddressZipCode: companyData.shippingAddressZipCode || null,
-				stateOfIncorporationCode: companyData.stateOfIncorporationCode || null,
-				submissionDate: companyData.submissionDate || null,
+				...companyData,
 			});
 
 			console.log("Create company response:", response);
 
-			if (!response?.id) {
+			if (!response.data?.id) {
+				console.error("Company creation failed - invalid response:", response);
 				throw new Error("Company creation failed - invalid response");
 			}
 
