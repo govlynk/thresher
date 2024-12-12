@@ -141,6 +141,9 @@ const schema = a.schema({
 			sbaBusinessTypeDesc: a.string().array(),
 			entityURL: a.url(),
 			opportunities: a.hasMany("Opportunity", "companyId"),
+			capabilities: a.hasMany("CapabilityStatement", "companyId"),
+			performances: a.hasMany("PastPerformance", "companyId"),
+			certifications: a.hasMany("Ceritification", "companyId"),
 			users: a.hasMany("UserCompanyRole", "companyId"),
 			teams: a.hasMany("Team", "companyId"),
 		})
@@ -240,17 +243,19 @@ const schema = a.schema({
 			contractValue: a.float(), // Changed to `a.float()` for numerical values
 			period: a.string(),
 			description: a.string(),
+			companyId: a.id().required(), // Changed to `a.id()` for proper unique identifier type
 			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 
-	Certifications: a
+	Certification: a
 		.model({
 			name: a.string().required(),
 			issuer: a.string().required(),
 			dateObtained: a.date(), // Changed to `a.date()` for proper date type
 			expirationDate: a.date(),
 			description: a.string(),
+			companyId: a.id().required(), // Changed to `a.id()` for proper unique identifier type
 			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),

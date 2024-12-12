@@ -53,8 +53,8 @@ export const DEFAULT_BOARDS = {
 	[BOARD_TYPES.PIPELINE]: {
 		columns: {
 			backlog: {
-				id: "prebid",
-				title: "Pre-Bid",
+				id: "backlog",
+				title: "Backlog",
 				limit: 4,
 				color: "#D671AE",
 				items: [],
@@ -63,6 +63,7 @@ export const DEFAULT_BOARDS = {
 				id: "response",
 				title: "Preparing Response",
 				limit: 4,
+				color: "#D6713E",
 				items: [],
 			},
 			review: {

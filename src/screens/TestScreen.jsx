@@ -9,7 +9,7 @@ import { useTeamStore } from "../stores/teamStore";
 import { useTodoStore } from "../stores/todoStore";
 import { useUserCompanyStore } from "../stores/userCompanyStore";
 
-function TodoScreen() {
+function TestScreen() {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editTodo, setEditTodo] = useState(null);
 	const { getActiveCompany } = useUserCompanyStore();
@@ -74,4 +74,4 @@ function TodoScreen() {
 	);
 }
 
-export default TodoScreen;
+export default TestScreen;

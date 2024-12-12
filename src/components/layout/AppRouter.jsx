@@ -15,6 +15,7 @@ import NotFoundPage from "../../screens/NotFoundPage";
 import MainLayout from "../layout/MainLayout";
 import TodoScreen from "../../screens/TodoScreen";
 import TestScreen from "../../screens/TestScreen";
+import PipelineScreen from "../../screens/PipelineScreen";
 import AssessmentScreen from "../../screens/AssessmentScreen";
 import CapabilityStatementScreen from "../../screens/CapabilityStatementScreen";
 
@@ -38,6 +39,7 @@ const AppRouter = ({ signOut, user }) => {
 				<Route path='assessment' element={<AssessmentScreen />} />
 				<Route path='capability' element={<CapabilityStatementScreen />} />
 				<Route path='spending-analysis' element={<SpendingAnalysisScreen />} />
+				<Route path='pipeline' element={<PipelineScreen />} />
 				<Route path='test' element={<TestScreen />} />
 				<Route path='*' element={<NotFoundPage />} />
 			</Route>
