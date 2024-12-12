@@ -203,6 +203,7 @@ const schema = a.schema({
 			resume: a.url(),
 			companyId: a.string().required(),
 			userId: a.string(),
+			user: a.belongsTo("User", "userId"),
 			teamMembers: a.hasMany("TeamMember", "contactId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
