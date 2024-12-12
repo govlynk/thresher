@@ -1,29 +1,64 @@
-import React from "react";
-import { Box, Typography, Tabs, Tab, Alert } from "@mui/material";
+import React, { useEffect } from "react";
+import { Box, Typography, Tabs, Tab, Alert, CircularProgress } from "@mui/material";
 import { OpportunityList } from "../components/opportunities/OpportunityList";
 import { OpportunitySearch } from "../components/opportunities/OpportunitySearch";
 import { useOpportunityStore } from "../stores/opportunityStore";
 import { useUserCompanyStore } from "../stores/userCompanyStore";
+import { getOpportunity } from "../utils/opportunityApi";
 
 export default function OpportunitiesScreen() {
 	const [activeTab, setActiveTab] = React.useState(0);
-	const { opportunities, savedOpportunities, rejectedOpportunities, loading, error, resetStore, initializeStore } =
-		useOpportunityStore();
+	const {
+		opportunities,
+		savedOpportunities,
+		rejectedOpportunities,
+		loading,
+		error,
+		setOpportunities,
+		initializeStore,
+		resetStore,
+	} = useOpportunityStore();
+
 	const { getActiveCompany } = useUserCompanyStore();
 	const activeCompany = getActiveCompany();
 
-	// Initialize store when component mounts or company changes
-	React.useEffect(() => {
-		if (activeCompany?.id) {
-			initializeStore().catch((err) => {
-				console.error("OpportunitiesScreen: Error initializing store:", err);
-			});
-		}
+	// Initialize store and fetch data when component mounts
+	useEffect(() => {
+		const initializeData = async () => {
+			if (!activeCompany?.id) return;
 
+			try {
+				// First initialize the store to get saved/rejected opportunities
+				await initializeStore();
+
+				// Then fetch new opportunities from SAM.gov
+				if (activeCompany.naicsCode?.length) {
+					const date = new Date();
+					const endDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+					const startDate = `${date.getMonth() - 2}/01/${date.getFullYear()}`;
+
+					const searchParams = {
+						naicsCode: activeCompany.naicsCode.join(","),
+						postedFrom: startDate,
+						postedTo: endDate,
+						limit: "100",
+					};
+
+					const newOpportunities = await getOpportunity(searchParams);
+					setOpportunities(newOpportunities);
+				}
+			} catch (err) {
+				console.error("Error initializing opportunities:", err);
+			}
+		};
+
+		initializeData();
+
+		// Cleanup on unmount
 		return () => {
 			resetStore();
 		};
-	}, [activeCompany?.id, initializeStore, resetStore]);
+	}, [activeCompany?.id, initializeStore, resetStore, setOpportunities]);
 
 	const handleTabChange = (event, newValue) => {
 		setActiveTab(newValue);
@@ -33,6 +68,14 @@ export default function OpportunitiesScreen() {
 		return (
 			<Box sx={{ p: 3 }}>
 				<Alert severity='warning'>Please select a company to view opportunities</Alert>
+			</Box>
+		);
+	}
+
+	if (loading) {
+		return (
+			<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
+				<CircularProgress />
 			</Box>
 		);
 	}
