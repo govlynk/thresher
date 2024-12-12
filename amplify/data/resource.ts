@@ -143,7 +143,7 @@ const schema = a.schema({
 			opportunities: a.hasMany("Opportunity", "companyId"),
 			capabilities: a.hasMany("CapabilityStatement", "companyId"),
 			performances: a.hasMany("PastPerformance", "companyId"),
-			certifications: a.hasMany("Ceritification", "companyId"),
+			certifications: a.hasMany("Certification", "companyId"),
 			users: a.hasMany("UserCompanyRole", "companyId"),
 			teams: a.hasMany("Team", "companyId"),
 		})
