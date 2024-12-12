@@ -1,48 +1,19 @@
-// src/screens/TodoScreen.jsx
-import React, { useState, useEffect } from "react";
-import { Box, Container, Alert } from "@mui/material";
-import { TodoDialog } from "../components/toDo/TodoDialog";
-import { TodoHeader } from "../components/toDo/TodoHeader";
-import { KanbanBoard } from "../components/kanban/KanbanBoard";
-import { BOARD_TYPES } from "../config/kanbanTypes";
-import { useTeamStore } from "../stores/teamStore";
-import { useTodoStore } from "../stores/todoStore";
+import React from "react";
+import { Box, Container, Alert, Typography } from "@mui/material";
+import { KanbanBoard } from "../components/pipeline/KanbanBoard";
+import { useOpportunityStore } from "../stores/opportunityStore";
 import { useUserCompanyStore } from "../stores/userCompanyStore";
 
-function PipelineScreen() {
-	const [dialogOpen, setDialogOpen] = useState(false);
-	const [editTodo, setEditTodo] = useState(null);
+export default function PipelineScreen() {
+	const { savedOpportunities, loading, error, moveOpportunity } = useOpportunityStore();
 	const { getActiveCompany } = useUserCompanyStore();
-	const { fetchTeams } = useTeamStore();
-	const { todos, loading, error, updateTodo, moveTodo } = useTodoStore();
 	const activeCompany = getActiveCompany();
 
-	useEffect(() => {
-		if (activeCompany?.id) {
-			fetchTeams(activeCompany.id);
-		}
-	}, [activeCompany?.id, fetchTeams]);
-
-	const handleAddClick = () => {
-		setEditTodo(null);
-		setDialogOpen(true);
-	};
-
-	const handleEditClick = (todo) => {
-		setEditTodo(todo);
-		setDialogOpen(true);
-	};
-
-	const handleCloseDialog = () => {
-		setDialogOpen(false);
-		setEditTodo(null);
-	};
-
-	const handleTodoMove = async (todoId, newStatus) => {
+	const handleOpportunityMove = async (opportunityId, newStatus) => {
 		try {
-			await moveTodo(todoId, newStatus);
+			await moveOpportunity(opportunityId, newStatus);
 		} catch (err) {
-			console.error("Error moving todo:", err);
+			console.error("Error moving opportunity:", err);
 		}
 	};
 
@@ -50,7 +21,7 @@ function PipelineScreen() {
 		return (
 			<Container maxWidth={false}>
 				<Box sx={{ p: 4 }}>
-					<Alert severity='warning'>Please select a company to manage tasks</Alert>
+					<Alert severity='warning'>Please select a company to view pipeline</Alert>
 				</Box>
 			</Container>
 		);
@@ -59,19 +30,16 @@ function PipelineScreen() {
 	return (
 		<Container maxWidth={false} disableGutters>
 			<Box sx={{ p: 4, width: "100%" }}>
-				<TodoHeader onAddClick={handleAddClick} />
+				<Typography variant='h4' sx={{ mb: 4, fontWeight: "bold" }}>
+					Pipeline
+				</Typography>
 				<KanbanBoard
-					items={todos}
-					type={BOARD_TYPES.PIPELINE}
+					opportunities={savedOpportunities}
 					loading={loading}
 					error={error}
-					onItemMove={handleTodoMove}
-					onItemUpdate={handleEditClick}
+					onOpportunityMove={handleOpportunityMove}
 				/>
-				<TodoDialog open={dialogOpen} onClose={handleCloseDialog} editTodo={editTodo} />
 			</Box>
 		</Container>
 	);
 }
-
-export default PipelineScreen;
