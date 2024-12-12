@@ -26,6 +26,19 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 	const { user } = useAuthStore();
 	const { setActiveCompany, setActiveTeam, setActiveUser } = useGlobalStore();
 
+	const checkExistingContact = async (email, companyId) => {
+		if (!email) return null;
+
+		const response = await client.models.Contact.list({
+			filter: {
+				companyId: { eq: companyId },
+				contactEmail: { eq: email },
+			},
+		});
+
+		return response?.data?.[0] || null;
+	};
+
 	const handleSetup = async () => {
 		setLoading(true);
 		setError(null);
@@ -128,87 +141,103 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 			setActiveCompany(company.data.id);
 
 			// 2. Create Contact
-			const contactData = {
-				firstName: setupData.user.firstName,
-				lastName: setupData.user.lastName,
-				title: setupData.user.title || null,
-				department: setupData.user.department || null,
-				contactEmail: setupData.user.contactEmail,
-				contactMobilePhone: setupData.user.contactMobilePhone || null,
-				contactBusinessPhone: setupData.user.contactBusinessPhone || null,
-				workAddressStreetLine1: setupData.user.workAddressStreetLine1 || null,
-				workAddressStreetLine2: setupData.user.workAddressStreetLine2 || null,
-				workAddressCity: setupData.user.workAddressCity || null,
-				workAddressStateCode: setupData.user.workAddressStateCode || null,
-				workAddressZipCode: setupData.user.workAddressZipCode || null,
-				workAddressCountryCode: setupData.user.workAddressCountryCode || "USA",
-				dateLastContacted: new Date().toISOString(),
-				notes: `Initial contact created during company setup. Role: ${setupData.user.roleId}`,
-				companyId: company.data?.id,
-			};
+			let userContact = await checkExistingContact(setupData.user.contactEmail, company.data.id);
+			if (!userContact) {
+				const contactData = {
+					firstName: setupData.user.firstName,
+					lastName: setupData.user.lastName,
+					title: setupData.user.title || null,
+					department: setupData.user.department || null,
+					contactEmail: setupData.user.contactEmail,
+					contactMobilePhone: setupData.user.contactMobilePhone || null,
+					contactBusinessPhone: setupData.user.contactBusinessPhone || null,
+					workAddressStreetLine1: setupData.user.workAddressStreetLine1 || null,
+					workAddressStreetLine2: setupData.user.workAddressStreetLine2 || null,
+					workAddressCity: setupData.user.workAddressCity || null,
+					workAddressStateCode: setupData.user.workAddressStateCode || null,
+					workAddressZipCode: setupData.user.workAddressZipCode || null,
+					workAddressCountryCode: setupData.user.workAddressCountryCode || "USA",
+					dateLastContacted: new Date().toISOString(),
+					notes: `Initial contact created during company setup. Role: ${setupData.user.roleId}`,
+					companyId: company.data?.id,
+				};
 
-			console.log("Creating contact with data:", contactData);
-			const contact = await client.models.Contact.create(contactData);
-			console.log("Contact created:", contact);
+				console.log("Creating contact with data:", contactData);
+				const contact = await client.models.Contact.create(contactData);
+				console.log("Contact created:", contact);
 
-			if (!contact?.data?.id) {
-				throw new Error("Failed to create contact");
+				if (!contact?.data?.id) {
+					throw new Error("Failed to create contact");
+				}
 			}
 			// 3. Create Contact - POC
-			const EBData = {
-				firstName: setupData.company.EBfirstName,
-				lastName: setupData.company.EBlastName,
-				title: setupData.company.EBtitle || null,
-				department: null,
-				contactEmail: null,
-				contactMobilePhone: null,
-				contactBusinessPhone: null,
-				workAddressStreetLine1: setupData.company.EBAddressStreetLine1 || null,
-				workAddressStreetLine2: setupData.company.EBAddressStreetLine2 || null,
-				workAddressCity: setupData.company.EBAddressCity || null,
-				workAddressStateCode: setupData.company.EBAddressStateCode || null,
-				workAddressZipCode: setupData.company.EBAddressZipCode || null,
-				workAddressCountryCode: setupData.company.EBstateOrProvinceCode || "USA",
-				dateLastContacted: new Date().toISOString(),
-				notes: `Electronic Point of Contact Data from SAM. `,
-				companyId: company.data.id,
-			};
+			let ebContact = null;
+			if (setupData.company.EBfirstName && setupData.company.EBlastName) {
+				ebContact = await checkExistingContact(null, company.data.id); // Use name-based check since email might not exist
 
-			console.log("Creating contact with data:", EBData);
-			const eb = await client.models.Contact.create(EBData);
-			console.log("Contact created:", eb);
+				if (!ebContact) {
+					const EBData = {
+						firstName: setupData.company.EBfirstName,
+						lastName: setupData.company.EBlastName,
+						title: setupData.company.EBtitle || null,
+						department: null,
+						contactEmail: null,
+						contactMobilePhone: null,
+						contactBusinessPhone: null,
+						workAddressStreetLine1: setupData.company.EBAddressStreetLine1 || null,
+						workAddressStreetLine2: setupData.company.EBAddressStreetLine2 || null,
+						workAddressCity: setupData.company.EBAddressCity || null,
+						workAddressStateCode: setupData.company.EBAddressStateCode || null,
+						workAddressZipCode: setupData.company.EBAddressZipCode || null,
+						workAddressCountryCode: setupData.company.EBstateOrProvinceCode || "USA",
+						dateLastContacted: new Date().toISOString(),
+						notes: `Electronic Point of Contact Data from SAM. `,
+						companyId: company.data.id,
+					};
 
-			if (!eb?.data?.id) {
-				throw new Error("Failed to create EB contact");
+					console.log("Creating contact with data:", EBData);
+					const eb = await client.models.Contact.create(EBData);
+					console.log("Contact created:", eb);
+
+					if (!eb?.data?.id) {
+						throw new Error("Failed to create EB contact");
+					}
+				}
 			}
 			// 4. Create Contact - POC
-			const GBData = {
-				firstName: setupData.company.GBfirstName,
-				lastName: setupData.company.GBlastName,
-				title: setupData.company.GBtitle || null,
-				department: null,
-				contactEmail: null,
-				contactMobilePhone: null,
-				contactBusinessPhone: null,
-				workAddressStreetLine1: setupData.company.GBAddressStreetLine1 || null,
-				workAddressStreetLine2: setupData.company.GBAddressStreetLine2 || null,
-				workAddressCity: setupData.company.GBAddressCity || null,
-				workAddressStateCode: setupData.company.GBAddressStateCode || null,
-				workAddressZipCode: setupData.company.GBAddressZipCode || null,
-				workAddressCountryCode: setupData.company.GBstateOrProvinceCode || "USA",
-				dateLastContacted: new Date().toISOString(),
-				notes: `Government Business Point of Contact Data from SAM. `,
-				companyId: company.data.id,
-			};
+			let gbContact = null;
+			if (setupData.company.GBfirstName && setupData.company.GBlastName) {
+				gbContact = await checkExistingContact(null, company.data.id); // Use name-based check since email might not exist
 
-			console.log("Creating contact with data:", GBData);
-			const gb = await client.models.Contact.create(GBData);
-			console.log("Contact created:", gb);
+				if (!gbContact) {
+					const GBData = {
+						firstName: setupData.company.GBfirstName,
+						lastName: setupData.company.GBlastName,
+						title: setupData.company.GBtitle || null,
+						department: null,
+						contactEmail: null,
+						contactMobilePhone: null,
+						contactBusinessPhone: null,
+						workAddressStreetLine1: setupData.company.GBAddressStreetLine1 || null,
+						workAddressStreetLine2: setupData.company.GBAddressStreetLine2 || null,
+						workAddressCity: setupData.company.GBAddressCity || null,
+						workAddressStateCode: setupData.company.GBAddressStateCode || null,
+						workAddressZipCode: setupData.company.GBAddressZipCode || null,
+						workAddressCountryCode: setupData.company.GBstateOrProvinceCode || "USA",
+						dateLastContacted: new Date().toISOString(),
+						notes: `Government Business Point of Contact Data from SAM. `,
+						companyId: company.data.id,
+					};
 
-			if (!gb?.data?.id) {
-				throw new Error("Failed to create GB contact");
+					console.log("Creating contact with data:", GBData);
+					const gb = await client.models.Contact.create(GBData);
+					console.log("Contact created:", gb);
+
+					if (!gb?.data?.id) {
+						throw new Error("Failed to create GB contact");
+					}
+				}
 			}
-
 			// 5. Create User
 			const userData = {
 				cognitoId: setupData.user.cognitoId || user.sub,

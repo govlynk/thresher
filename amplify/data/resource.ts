@@ -75,7 +75,7 @@ const schema = a.schema({
 
 	User: a
 		.model({
-			cognitoId: a.string().required(),
+			cognitoId: a.string(),
 			email: a.email().required(),
 			name: a.string().required(),
 			phone: a.string(),
@@ -84,6 +84,7 @@ const schema = a.schema({
 			avatar: a.url(),
 			opportunities: a.hasMany("Opportunity", "userId"),
 			companies: a.hasMany("UserCompanyRole", "userId"),
+			contacts: a.hasMany("Contact", "userId"),
 			todos: a.hasMany("Todo", "assigneeId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
@@ -140,6 +141,7 @@ const schema = a.schema({
 			pscCode: a.string().array(),
 			sbaBusinessTypeDesc: a.string().array(),
 			entityURL: a.url(),
+			documentFolder: a.url(),
 			opportunities: a.hasMany("Opportunity", "companyId"),
 			capabilities: a.hasMany("CapabilityStatement", "companyId"),
 			performances: a.hasMany("PastPerformance", "companyId"),
@@ -195,8 +197,12 @@ const schema = a.schema({
 			workAddressStateCode: a.string(),
 			workAddressZipCode: a.string(),
 			workAddressCountryCode: a.string(),
+			emailOptOut: a.boolean(),
 			notes: a.string(),
+			documentFolder: a.url(),
+			resume: a.url(),
 			companyId: a.string().required(),
+			userId: a.string(),
 			teamMembers: a.hasMany("TeamMember", "contactId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
