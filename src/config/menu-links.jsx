@@ -45,6 +45,10 @@ export const menuLinks = [
 				path: "/assessment",
 			},
 			{
+				title: "Capability Statement",
+				path: "/capability",
+			},
+			{
 				title: "SAM Registration",
 				path: "/sam",
 			},

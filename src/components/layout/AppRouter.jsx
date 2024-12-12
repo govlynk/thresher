@@ -16,6 +16,7 @@ import MainLayout from "../layout/MainLayout";
 import TodoScreen from "../../screens/TodoScreen";
 import TestScreen from "../../screens/TestScreen";
 import AssessmentScreen from "../../screens/AssessmentScreen";
+import CapabilityStatementScreen from "../../screens/CapabilityStatementScreen";
 
 const AppRouter = ({ signOut, user }) => {
 	return (
@@ -35,6 +36,7 @@ const AppRouter = ({ signOut, user }) => {
 				<Route path='sam' element={<SAMRegistrationScreen />} />
 				<Route path='opportunities' element={<OpportunitiesScreen />} />
 				<Route path='assessment' element={<AssessmentScreen />} />
+				<Route path='capability' element={<CapabilityStatementScreen />} />
 				<Route path='spending-analysis' element={<SpendingAnalysisScreen />} />
 				<Route path='test' element={<TestScreen />} />
 				<Route path='*' element={<NotFoundPage />} />

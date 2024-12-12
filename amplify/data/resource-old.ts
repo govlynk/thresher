@@ -1,5 +1,7 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { type DefaultAuthorizationMode } from "@aws-amplify/backend-data";
+import { sortCollisionsAsc } from "@dnd-kit/core/dist/utilities/algorithms/helpers";
+import { notStrictEqual } from "assert";
 
 const COMPANY_ROLES = [
 	"Executive",
@@ -87,6 +89,14 @@ const schema = a.schema({
 			todos: a.hasMany("Todo", "assigneeId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+
+	// Capability: a
+	// 	.model({
+	// 		opportunities: a.hasMany("Opportunity", "companyId"),
+	// 		users: a.hasMany("UserCompanyRole", "companyId"),
+	// 		teams: a.hasMany("Team", "companyId"),
+	// 	})
+	// 	.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 
 	Company: a
 		.model({
@@ -216,42 +226,6 @@ const schema = a.schema({
 			status: a.enum(["ACTIVE", "INACTIVE"]),
 			user: a.belongsTo("User", "userId"),
 			company: a.belongsTo("Company", "companyId"),
-		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
-
-	CapabilityStatement: a
-		.model({
-			companyId: a.id().required(), // Changed to `a.id()` for proper unique identifier type
-			aboutUs: a.string(), // Added `.optional()` for clarity
-			keyCapabilities: a.string().array(), // Ensured `.array()` is valid and marked as optional
-			competitiveAdvantage: a.string(),
-			mission: a.string(),
-			vision: a.string(),
-			keywords: a.string().array(), // Ensured `.array()` is valid and marked as optional
-			lastModified: a.datetime(), // Marked as optional for flexibility
-			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship
-		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
-
-	PastPerformance: a
-		.model({
-			projectName: a.string().required(),
-			client: a.string().required(),
-			contractValue: a.float(), // Changed to `a.float()` for numerical values
-			period: a.string(),
-			description: a.string(),
-			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship
-		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
-
-	Certifications: a
-		.model({
-			name: a.string().required(),
-			issuer: a.string().required(),
-			dateObtained: a.date(), // Changed to `a.date()` for proper date type
-			expirationDate: a.date(),
-			description: a.string(),
-			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 });
