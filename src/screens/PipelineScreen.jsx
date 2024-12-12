@@ -1,13 +1,30 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Container, Alert, Typography } from "@mui/material";
 import { KanbanBoard } from "../components/pipeline/KanbanBoard";
 import { useOpportunityStore } from "../stores/opportunityStore";
 import { useUserCompanyStore } from "../stores/userCompanyStore";
 
 export default function PipelineScreen() {
-	const { savedOpportunities, loading, error, moveOpportunity } = useOpportunityStore();
+	const {
+		savedOpportunities,
+		loading,
+		error,
+		moveOpportunity,
+		fetchSavedOpportunities,
+		initializeSubscription,
+		cleanup,
+	} = useOpportunityStore();
+
 	const { getActiveCompany } = useUserCompanyStore();
 	const activeCompany = getActiveCompany();
+
+	useEffect(() => {
+		if (activeCompany?.id) {
+			fetchSavedOpportunities();
+			initializeSubscription();
+		}
+		return () => cleanup();
+	}, [activeCompany?.id]);
 
 	const handleOpportunityMove = async (opportunityId, newStatus) => {
 		try {
