@@ -1,81 +1,90 @@
-import React, { useEffect } from "react";
-import { Box, Typography, Tabs, Tab, Alert, CircularProgress } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Typography, Tabs, Tab, Alert } from "@mui/material";
 import { OpportunityList } from "../components/opportunities/OpportunityList";
 import { OpportunitySearch } from "../components/opportunities/OpportunitySearch";
 import { useOpportunityStore } from "../stores/opportunityStore";
 import { useUserCompanyStore } from "../stores/userCompanyStore";
-import { getOpportunity } from "../utils/opportunityApi";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function OpportunitiesScreen() {
-	const [activeTab, setActiveTab] = React.useState(0);
+	const [activeTab, setActiveTab] = useState(0);
+	const [loading, setLoading] = useState(false);
+	const queryClient = useQueryClient();
 	const {
 		opportunities,
 		savedOpportunities,
 		rejectedOpportunities,
-		loading,
 		error,
-		setOpportunities,
 		initializeStore,
+		saveOpportunity,
+		rejectOpportunity,
+		moveToSaved,
 		resetStore,
 	} = useOpportunityStore();
-
 	const { getActiveCompany } = useUserCompanyStore();
 	const activeCompany = getActiveCompany();
 
-	// Initialize store and fetch data when component mounts
 	useEffect(() => {
-		const initializeData = async () => {
-			if (!activeCompany?.id) return;
-
-			try {
-				// First initialize the store to get saved/rejected opportunities
-				await initializeStore();
-
-				// Then fetch new opportunities from SAM.gov
-				if (activeCompany.naicsCode?.length) {
-					const date = new Date();
-					const endDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-					const startDate = `${date.getMonth() - 2}/01/${date.getFullYear()}`;
-
-					const searchParams = {
-						naicsCode: activeCompany.naicsCode.join(","),
-						postedFrom: startDate,
-						postedTo: endDate,
-						limit: "100",
-					};
-
-					const newOpportunities = await getOpportunity(searchParams);
-					setOpportunities(newOpportunities);
-				}
-			} catch (err) {
-				console.error("Error initializing opportunities:", err);
-			}
-		};
-
-		initializeData();
-
-		// Cleanup on unmount
-		return () => {
-			resetStore();
-		};
-	}, [activeCompany?.id, initializeStore, resetStore, setOpportunities]);
+		if (activeCompany?.id) {
+			initializeStore();
+		}
+		return () => resetStore();
+	}, [activeCompany?.id]);
 
 	const handleTabChange = (event, newValue) => {
 		setActiveTab(newValue);
+	};
+
+	const handleSaveOpportunity = async (opportunity) => {
+		setLoading(true);
+		try {
+			// Optimistic update
+			queryClient.setQueryData(["opportunities"], (old) =>
+				old?.filter((opp) => opp.noticeId !== opportunity.noticeId)
+			);
+			queryClient.setQueryData(["savedOpportunities"], (old) => [
+				...(old || []),
+				{ ...opportunity, status: "BACKLOG" },
+			]);
+
+			await saveOpportunity(opportunity);
+		} catch (err) {
+			// Revert on error
+			queryClient.invalidateQueries(["opportunities"]);
+			queryClient.invalidateQueries(["savedOpportunities"]);
+			console.error("Error saving opportunity:", err);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleRejectOpportunity = async (opportunity) => {
+		setLoading(true);
+		try {
+			// Optimistic update
+			queryClient.setQueryData(["opportunities"], (old) =>
+				old?.filter((opp) => opp.noticeId !== opportunity.noticeId)
+			);
+			queryClient.setQueryData(["rejectedOpportunities"], (old) => [
+				...(old || []),
+				{ ...opportunity, status: "REJECTED" },
+			]);
+
+			await rejectOpportunity(opportunity);
+		} catch (err) {
+			// Revert on error
+			queryClient.invalidateQueries(["opportunities"]);
+			queryClient.invalidateQueries(["rejectedOpportunities"]);
+			console.error("Error rejecting opportunity:", err);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	if (!activeCompany) {
 		return (
 			<Box sx={{ p: 3 }}>
 				<Alert severity='warning'>Please select a company to view opportunities</Alert>
-			</Box>
-		);
-	}
-
-	if (loading) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
-				<CircularProgress />
 			</Box>
 		);
 	}
@@ -101,15 +110,30 @@ export default function OpportunitiesScreen() {
 			)}
 
 			<Box role='tabpanel' hidden={activeTab !== 0}>
-				{activeTab === 0 && <OpportunityList opportunities={opportunities} type='new' />}
+				{activeTab === 0 && (
+					<OpportunityList
+						opportunities={opportunities}
+						type='new'
+						onSave={handleSaveOpportunity}
+						onReject={handleRejectOpportunity}
+						loading={loading}
+					/>
+				)}
 			</Box>
 
 			<Box role='tabpanel' hidden={activeTab !== 1}>
-				{activeTab === 1 && <OpportunityList opportunities={savedOpportunities} type='saved' />}
+				{activeTab === 1 && <OpportunityList opportunities={savedOpportunities} type='saved' loading={loading} />}
 			</Box>
 
 			<Box role='tabpanel' hidden={activeTab !== 2}>
-				{activeTab === 2 && <OpportunityList opportunities={rejectedOpportunities} type='rejected' />}
+				{activeTab === 2 && (
+					<OpportunityList
+						opportunities={rejectedOpportunities}
+						type='rejected'
+						onMoveToSaved={moveToSaved}
+						loading={loading}
+					/>
+				)}
 			</Box>
 		</Box>
 	);
