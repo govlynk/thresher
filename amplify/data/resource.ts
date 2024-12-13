@@ -141,6 +141,7 @@ const schema = a.schema({
 			pscCode: a.string().array(),
 			sbaBusinessTypeDesc: a.string().array(),
 			entityURL: a.url(),
+			companyLogo: a.url(),
 			documentFolder: a.url(),
 			opportunities: a.hasMany("Opportunity", "companyId"),
 			capabilities: a.hasMany("CapabilityStatement", "companyId"),
