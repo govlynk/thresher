@@ -6,7 +6,7 @@ import { useCompanyStore } from "../../stores/companyStore";
 import { useUserStore } from "../../stores/userStore";
 import { useTeamStore } from "../../stores/teamStore";
 import { useTeamMemberStore } from "../../stores/teamMemberStore";
-import { useUserCompanyAccessStore } from "../../stores/UserCompanyAccessStore";
+import { useUserCompanyAccessStore } from "../../stores/userCompanyAccessStore";
 import { useAuthStore } from "../../stores/authStore";
 import { useGlobalStore } from "../../stores/globalStore";
 
