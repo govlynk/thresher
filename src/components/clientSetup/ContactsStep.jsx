@@ -13,7 +13,7 @@ export function ContactsStep() {
 
 	useEffect(() => {
 		// Initialize contacts from company data if available
-		if (companyData) {
+		if (companyData && contactsData.length === 0) {
 			const initialContacts = [];
 			if (companyData.EBfirstName) {
 				initialContacts.push({
@@ -36,7 +36,7 @@ export function ContactsStep() {
 					phone: companyData.GBphone,
 					dateLastContacted: new Date().toISOString(),
 					role: "Executive",
-					notes: `Initial contact created during company setup. Role: Governemnt Business POC`,
+					notes: `Initial contact created during company setup. Role: Government Business POC`,
 				});
 			}
 			setContactsData(initialContacts);
@@ -60,6 +60,20 @@ export function ContactsStep() {
 		setError(null);
 	};
 
+	const handleEditContact = (contact) => {
+		setEditContact(contact);
+		setDialogOpen(true);
+	};
+
+	const handleRemoveContact = (contactId) => {
+		setContactsData(contactsData.filter((c) => c.id !== contactId));
+	};
+
+	const handleCloseDialog = () => {
+		setDialogOpen(false);
+		setEditContact(null);
+	};
+
 	return (
 		<Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
 			<Typography variant='h5' gutterBottom>
@@ -78,18 +92,9 @@ export function ContactsStep() {
 				</Button>
 			</Box>
 
-			<ContactsTable
-				contacts={contactsData}
-				onEdit={(contact) => {
-					setEditContact(contact);
-					setDialogOpen(true);
-				}}
-				onDelete={(contactId) => {
-					setContactsData(contactsData.filter((c) => c.id !== contactId));
-				}}
-			/>
+			<ContactsTable contacts={contactsData} onEdit={handleEditContact} onDelete={handleRemoveContact} />
 
-			<Box sx={{ display: "flex", justifyContent: "space-between" }}>
+			<Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
 				<Button onClick={prevStep}>Back</Button>
 				<Button variant='contained' onClick={nextStep} disabled={contactsData.length === 0}>
 					Continue
@@ -98,10 +103,7 @@ export function ContactsStep() {
 
 			<ContactDialog
 				open={dialogOpen}
-				onClose={() => {
-					setDialogOpen(false);
-					setEditContact(null);
-				}}
+				onClose={handleCloseDialog}
 				onSave={handleSaveContact}
 				initialData={editContact}
 				error={error}

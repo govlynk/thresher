@@ -9,7 +9,7 @@ import { TeamSetupScreen } from "../components/clientSetup/TeamSetupScreen";
 const steps = ["Company Search", "Contacts", "Admin Setup", "Team Setup"];
 
 export default function ClientSetupScreen() {
-	const { activeStep, getCompanyData } = useSetupWorkflowStore();
+	const { activeStep, getCompanyData, getContactsData } = useSetupWorkflowStore();
 
 	const renderStep = () => {
 		switch (activeStep) {
@@ -20,7 +20,7 @@ export default function ClientSetupScreen() {
 			case 2:
 				return <AdminSetupStep />;
 			case 3:
-				return <TeamSetupScreen />;
+				return <TeamSetupScreen companyData={getCompanyData()} contactsData={getContactsData()} />;
 			default:
 				return null;
 		}

@@ -27,6 +27,7 @@ export const useSetupWorkflowStore = create((set, get) => ({
 
 	// Data getters
 	getCompanyData: () => get().companyData,
+	getContactsData: () => get().contactsData,
 
 	// Reset workflow
 	resetWorkflow: () =>

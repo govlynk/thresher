@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { Box, Button, TextField, Typography, Alert, Card, Divider, Chip, Stack, useTheme } from "@mui/material";
 import { ArrowLeft, ArrowRight, Users } from "lucide-react";
 
-export function TeamSetupScreen({ onSubmit, onBack, setupData }) {
+export function TeamSetupScreen({ onSubmit, onBack, companyData, contactsData }) {
 	const theme = useTheme();
 	const [formData, setFormData] = useState({
-		name: `${setupData.company.legalBusinessName} Team`,
-		description: `Default team for ${setupData.company.legalBusinessName}`,
+		name: `${companyData.legalBusinessName} Team`,
+		description: `Default team for ${companyData.legalBusinessName}`,
 	});
 	const [error, setError] = useState(null);
 
@@ -77,21 +77,21 @@ export function TeamSetupScreen({ onSubmit, onBack, setupData }) {
 									Name
 								</Typography>
 								<Typography color='text.secondary'>
-									{setupData.user.firstName} {setupData.user.lastName}
+									{contactsData.firstName} {contactsData.lastName}
 								</Typography>
 							</Box>
 							<Box>
 								<Typography variant='caption' display='block' color='text.secondary' gutterBottom>
 									Email
 								</Typography>
-								<Typography color='text.secondary'>{setupData.user.contactEmail}</Typography>
+								<Typography color='text.secondary'>{contactsData.contactEmail}</Typography>
 							</Box>
 							<Box>
 								<Typography variant='caption' display='block' color='text.secondary' gutterBottom>
 									Role
 								</Typography>
 								<Box sx={{ mt: 0.5 }}>
-									<Chip label={setupData.user.roleId} size='small' color='secondary' />
+									<Chip label={contactsData.roleId} size='small' color='secondary' />
 								</Box>
 							</Box>
 						</Stack>
