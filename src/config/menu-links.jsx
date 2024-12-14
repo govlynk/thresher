@@ -22,10 +22,6 @@ export const menuLinks = [
 		icon: Home,
 		links: [
 			{
-				title: "Welcome",
-				path: "/welcome",
-			},
-			{
 				title: "Dashboard",
 				path: "/dashboard",
 			},
@@ -111,8 +107,8 @@ export const menuLinks = [
 		],
 	},
 	{
-		id: "admin",
-		title: "Admin",
+		id: "govlynk",
+		title: "GovLynk",
 		icon: Settings,
 		links: [
 			{

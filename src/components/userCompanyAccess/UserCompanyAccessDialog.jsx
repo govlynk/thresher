@@ -13,7 +13,7 @@ import {
 	Alert,
 	CircularProgress,
 } from "@mui/material";
-import { useUserCompanyAccessStore } from "../../stores/UserCompanyAccessStore";
+import { useUserCompanyAccessStore } from "../../stores/userCompanyAccessStore";
 import { generateClient } from "aws-amplify/data";
 
 const client = generateClient({
