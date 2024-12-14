@@ -84,7 +84,7 @@ const schema = a.schema({
 			avatar: a.url(),
 			contactId: a.string(),
 			opportunities: a.hasMany("Opportunity", "userId"),
-			companies: a.hasMany("userCompanyAccess", "userId"),
+			companies: a.hasMany("UserCompanyAccess", "userId"),
 			contact: a.belongsTo("Contact", "contactId"), // Relationship to Contact
 			todos: a.hasMany("Todo", "assigneeId"),
 		})
