@@ -1,10 +1,14 @@
 import React, { useState } from "react";
-import { Box, TextField, Button, Typography, CircularProgress, Alert, Paper, useTheme } from "@mui/material";
-import { Search, ArrowRight } from "lucide-react";
+import { Box, TextField, Button, Typography, Paper, useTheme, CircularProgress, Alert } from "@mui/material";
+import { Search, ArrowRight, Building2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { getEntity } from "../../utils/samApi";
+import { useSetupWorkflowStore } from "../../stores/setupWorkflowStore";
 import { formatCompanyData } from "../../utils/companyDataMapper";
 
-export function CompanySearch({ onCompanySelect }) {
+export function CompanySearchStep() {
+	const [selectedCompany, setSelectedCompany] = useState(null);
+	const { setCompanyData, nextStep } = useSetupWorkflowStore();
 	const theme = useTheme();
 	const [uei, setUei] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -23,13 +27,15 @@ export function CompanySearch({ onCompanySelect }) {
 		try {
 			const entityData = await getEntity(uei.trim());
 			const formattedData = formatCompanyData(entityData);
+
 			if (!formattedData) {
 				throw new Error("No data found for the provided UEI");
 			}
-
+			setCompanyData(formattedData);
+			// setSearchResult(formattedData);
 			console.log("Raw entity data:", entityData);
 			console.log("Formatted company data:", formattedData);
-			setSearchResult(formattedData);
+			setSelectedCompany(formattedData);
 		} catch (err) {
 			console.error("Search error:", err);
 			setError(err.message || "Failed to fetch company information");
@@ -38,19 +44,16 @@ export function CompanySearch({ onCompanySelect }) {
 		}
 	};
 
+	// const handleCompanySelect = (company) => {
+	// 	setSelectedCompany(company);
+	// 	const formattedData = formatCompanyData(company);
+	// 	setCompanyData(formattedData);
+	// };
+
 	const handleContinue = () => {
-		if (!searchResult) {
-			setError("Please search for a company first");
-			return;
+		if (selectedCompany) {
+			nextStep();
 		}
-
-		// Ensure all required fields are present
-		if (!searchResult.legalBusinessName || !searchResult.uei) {
-			setError("Company data is incomplete. Please try searching again.");
-			return;
-		}
-
-		onCompanySelect(searchResult);
 	};
 
 	const handleKeyPress = (e) => {
@@ -94,7 +97,7 @@ export function CompanySearch({ onCompanySelect }) {
 				</Alert>
 			)}
 
-			{searchResult && (
+			{selectedCompany && (
 				<Paper
 					sx={{
 						p: 3,
@@ -112,39 +115,39 @@ export function CompanySearch({ onCompanySelect }) {
 							<Typography variant='caption' color='text.secondary'>
 								Legal Business Name
 							</Typography>
-							<Typography variant='body1'>{searchResult.legalBusinessName}</Typography>
+							<Typography variant='body1'>{selectedCompany.legalBusinessName}</Typography>
 						</Box>
 						<Box>
 							<Typography variant='caption' color='text.secondary'>
 								DBA Name
 							</Typography>
-							<Typography variant='body1'>{searchResult.dbaName || "-"}</Typography>
+							<Typography variant='body1'>{selectedCompany.dbaName || "-"}</Typography>
 						</Box>
 						<Box>
 							<Typography variant='caption' color='text.secondary'>
 								UEI
 							</Typography>
-							<Typography variant='body1'>{searchResult.uei}</Typography>
+							<Typography variant='body1'>{selectedCompany.uei}</Typography>
 						</Box>
 						<Box>
 							<Typography variant='caption' color='text.secondary'>
 								CAGE Code
 							</Typography>
-							<Typography variant='body1'>{searchResult.cageCode || "-"}</Typography>
+							<Typography variant='body1'>{selectedCompany.cageCode || "-"}</Typography>
 						</Box>
 						<Box>
 							<Typography variant='caption' color='text.secondary'>
 								Registration Status
 							</Typography>
-							<Typography variant='body1'>{searchResult.registrationStatus || "-"}</Typography>
+							<Typography variant='body1'>{selectedCompany.registrationStatus || "-"}</Typography>
 						</Box>
 						<Box>
 							<Typography variant='caption' color='text.secondary'>
 								Expiration Date
 							</Typography>
 							<Typography variant='body1'>
-								{searchResult.registrationExpirationDate
-									? new Date(searchResult.registrationExpirationDate).toLocaleDateString()
+								{selectedCompany.registrationExpirationDate
+									? new Date(selectedCompany.registrationExpirationDate).toLocaleDateString()
 									: "-"}
 							</Typography>
 						</Box>
@@ -153,22 +156,27 @@ export function CompanySearch({ onCompanySelect }) {
 								Physical Address
 							</Typography>
 							<Typography variant='body1'>
-								{searchResult.shippingAddressStreetLine1}
-								{searchResult.shippingAddressStreetLine2 && (
+								{selectedCompany.shippingAddressStreetLine1}
+								{selectedCompany.shippingAddressStreetLine2 && (
 									<>
 										<br />
-										{searchResult.shippingAddressStreetLine2}
+										{selectedCompany.shippingAddressStreetLine2}
 									</>
 								)}
 								<br />
-								{searchResult.shippingAddressCity}, {searchResult.shippingAddressStateCode}{" "}
-								{searchResult.shippingAddressZipCode}
+								{selectedCompany.shippingAddressCity}, {selectedCompany.shippingAddressStateCode}{" "}
+								{selectedCompany.shippingAddressZipCode}
 							</Typography>
 						</Box>
 					</Box>
 
 					<Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-						<Button variant='contained' endIcon={<ArrowRight />} onClick={handleContinue}>
+						<Button
+							variant='contained'
+							endIcon={<ArrowRight />}
+							onClick={handleContinue}
+							disabled={!selectedCompany}
+						>
 							Continue
 						</Button>
 					</Box>
