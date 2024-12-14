@@ -82,9 +82,10 @@ const schema = a.schema({
 			status: a.enum(["ACTIVE", "INACTIVE"]),
 			lastLogin: a.datetime(),
 			avatar: a.url(),
+			contactId: a.string(),
 			opportunities: a.hasMany("Opportunity", "userId"),
 			companies: a.hasMany("UserCompanyRole", "userId"),
-			contacts: a.hasMany("Contact", "userId"),
+			contacts: a.belongsTo("Contact", "userId"),
 			todos: a.hasMany("Todo", "assigneeId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
@@ -164,24 +165,6 @@ const schema = a.schema({
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 
-	Todo: a
-		.model({
-			title: a.string().required(),
-			description: a.string().required(),
-			status: a.enum(["TODO", "DOING", "DONE"]),
-			priority: a.enum(["LOW", "MEDIUM", "HIGH"]),
-			dueDate: a.datetime().required(),
-			estimatedEffort: a.float(),
-			actualEffort: a.float(),
-			tags: a.string().array(),
-			position: a.integer().required(),
-			assigneeId: a.string(),
-			assignee: a.belongsTo("User", "assigneeId"),
-			teamId: a.string().required(),
-			team: a.belongsTo("Team", "teamId"),
-		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
-
 	Contact: a
 		.model({
 			firstName: a.string().required(),
@@ -203,8 +186,6 @@ const schema = a.schema({
 			documentFolder: a.url(),
 			resume: a.url(),
 			companyId: a.string().required(),
-			userId: a.string(),
-			user: a.belongsTo("User", "userId"),
 			teamMembers: a.hasMany("TeamMember", "contactId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
@@ -265,6 +246,24 @@ const schema = a.schema({
 			description: a.string(),
 			companyId: a.id().required(), // Changed to `a.id()` for proper unique identifier type
 			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship
+		})
+		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+
+	Todo: a
+		.model({
+			title: a.string().required(),
+			description: a.string().required(),
+			status: a.enum(["TODO", "DOING", "DONE"]),
+			priority: a.enum(["LOW", "MEDIUM", "HIGH"]),
+			dueDate: a.datetime().required(),
+			estimatedEffort: a.float(),
+			actualEffort: a.float(),
+			tags: a.string().array(),
+			position: a.integer().required(),
+			assigneeId: a.string(),
+			assignee: a.belongsTo("User", "assigneeId"),
+			teamId: a.string().required(),
+			team: a.belongsTo("Team", "teamId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 });

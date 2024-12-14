@@ -25,6 +25,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 	const { addUserCompanyRole } = useUserCompanyRoleStore();
 	const { user } = useAuthStore();
 	const { setActiveCompany, setActiveTeam, setActiveUser } = useGlobalStore();
+	const contact = null;
 
 	const checkExistingContact = async (email, companyId) => {
 		if (!email) return null;
@@ -163,7 +164,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 				};
 
 				console.log("Creating contact with data:", contactData);
-				const contact = await client.models.Contact.create(contactData);
+				let contact = await client.models.Contact.create(contactData);
 				console.log("Contact created:", contact);
 
 				if (!contact?.data?.id) {
@@ -238,12 +239,14 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 					}
 				}
 			}
+
 			// 5. Create User
 			const userData = {
-				cognitoId: setupData.user.cognitoId || user.sub,
+				cognitoId: setupData.user.cognitoId || null,
 				email: setupData.user.contactEmail,
 				name: `${setupData.user.firstName} ${setupData.user.lastName}`,
 				phone: setupData.user.contactBusinessPhone || setupData.user.contactMobilePhone || null,
+				contactId: contact?.data?.id,
 				status: "ACTIVE",
 				lastLogin: new Date().toISOString(),
 			};
@@ -271,7 +274,8 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 				throw new Error("Failed to create team");
 			}
 			setActiveTeam(team.id);
-			// 5. Create Team Member
+
+			// 6. Create Team Member
 			const teamMemberData = {
 				teamId: team.id,
 				contactId: contact.data.id,
@@ -282,7 +286,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 			const teamMember = await addTeamMember(teamMemberData);
 			console.log("Team member created:", teamMember);
 
-			// 6. Create User Company Role
+			// 7. Create User Company Role
 			const userCompanyRoleData = {
 				userId: newUser.id,
 				companyId: company.data.id,
