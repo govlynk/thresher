@@ -20,7 +20,7 @@ import {
 	Alert,
 } from "@mui/material";
 import { Edit, Trash2, UserPlus } from "lucide-react";
-import { UserCompanyAccessDialog } from "../components/UserCompanyAccess/UserCompanyAccessDialog";
+import { UserCompanyAccessDialog } from "../components/userCompanyAccess/UserCompanyAccessDialog";
 import { useUserCompanyAccessStore } from "../stores/UserCompanyAccessStore";
 import { generateClient } from "aws-amplify/data";
 
