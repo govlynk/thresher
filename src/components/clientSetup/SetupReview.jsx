@@ -26,6 +26,8 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 	const { user } = useAuthStore();
 	const { setActiveCompany, setActiveTeam, setActiveUser } = useGlobalStore();
 	const contact = null;
+	const eb = null;
+	const gb = null;
 
 	const checkExistingContact = async (email, companyId) => {
 		if (!email) return null;
@@ -197,7 +199,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 					};
 
 					console.log("Creating contact with data:", EBData);
-					const eb = await client.models.Contact.create(EBData);
+					let eb = await client.models.Contact.create(EBData);
 					console.log("Contact created:", eb);
 
 					if (!eb?.data?.id) {
@@ -231,7 +233,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 					};
 
 					console.log("Creating contact with data:", GBData);
-					const gb = await client.models.Contact.create(GBData);
+					let gb = await client.models.Contact.create(GBData);
 					console.log("Contact created:", gb);
 
 					if (!gb?.data?.id) {
@@ -259,7 +261,8 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 				throw new Error("Failed to create user");
 			}
 			setActiveUser(newUser.id);
-			// 4. Create Team
+
+			// 6. Create Team
 			const teamData = {
 				name: setupData.team.name,
 				description: setupData.team.description,
@@ -275,8 +278,8 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 			}
 			setActiveTeam(team.id);
 
-			// 6. Create Team Member
-			const teamMemberData = {
+			// 7. Create primary Team Member
+			let teamMemberData = {
 				teamId: team.id,
 				contactId: contact.data.id,
 				role: setupData.user.roleId,
@@ -285,6 +288,28 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 			console.log("Creating team member with data:", teamMemberData);
 			const teamMember = await addTeamMember(teamMemberData);
 			console.log("Team member created:", teamMember);
+
+			if (eb) {
+				teamMemberData = {
+					teamId: team.id,
+					contactId: eb.data.id,
+					role: "MEMBER",
+				};
+
+				const ebMember = await addTeamMember(teamMemberData);
+				console.log("Team EB member created:", ebMember);
+			}
+
+			if (gb) {
+				teamMemberData = {
+					teamId: team.id,
+					contactId: gb.data.id,
+					role: "MEMBER",
+				};
+
+				const gbMember = await addTeamMember(teamMemberData);
+				console.log("Team EB member created:", gbMember);
+			}
 
 			// 7. Create User Company Role
 			const userCompanyRoleData = {

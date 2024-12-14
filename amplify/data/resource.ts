@@ -85,7 +85,7 @@ const schema = a.schema({
 			contactId: a.string(),
 			opportunities: a.hasMany("Opportunity", "userId"),
 			companies: a.hasMany("UserCompanyRole", "userId"),
-			contacts: a.belongsTo("Contact", "userId"),
+			contact: a.belongsTo("Contact", "contactId"), // Relationship to Contact
 			todos: a.hasMany("Todo", "assigneeId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
@@ -186,6 +186,7 @@ const schema = a.schema({
 			documentFolder: a.url(),
 			resume: a.url(),
 			companyId: a.string().required(),
+			users: a.hasMany("User", "contactId"), // Inverse relationship to User
 			teamMembers: a.hasMany("TeamMember", "contactId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
