@@ -28,14 +28,14 @@ export const useUserCompanyAccessStore = create((set, get) => ({
 
 			set({ UserCompanyAccesss: response.data, loading: false, error: null });
 		} catch (err) {
-			console.error("Failed to fetch user-company roles:", err);
-			set({ error: err.message || "Failed to fetch user-company roles", loading: false });
+			console.error("Failed to fetch user-company access:", err);
+			set({ error: err.message || "Failed to fetch user-company access", loading: false });
 		}
 	},
 
 	addUserCompanyAccess: async (roleData) => {
-		if (!roleData.userId || !roleData.companyId || !roleData.roleId) {
-			throw new Error("Missing required fields: userId, companyId, or roleId");
+		if (!roleData.userId || !roleData.companyId || !roleData.access) {
+			throw new Error("Missing required fields: userId, companyId, or access");
 		}
 
 		set({ loading: true, error: null });
@@ -43,12 +43,14 @@ export const useUserCompanyAccessStore = create((set, get) => ({
 			const response = await client.models.UserCompanyAccess.create({
 				userId: roleData.userId,
 				companyId: roleData.companyId,
-				roleId: roleData.roleId,
+				access: roleData.access,
 				status: roleData.status || "ACTIVE",
 			});
 
+			console.log("User company access created:", response);
+
 			if (!response?.data) {
-				throw new Error("Failed to create user company role");
+				throw new Error("Failed to create user company access");
 			}
 
 			set((state) => ({
@@ -59,59 +61,59 @@ export const useUserCompanyAccessStore = create((set, get) => ({
 
 			return response.data;
 		} catch (err) {
-			console.error("Error adding user company role:", err);
-			set({ error: err.message || "Failed to add user company role", loading: false });
+			console.error("Error adding user company access:", err);
+			set({ error: err.message || "Failed to add user company access", loading: false });
 			throw err;
 		}
 	},
 
-	updateUserCompanyAccess: async (id, updates) => {
-		if (!id) {
-			throw new Error("Role ID is required");
+	updateUserCompanyAccess: async (access, updates) => {
+		if (!access) {
+			throw new Error("Access is required");
 		}
 
 		set({ loading: true, error: null });
 		try {
 			const response = await client.models.UserCompanyAccess.update({
-				id,
+				access,
 				...updates,
 			});
 
 			if (!response?.data) {
-				throw new Error("Failed to update user company role");
+				throw new Error("Failed to update user company access");
 			}
 
 			set((state) => ({
-				UserCompanyAccesss: state.UserCompanyAccesss.map((role) => (role.id === id ? response.data : role)),
+				UserCompanyAccesss: state.UserCompanyAccesss.map((role) => (role.access === access ? response.data : role)),
 				loading: false,
 				error: null,
 			}));
 
 			return response.data;
 		} catch (err) {
-			console.error("Error updating user company role:", err);
-			set({ error: err.message || "Failed to update user company role", loading: false });
+			console.error("Error updating user company access:", err);
+			set({ error: err.message || "Failed to update user company access", loading: false });
 			throw err;
 		}
 	},
 
-	removeUserCompanyAccess: async (id) => {
-		if (!id) {
-			throw new Error("Role ID is required");
+	removeUserCompanyAccess: async (access) => {
+		if (!access) {
+			throw new Error("Access is required");
 		}
 
 		set({ loading: true, error: null });
 		try {
-			await client.models.UserCompanyAccess.delete({ id });
+			await client.models.UserCompanyAccess.delete({ access });
 
 			set((state) => ({
-				UserCompanyAccesss: state.UserCompanyAccesss.filter((role) => role.id !== id),
+				UserCompanyAccesss: state.UserCompanyAccesss.filter((role) => role.access !== access),
 				loading: false,
 				error: null,
 			}));
 		} catch (err) {
-			console.error("Error removing user company role:", err);
-			set({ error: err.message || "Failed to remove user company role", loading: false });
+			console.error("Error removing user company access:", err);
+			set({ error: err.message || "Failed to remove user company access", loading: false });
 			throw err;
 		}
 	},

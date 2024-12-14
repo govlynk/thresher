@@ -22,13 +22,9 @@ export function CompanySearch({ onCompanySelect }) {
 
 		try {
 			const entityData = await getEntity(uei.trim());
-			if (!entityData) {
-				throw new Error("No data found for the provided UEI");
-			}
-
 			const formattedData = formatCompanyData(entityData);
 			if (!formattedData) {
-				throw new Error("Failed to format company data");
+				throw new Error("No data found for the provided UEI");
 			}
 
 			console.log("Raw entity data:", entityData);
@@ -36,7 +32,7 @@ export function CompanySearch({ onCompanySelect }) {
 			setSearchResult(formattedData);
 		} catch (err) {
 			console.error("Search error:", err);
-			setError(err.message || "Failed to fetch company information. Please verify the UEI and try again.");
+			setError(err.message || "Failed to fetch company information");
 		} finally {
 			setLoading(false);
 		}
