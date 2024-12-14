@@ -105,7 +105,7 @@ export function CompanyDialog({ open, onClose, editCompany = null }) {
 				const company = await client.models.Company.create(companyData);
 
 				if (formData.associateCurrentUser && currentUser?.sub) {
-					await client.models.UserCompanyRole.create({
+					await client.models.userCompanyAccess.create({
 						userId: currentUser.sub,
 						companyId: company.id,
 						roleId: formData.userRole,

@@ -20,16 +20,16 @@ import {
 	Alert,
 } from "@mui/material";
 import { Edit, Trash2, UserPlus } from "lucide-react";
-import { UserCompanyRoleDialog } from "../components/userCompanyRole/UserCompanyRoleDialog";
-import { useUserCompanyRoleStore } from "../stores/userCompanyRoleStore";
+import { userCompanyAccessDialog } from "../components/userCompanyAccess/userCompanyAccessDialog";
+import { useuserCompanyAccessStore } from "../stores/userCompanyAccessStore";
 import { generateClient } from "aws-amplify/data";
 
 const client = generateClient({
 	authMode: "userPool",
 });
 
-export default function UserCompanyRoleScreen() {
-	const { userCompanyRoles, fetchUserCompanyRoles, loading, error } = useUserCompanyRoleStore();
+export default function userCompanyAccessScreen() {
+	const { userCompanyAccesss, fetchuserCompanyAccesss, loading, error } = useuserCompanyAccessStore();
 	const [companies, setCompanies] = useState([]);
 	const [selectedCompany, setSelectedCompany] = useState("");
 	const [users, setUsers] = useState({});
@@ -44,16 +44,16 @@ export default function UserCompanyRoleScreen() {
 
 	useEffect(() => {
 		if (selectedCompany) {
-			fetchUserCompanyRoles(selectedCompany);
+			fetchuserCompanyAccesss(selectedCompany);
 		}
-	}, [selectedCompany, fetchUserCompanyRoles]);
+	}, [selectedCompany, fetchuserCompanyAccesss]);
 
 	useEffect(() => {
-		if (userCompanyRoles.length > 0) {
-			const userIds = userCompanyRoles.map((role) => role.userId);
+		if (userCompanyAccesss.length > 0) {
+			const userIds = userCompanyAccesss.map((role) => role.userId);
 			fetchUsers(userIds);
 		}
-	}, [userCompanyRoles]);
+	}, [userCompanyAccesss]);
 
 	const fetchCompanies = async () => {
 		setLocalLoading(true);
@@ -140,9 +140,9 @@ export default function UserCompanyRoleScreen() {
 
 		setLocalLoading(true);
 		try {
-			await client.models.UserCompanyRole.delete({ id: role.id });
+			await client.models.userCompanyAccess.delete({ id: role.id });
 			if (selectedCompany) {
-				await fetchUserCompanyRoles(selectedCompany);
+				await fetchuserCompanyAccesss(selectedCompany);
 			}
 			setLocalError(null);
 		} catch (err) {
@@ -157,7 +157,7 @@ export default function UserCompanyRoleScreen() {
 		setDialogOpen(false);
 		setEditRole(null);
 		if (selectedCompany) {
-			fetchUserCompanyRoles(selectedCompany);
+			fetchuserCompanyAccesss(selectedCompany);
 		}
 	};
 
@@ -204,7 +204,7 @@ export default function UserCompanyRoleScreen() {
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{userCompanyRoles.map((role) => {
+							{userCompanyAccesss.map((role) => {
 								const user = users[role.userId] || {};
 								return (
 									<TableRow key={role.id} hover>
@@ -234,7 +234,7 @@ export default function UserCompanyRoleScreen() {
 									</TableRow>
 								);
 							})}
-							{userCompanyRoles.length === 0 && (
+							{userCompanyAccesss.length === 0 && (
 								<TableRow>
 									<TableCell colSpan={5} align='center'>
 										No roles found for this company
@@ -257,7 +257,7 @@ export default function UserCompanyRoleScreen() {
 				Add Role
 			</Button>
 
-			<UserCompanyRoleDialog
+			<userCompanyAccessDialog
 				open={dialogOpen}
 				onClose={handleDialogClose}
 				role={editRole}

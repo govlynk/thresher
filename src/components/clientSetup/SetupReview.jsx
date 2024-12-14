@@ -6,7 +6,7 @@ import { useCompanyStore } from "../../stores/companyStore";
 import { useUserStore } from "../../stores/userStore";
 import { useTeamStore } from "../../stores/teamStore";
 import { useTeamMemberStore } from "../../stores/teamMemberStore";
-import { useUserCompanyRoleStore } from "../../stores/userCompanyRoleStore";
+import { useuserCompanyAccessStore } from "../../stores/userCompanyAccessStore";
 import { useAuthStore } from "../../stores/authStore";
 import { useGlobalStore } from "../../stores/globalStore";
 
@@ -22,7 +22,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 	const { addUser } = useUserStore();
 	const { addTeam } = useTeamStore();
 	const { addTeamMember } = useTeamMemberStore();
-	const { addUserCompanyRole } = useUserCompanyRoleStore();
+	const { adduserCompanyAccess } = useuserCompanyAccessStore();
 	const { user } = useAuthStore();
 	const { setActiveCompany, setActiveTeam, setActiveUser } = useGlobalStore();
 	const contact = null;
@@ -281,7 +281,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 			// 7. Create primary Team Member
 			let teamMemberData = {
 				teamId: team.id,
-				contactId: contact.data.id,
+				contactId: contact.id,
 				role: setupData.user.roleId,
 			};
 
@@ -292,7 +292,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 			if (eb) {
 				teamMemberData = {
 					teamId: team.id,
-					contactId: eb.data.id,
+					contactId: eb.id,
 					role: "MEMBER",
 				};
 
@@ -303,7 +303,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 			if (gb) {
 				teamMemberData = {
 					teamId: team.id,
-					contactId: gb.data.id,
+					contactId: gb.id,
 					role: "MEMBER",
 				};
 
@@ -312,16 +312,16 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 			}
 
 			// 7. Create User Company Role
-			const userCompanyRoleData = {
+			const userCompanyAccessData = {
 				userId: newUser.id,
 				companyId: company.data.id,
 				roleId: setupData.user.roleId,
 				status: "ACTIVE",
 			};
 
-			console.log("Creating user company role with data:", userCompanyRoleData);
-			const userCompanyRole = await addUserCompanyRole(userCompanyRoleData);
-			console.log("User company role created:", userCompanyRole);
+			console.log("Creating user company role with data:", userCompanyAccessData);
+			const userCompanyAccess = await adduserCompanyAccess(userCompanyAccessData);
+			console.log("User company role created:", userCompanyAccess);
 
 			setSuccess(true);
 			if (onComplete) {

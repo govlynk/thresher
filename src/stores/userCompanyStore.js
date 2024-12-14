@@ -23,7 +23,7 @@ export const useUserCompanyStore = create((set, get) => ({
 		set({ loading: true, error: null });
 
 		try {
-			const response = await client.models.UserCompanyRole.list({
+			const response = await client.models.userCompanyAccess.list({
 				filter: { userId: { eq: currentUser.id } },
 			});
 
@@ -39,7 +39,7 @@ export const useUserCompanyStore = create((set, get) => ({
 					return {
 						...companyResponse.data,
 						roleId: ucr.roleId,
-						userCompanyRoleId: ucr.id,
+						userCompanyAccessId: ucr.id,
 						status: ucr.status,
 					};
 				})

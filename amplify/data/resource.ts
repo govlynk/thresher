@@ -84,7 +84,7 @@ const schema = a.schema({
 			avatar: a.url(),
 			contactId: a.string(),
 			opportunities: a.hasMany("Opportunity", "userId"),
-			companies: a.hasMany("UserCompanyRole", "userId"),
+			companies: a.hasMany("userCompanyAccess", "userId"),
 			contact: a.belongsTo("Contact", "contactId"), // Relationship to Contact
 			todos: a.hasMany("Todo", "assigneeId"),
 		})
@@ -148,7 +148,7 @@ const schema = a.schema({
 			capabilities: a.hasMany("CapabilityStatement", "companyId"),
 			performances: a.hasMany("PastPerformance", "companyId"),
 			certifications: a.hasMany("Certification", "companyId"),
-			users: a.hasMany("UserCompanyRole", "companyId"),
+			users: a.hasMany("UserCompanyAccess", "companyId"),
 			teams: a.hasMany("Team", "companyId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
@@ -201,11 +201,11 @@ const schema = a.schema({
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 
-	UserCompanyRole: a
+	UserCompanyAccess: a
 		.model({
 			userId: a.string().required(),
 			companyId: a.string().required(),
-			roleId: a.string().required(),
+			access: a.enum(["COMPANY_ADMIN", "MANAGER", "MEMBER", "GOVLYNK_ADMIN", "GOVLYNK_MEMBER", "GOVLYNK_USER"]),
 			status: a.enum(["ACTIVE", "INACTIVE"]),
 			user: a.belongsTo("User", "userId"),
 			company: a.belongsTo("Company", "companyId"),

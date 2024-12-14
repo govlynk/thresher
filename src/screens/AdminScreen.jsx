@@ -182,13 +182,13 @@ export default function AdminScreen() {
 
 		setLoading(true);
 		try {
-			// First delete all associated UserCompanyRoles
-			const userCompanyRoles = await client.models.UserCompanyRole.list({
+			// First delete all associated userCompanyAccesss
+			const userCompanyAccesss = await client.models.userCompanyAccess.list({
 				filter: { companyId: { eq: id } },
 			});
 
-			for (const role of userCompanyRoles.data) {
-				await client.models.UserCompanyRole.delete({ id: role.id });
+			for (const role of userCompanyAccesss.data) {
+				await client.models.userCompanyAccess.delete({ id: role.id });
 			}
 
 			// Then delete all associated Teams

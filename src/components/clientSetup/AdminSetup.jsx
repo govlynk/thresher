@@ -21,7 +21,7 @@ const ACCESS_LEVELS = {
 	MANAGER: "Company Manager",
 	MEMBER: "Company Member",
 	GOVLYNK_ADMIN: "Govlynk Administrator",
-	GOVLYNK_CONSULTANT: "Govlynk Consultant",
+	GOVLYNK_MEMBER: "Govlynk Member",
 	GOVLYNK_USER: "Govlynk User",
 };
 
