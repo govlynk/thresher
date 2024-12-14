@@ -13,7 +13,7 @@ import {
 	Alert,
 	CircularProgress,
 } from "@mui/material";
-import { useuserCompanyAccessStore } from "../../stores/userCompanyAccessStore";
+import { useUserCompanyAccessStore } from "../../stores/UserCompanyAccessStore";
 import { generateClient } from "aws-amplify/data";
 
 const client = generateClient({
@@ -35,8 +35,8 @@ const initialFormState = {
 	status: "ACTIVE",
 };
 
-export function userCompanyAccessDialog({ open, onClose, role = null, companyId }) {
-	const { adduserCompanyAccess, updateuserCompanyAccess } = useuserCompanyAccessStore();
+export function UserCompanyAccessDialog({ open, onClose, role = null, companyId }) {
+	const { addUserCompanyAccess, updateUserCompanyAccess } = useUserCompanyAccessStore();
 	const [formData, setFormData] = useState(initialFormState);
 	const [users, setUsers] = useState([]);
 	const [companies, setCompanies] = useState([]);
@@ -177,9 +177,9 @@ export function userCompanyAccessDialog({ open, onClose, role = null, companyId 
 			};
 
 			if (role?.id) {
-				await updateuserCompanyAccess(role.id, roleData);
+				await updateUserCompanyAccess(role.id, roleData);
 			} else {
-				await adduserCompanyAccess(roleData);
+				await addUserCompanyAccess(roleData);
 			}
 
 			setError(null);

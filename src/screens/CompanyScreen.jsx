@@ -64,13 +64,13 @@ export default function CompanyScreen() {
 	const handleDeleteClick = async (companyId) => {
 		if (window.confirm("Are you sure you want to delete this company?")) {
 			try {
-				// First delete all associated userCompanyAccesss
-				const userCompanyAccesss = await client.models.userCompanyAccess.list({
+				// First delete all associated UserCompanyAccesss
+				const UserCompanyAccesss = await client.models.UserCompanyAccess.list({
 					filter: { companyId: { eq: companyId } },
 				});
 
-				for (const role of userCompanyAccesss.data) {
-					await client.models.userCompanyAccess.delete({ id: role.id });
+				for (const role of UserCompanyAccesss.data) {
+					await client.models.UserCompanyAccess.delete({ id: role.id });
 				}
 
 				// Then delete all associated Teams

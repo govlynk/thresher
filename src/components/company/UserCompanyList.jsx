@@ -26,9 +26,9 @@ export function UserCompanyList() {
 		};
 	}, [fetchUserCompanies]);
 
-	const handleRemoveAssociation = async (userCompanyAccessId) => {
+	const handleRemoveAssociation = async (UserCompanyAccessId) => {
 		if (window.confirm("Are you sure you want to remove this company association?")) {
-			await removeUserCompanyAssociation(userCompanyAccessId);
+			await removeUserCompanyAssociation(UserCompanyAccessId);
 		}
 	};
 
@@ -59,7 +59,7 @@ export function UserCompanyList() {
 					</TableHead>
 					<TableBody>
 						{userCompanies.map((company) => (
-							<TableRow key={company.userCompanyAccessId}>
+							<TableRow key={company.UserCompanyAccessId}>
 								<TableCell>{company.legalBusinessName}</TableCell>
 								<TableCell>{company.uei}</TableCell>
 								<TableCell>{company.roleId}</TableCell>
@@ -72,7 +72,7 @@ export function UserCompanyList() {
 								</TableCell>
 								<TableCell align='right'>
 									<IconButton
-										onClick={() => handleRemoveAssociation(company.userCompanyAccessId)}
+										onClick={() => handleRemoveAssociation(company.UserCompanyAccessId)}
 										size='small'
 										color='error'
 										title='Remove Association'

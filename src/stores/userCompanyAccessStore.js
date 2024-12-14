@@ -5,12 +5,12 @@ const client = generateClient({
 	authMode: "userPool",
 });
 
-export const useuserCompanyAccessStore = create((set, get) => ({
-	userCompanyAccesss: [],
+export const useUserCompanyAccessStore = create((set, get) => ({
+	UserCompanyAccesss: [],
 	loading: false,
 	error: null,
 
-	fetchuserCompanyAccesss: async (companyId) => {
+	fetchUserCompanyAccesss: async (companyId) => {
 		if (!companyId) {
 			set({ error: "Company ID is required", loading: false });
 			return;
@@ -18,7 +18,7 @@ export const useuserCompanyAccessStore = create((set, get) => ({
 
 		set({ loading: true, error: null });
 		try {
-			const response = await client.models.userCompanyAccess.list({
+			const response = await client.models.UserCompanyAccess.list({
 				filter: { companyId: { eq: companyId } },
 			});
 
@@ -26,21 +26,21 @@ export const useuserCompanyAccessStore = create((set, get) => ({
 				throw new Error("Invalid response from server");
 			}
 
-			set({ userCompanyAccesss: response.data, loading: false, error: null });
+			set({ UserCompanyAccesss: response.data, loading: false, error: null });
 		} catch (err) {
 			console.error("Failed to fetch user-company roles:", err);
 			set({ error: err.message || "Failed to fetch user-company roles", loading: false });
 		}
 	},
 
-	adduserCompanyAccess: async (roleData) => {
+	addUserCompanyAccess: async (roleData) => {
 		if (!roleData.userId || !roleData.companyId || !roleData.roleId) {
 			throw new Error("Missing required fields: userId, companyId, or roleId");
 		}
 
 		set({ loading: true, error: null });
 		try {
-			const response = await client.models.userCompanyAccess.create({
+			const response = await client.models.UserCompanyAccess.create({
 				userId: roleData.userId,
 				companyId: roleData.companyId,
 				roleId: roleData.roleId,
@@ -52,7 +52,7 @@ export const useuserCompanyAccessStore = create((set, get) => ({
 			}
 
 			set((state) => ({
-				userCompanyAccesss: [...state.userCompanyAccesss, response.data],
+				UserCompanyAccesss: [...state.UserCompanyAccesss, response.data],
 				loading: false,
 				error: null,
 			}));
@@ -65,14 +65,14 @@ export const useuserCompanyAccessStore = create((set, get) => ({
 		}
 	},
 
-	updateuserCompanyAccess: async (id, updates) => {
+	updateUserCompanyAccess: async (id, updates) => {
 		if (!id) {
 			throw new Error("Role ID is required");
 		}
 
 		set({ loading: true, error: null });
 		try {
-			const response = await client.models.userCompanyAccess.update({
+			const response = await client.models.UserCompanyAccess.update({
 				id,
 				...updates,
 			});
@@ -82,7 +82,7 @@ export const useuserCompanyAccessStore = create((set, get) => ({
 			}
 
 			set((state) => ({
-				userCompanyAccesss: state.userCompanyAccesss.map((role) => (role.id === id ? response.data : role)),
+				UserCompanyAccesss: state.UserCompanyAccesss.map((role) => (role.id === id ? response.data : role)),
 				loading: false,
 				error: null,
 			}));
@@ -95,17 +95,17 @@ export const useuserCompanyAccessStore = create((set, get) => ({
 		}
 	},
 
-	removeuserCompanyAccess: async (id) => {
+	removeUserCompanyAccess: async (id) => {
 		if (!id) {
 			throw new Error("Role ID is required");
 		}
 
 		set({ loading: true, error: null });
 		try {
-			await client.models.userCompanyAccess.delete({ id });
+			await client.models.UserCompanyAccess.delete({ id });
 
 			set((state) => ({
-				userCompanyAccesss: state.userCompanyAccesss.filter((role) => role.id !== id),
+				UserCompanyAccesss: state.UserCompanyAccesss.filter((role) => role.id !== id),
 				loading: false,
 				error: null,
 			}));

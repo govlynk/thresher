@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useCompanyStore } from "../stores/companyStore";
 import { useUserStore } from "../stores/userStore";
-import { useuserCompanyAccessStore } from "../stores/userCompanyAccessStore";
+import { useUserCompanyAccessStore } from "../stores/UserCompanyAccessStore";
 import { useAuthStore } from "../stores/authStore";
 import { generateClient } from "aws-amplify/data";
 
@@ -40,9 +40,9 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 	const [loading, setLoading] = useState(false);
 	const { companies, fetchCompanies } = useCompanyStore();
 	const { addUser, updateUser } = useUserStore();
-	const { adduserCompanyAccess, removeuserCompanyAccess } = useuserCompanyAccessStore();
+	const { addUserCompanyAccess, removeUserCompanyAccess } = useUserCompanyAccessStore();
 	const currentUser = useAuthStore((state) => state.user);
-	const [userCompanyAccesss, setuserCompanyAccesss] = useState([]);
+	const [UserCompanyAccesss, setUserCompanyAccesss] = useState([]);
 	const [companyDetails, setCompanyDetails] = useState([]);
 
 	useEffect(() => {
@@ -52,7 +52,7 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 				try {
 					await fetchCompanies();
 					if (editUser?.id) {
-						await fetchuserCompanyAccesss(editUser.id);
+						await fetchUserCompanyAccesss(editUser.id);
 					}
 				} catch (err) {
 					console.error("Error loading data:", err);
@@ -65,15 +65,15 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 		loadData();
 	}, [open, editUser?.id, fetchCompanies]);
 
-	const fetchuserCompanyAccesss = async (userId) => {
+	const fetchUserCompanyAccesss = async (userId) => {
 		try {
 			console.log("UserDialog: Fetching company roles for user:", userId);
-			const response = await client.models.userCompanyAccess.list({
+			const response = await client.models.UserCompanyAccess.list({
 				filter: { userId: { eq: userId } },
 			});
 
 			if (response?.data) {
-				setuserCompanyAccesss(response.data);
+				setUserCompanyAccesss(response.data);
 
 				const companiesData = await Promise.all(
 					response.data.map(async (role) => {
@@ -81,7 +81,7 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 						return {
 							...companyResponse.data,
 							roleId: role.roleId,
-							userCompanyAccessId: role.id,
+							UserCompanyAccessId: role.id,
 						};
 					})
 				);
@@ -165,16 +165,16 @@ export const UserDialog = ({ open, onClose, editUser = null }) => {
 			}
 
 			const currentCompanyIds = formData.selectedCompanies.map((c) => c.id);
-			const existingCompanyIds = userCompanyAccesss.map((role) => role.companyId);
+			const existingCompanyIds = UserCompanyAccesss.map((role) => role.companyId);
 
-			const toRemove = userCompanyAccesss.filter((role) => !currentCompanyIds.includes(role.companyId));
+			const toRemove = UserCompanyAccesss.filter((role) => !currentCompanyIds.includes(role.companyId));
 			for (const role of toRemove) {
-				await removeuserCompanyAccess(role.id);
+				await removeUserCompanyAccess(role.id);
 			}
 
 			const toAdd = currentCompanyIds.filter((id) => !existingCompanyIds.includes(id));
 			for (const companyId of toAdd) {
-				await adduserCompanyAccess({
+				await addUserCompanyAccess({
 					userId: savedUser.id,
 					companyId,
 					roleId: "MEMBER",

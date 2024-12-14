@@ -5,8 +5,8 @@ const client = generateClient();
 
 export async function getUsersByCompany(companyId) {
 	try {
-		// First get all userCompanyAccesss for the company
-		const userRolesResponse = await client.models.userCompanyAccess.list({
+		// First get all UserCompanyAccesss for the company
+		const userRolesResponse = await client.models.UserCompanyAccess.list({
 			filter: { companyId: { eq: companyId } },
 		});
 
@@ -45,7 +45,7 @@ export async function createUserWithCompanyRole(userData, companyId) {
 		}
 
 		// Create user-company association
-		await client.models.userCompanyAccess.create({
+		await client.models.UserCompanyAccess.create({
 			userId: userResponse.data.id,
 			companyId: companyId,
 			roleId: userData.roleId || "MEMBER",
@@ -62,12 +62,12 @@ export async function createUserWithCompanyRole(userData, companyId) {
 export async function deleteUserAndRoles(userId) {
 	try {
 		// Delete all user-company roles first
-		const rolesResponse = await client.models.userCompanyAccess.list({
+		const rolesResponse = await client.models.UserCompanyAccess.list({
 			filter: { userId: { eq: userId } },
 		});
 
 		if (rolesResponse?.data) {
-			await Promise.all(rolesResponse.data.map((role) => client.models.userCompanyAccess.delete({ id: role.id })));
+			await Promise.all(rolesResponse.data.map((role) => client.models.UserCompanyAccess.delete({ id: role.id })));
 		}
 
 		// Then delete the user

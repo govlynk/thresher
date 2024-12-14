@@ -45,7 +45,7 @@ export const useCurrentUserStore = create((set) => ({
 			}
 
 			// Fetch user's company associations with roles
-			const userCompanyAccesss = await client.models.userCompanyAccess.list({
+			const UserCompanyAccesss = await client.models.UserCompanyAccess.list({
 				filter: { userId: { eq: userData.id } },
 				include: {
 					company: true,
@@ -54,10 +54,10 @@ export const useCurrentUserStore = create((set) => ({
 			});
 
 			// Process company and role data
-			const companies = userCompanyAccesss.data.map((ucr) => ({
+			const companies = UserCompanyAccesss.data.map((ucr) => ({
 				...ucr.company,
 				roleId: ucr.roleId,
-				userCompanyAccessId: ucr.id,
+				UserCompanyAccessId: ucr.id,
 				status: ucr.status,
 			}));
 
@@ -71,7 +71,7 @@ export const useCurrentUserStore = create((set) => ({
 				isAdmin,
 				groups,
 				userCompanies: companies,
-				userRoles: userCompanyAccesss.data.map((ucr) => ucr.role),
+				userRoles: UserCompanyAccesss.data.map((ucr) => ucr.role),
 				loading: false,
 				error: null,
 			});

@@ -69,7 +69,7 @@ export const useAuthStore = create()(
 					}
 
 					// Fetch user's company associations
-					const { data: userCompanyAccesss } = await client.models.userCompanyAccess.list({
+					const { data: UserCompanyAccesss } = await client.models.UserCompanyAccess.list({
 						filter: { userId: { eq: userData.id } },
 						include: {
 							company: true,
@@ -82,10 +82,10 @@ export const useAuthStore = create()(
 						...authInfo,
 						groups,
 						companies:
-							userCompanyAccesss?.map((ucr) => ({
+							UserCompanyAccesss?.map((ucr) => ({
 								...ucr.company,
 								roleId: ucr.roleId,
-								userCompanyAccessId: ucr.id,
+								UserCompanyAccessId: ucr.id,
 								status: ucr.status,
 							})) || [],
 						signInUserSession: cognitoUser.signInUserSession,

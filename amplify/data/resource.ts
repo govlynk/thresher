@@ -1,5 +1,6 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { type DefaultAuthorizationMode } from "@aws-amplify/backend-data";
+// add settings table
 
 const COMPANY_ROLES = [
 	"Executive",

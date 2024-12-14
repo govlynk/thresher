@@ -480,7 +480,7 @@
 							"name": "companies",
 							"isArray": true,
 							"type": {
-								"model": "userCompanyAccess"
+								"model": "UserCompanyAccess"
 							},
 							"isRequired": false,
 							"attributes": [],
@@ -1010,7 +1010,7 @@
 							"name": "users",
 							"isArray": true,
 							"type": {
-								"model": "userCompanyAccess"
+								"model": "UserCompanyAccess"
 							},
 							"isRequired": false,
 							"attributes": [],
@@ -1558,8 +1558,8 @@
 						"sortKeyFieldNames": []
 					}
 				},
-				"userCompanyAccess": {
-					"name": "userCompanyAccess",
+				"UserCompanyAccess": {
+					"name": "UserCompanyAccess",
 					"fields": {
 						"id": {
 							"name": "id",
@@ -1593,7 +1593,7 @@
 							"name": "status",
 							"isArray": false,
 							"type": {
-								"enum": "userCompanyAccessStatus"
+								"enum": "UserCompanyAccessStatus"
 							},
 							"isRequired": false,
 							"attributes": []
@@ -1642,7 +1642,7 @@
 						}
 					},
 					"syncable": true,
-					"pluralName": "userCompanyAccesss",
+					"pluralName": "UserCompanyAccesss",
 					"attributes": [
 						{
 							"type": "model",
@@ -2249,8 +2249,8 @@
 						"Other"
 					]
 				},
-				"userCompanyAccessStatus": {
-					"name": "userCompanyAccessStatus",
+				"UserCompanyAccessStatus": {
+					"name": "UserCompanyAccessStatus",
 					"values": ["ACTIVE", "INACTIVE"]
 				},
 				"TodoStatus": {

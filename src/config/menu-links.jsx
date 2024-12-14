@@ -132,20 +132,12 @@ export const menuLinks = [
 				path: "/contact-admin",
 			},
 			{
-				title: "User Company Roles",
-				path: "/user-company-roles",
+				title: "User Company Access",
+				path: "/user-company-access",
 			},
 			{
 				title: "Test",
 				path: "/test",
-			},
-			{
-				title: "Color Sections",
-				path: "/color-sections",
-			},
-			{
-				title: "Menu Manager",
-				path: "/menu-manager",
 			},
 		],
 	},

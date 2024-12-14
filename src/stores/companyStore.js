@@ -102,13 +102,13 @@ export const useCompanyStore = create((set, get) => ({
 				throw new Error("Company ID is required for removal");
 			}
 
-			// First remove all userCompanyAccesss associated with this company
-			const userCompanyAccesss = await client.models.userCompanyAccess.list({
+			// First remove all UserCompanyAccesss associated with this company
+			const UserCompanyAccesss = await client.models.UserCompanyAccess.list({
 				filter: { companyId: { eq: id } },
 			});
 
-			for (const role of userCompanyAccesss.data) {
-				await client.models.userCompanyAccess.delete({ id: role.id });
+			for (const role of UserCompanyAccesss.data) {
+				await client.models.UserCompanyAccess.delete({ id: role.id });
 			}
 
 			// Then remove all team members associated with this company
