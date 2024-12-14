@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useCompanyStore } from "../stores/companyStore";
 import { useUserStore } from "../stores/userStore";
-import { useUserCompanyAccessStore } from "../stores/UserCompanyAccessStore";
+import { useUserCompanyAccessStore } from "../stores/userCompanyAccessStore";
 import { useAuthStore } from "../stores/authStore";
 import { generateClient } from "aws-amplify/data";
 
