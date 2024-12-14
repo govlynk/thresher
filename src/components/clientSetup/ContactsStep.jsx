@@ -17,7 +17,7 @@ export function ContactsStep() {
 			const initialContacts = [];
 			if (companyData.EBfirstName) {
 				initialContacts.push({
-					id: "eb",
+					id: "EB",
 					firstName: companyData.EBfirstName,
 					lastName: companyData.EBlastName,
 					email: companyData.EBemail,
@@ -29,7 +29,7 @@ export function ContactsStep() {
 			}
 			if (companyData.GBfirstName) {
 				initialContacts.push({
-					id: "gb",
+					id: "GB",
 					firstName: companyData.GBfirstName,
 					lastName: companyData.GBlastName,
 					email: companyData.GBemail,
