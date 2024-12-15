@@ -3,7 +3,6 @@ import { Box, Paper, Typography, Chip, Divider } from "@mui/material";
 import { CaptionsOff, UserCog } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 import { DataField } from "./DataField";
-import { Console } from "console";
 
 const ACCESS_LEVELS = {
 	COMPANY_ADMIN: "Company Administrator",
@@ -16,7 +15,7 @@ const ACCESS_LEVELS = {
 export function AdminSection({ admins }) {
 	if (!admins?.length) return null;
 
-	Console.log("admins", admins);
+	console.log("admins", admins);
 	return (
 		<Paper sx={{ p: 3 }}>
 			<SectionHeader icon={UserCog} title='Administrative Users' />

@@ -47,7 +47,7 @@ export function CompanySelector() {
 				<Typography variant='body2' noWrap>
 					{company.legalBusinessName}
 				</Typography>
-				<Chip label={company.roleId} size='small' sx={{ ml: "auto" }} />
+				<Chip label={company.access} size='small' sx={{ ml: "auto" }} />
 			</Box>
 		);
 	};
@@ -87,7 +87,7 @@ export function CompanySelector() {
 							<Typography variant='body2' noWrap>
 								{company.legalBusinessName}
 							</Typography>
-							<Chip label={company.ACCESS} size='small' sx={{ ml: "auto" }} />
+							<Chip label={company.access} size='small' sx={{ ml: "auto" }} />
 						</MenuItem>
 					))}
 				</Select>

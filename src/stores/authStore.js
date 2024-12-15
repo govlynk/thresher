@@ -21,6 +21,8 @@ export const useAuthStore = create()(
 						user: null,
 						isAuthenticated: false,
 						isAdmin: false,
+						isGovLynk: false,
+						isGovLynkAdmin: false,
 						groups: [],
 						authDetails: null,
 					});
@@ -40,6 +42,12 @@ export const useAuthStore = create()(
 					// Extract groups from Cognito token
 					const groups = cognitoUser.signInUserSession?.accessToken?.payload?.["cognito:groups"] || [];
 					const isAdmin = groups.some((group) => typeof group === "string" && group.toLowerCase() === "admin");
+					const isGovLynk = groups.some(
+						(group) => typeof group === "string" && group.toLowerCase().includes === "govlynk"
+					);
+					const isGovLynkAdmin = groups.some(
+						(group) => typeof group === "string" && group.toLowerCase() === "govlynk_admin"
+					);
 
 					// Fetch user data from database using email
 					const { data: users } = await client.models.User.list({
@@ -50,15 +58,16 @@ export const useAuthStore = create()(
 					let userData = users?.[0];
 
 					if (!userData) {
+						//throw new Error("User is not defined");
 						// Create new user if doesn't exist
-						const { data: newUser } = await client.models.User.create({
-							cognitoId: cognitoUser.userId,
-							email: authInfo.email,
-							name: cognitoUser.username,
-							status: "ACTIVE",
-							lastLogin: new Date().toISOString(),
-						});
-						userData = newUser;
+						// const { data: newUser } = await client.models.User.create({
+						// 	cognitoId: cognitoUser.userId,
+						// 	email: authInfo.email,
+						// 	name: cognitoUser.username,
+						// 	status: "ACTIVE",
+						// 	lastLogin: new Date().toISOString(),
+						// });
+						// userData = newUser;
 					} else {
 						// Update last login
 						const { data: updatedUser } = await client.models.User.update({
@@ -84,7 +93,7 @@ export const useAuthStore = create()(
 						companies:
 							UserCompanyAccesss?.map((ucr) => ({
 								...ucr.company,
-								roleId: ucr.roleId,
+								access: ucr.access,
 								UserCompanyAccessId: ucr.id,
 								status: ucr.status,
 							})) || [],
@@ -95,6 +104,8 @@ export const useAuthStore = create()(
 						user: normalizedUser,
 						isAuthenticated: true,
 						isAdmin,
+						isGovLynk,
+						isGovLynkAdmin,
 						groups,
 						authDetails: authInfo,
 					});
@@ -140,6 +151,8 @@ export const useAuthStore = create()(
 					user: null,
 					isAuthenticated: false,
 					isAdmin: false,
+					isGovLynk: false,
+					isGovLynkAdmin: false,
 					groups: [],
 					authDetails: null,
 				});
@@ -150,6 +163,8 @@ export const useAuthStore = create()(
 			partialize: (state) => ({
 				isAuthenticated: state.isAuthenticated,
 				isAdmin: state.isAdmin,
+				isGovLynk: state.false,
+				isGovLynkAdmin: state.false,
 				groups: state.groups,
 				authDetails: state.authDetails,
 			}),

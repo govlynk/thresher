@@ -19,7 +19,7 @@ import {
 	CircularProgress,
 } from "@mui/material";
 import { UserPlus, Edit, Trash2, Mail, Phone } from "lucide-react";
-import { ContactDialog } from "../components/contacts/ContactDialog";
+import { ContactDialog } from "../components/clientSetup/contacts/ContactDialog";
 import { useContactStore } from "../stores/contactStore";
 import { useUserCompanyStore } from "../stores/userCompanyStore";
 
