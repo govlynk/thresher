@@ -12,6 +12,8 @@ export const useAuthStore = create()(
 			user: null,
 			isAuthenticated: false,
 			isAdmin: false,
+			isGovLynk: false,
+			isGovLynkAdmin: false,
 			groups: [],
 			authDetails: null,
 
@@ -48,7 +50,7 @@ export const useAuthStore = create()(
 					const isGovLynkAdmin = groups.some(
 						(group) => typeof group === "string" && group.toLowerCase() === "govlynk_admin"
 					);
-
+					console.log("authInfo", authInfo);
 					// Fetch user data from database using email
 					const { data: users } = await client.models.User.list({
 						filter: { email: { eq: authInfo.email } },
@@ -56,6 +58,7 @@ export const useAuthStore = create()(
 					});
 
 					let userData = users?.[0];
+					console.log("users", users);
 
 					if (!userData) {
 						//throw new Error("User is not defined");
