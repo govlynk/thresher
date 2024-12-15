@@ -1,19 +1,10 @@
 import { generateClient } from "aws-amplify/data";
-import { useState } from "react";
-import {
-	initializeCompanyData,
-	initializeContactData,
-	initializeUserData,
-	initializeTeamData,
-	initializeTeamMemberData,
-	initializeUserCompanyAccess,
-} from "./setupUtils";
+import { initializeCompanyData, initializeContactData, initializeTeamData } from "./setupUtils";
 
 const client = generateClient({
 	authMode: "userPool",
 });
 
-// Main setup function that orchestrates the entire setup process
 export async function setupCompany({ companyData, contactsData, adminData, teamData }) {
 	try {
 		// 1. Create company
@@ -31,37 +22,98 @@ export async function setupCompany({ companyData, contactsData, adminData, teamD
 		// 4. Create admin users and their associations
 		const adminUsers = await Promise.all(
 			adminData.map(async (admin) => {
-				// Create user
-				const user = await createUser({
-					cognitoId: admin.cognitoId,
-					email: admin.email,
-					name: `${admin.firstName} ${admin.lastName}`,
-					phone: admin.phone,
-					contactId: contacts.find((c) => c.email === admin.email || c.contactEmail === admin.email).id,
-					status: "ACTIVE",
+				// Find matching contact
+				const contact = contacts.find((c) => c.contactEmail === admin.email || c.email === admin.email);
+
+				if (!contact) {
+					throw new Error(`No matching contact found for admin email: ${admin.email}`);
+				}
+
+				// Check if user already exists with this email
+				const existingUsers = await client.models.User.list({
+					filter: { email: { eq: admin.email } },
 				});
 
-				// Create user-company access
-				await createUserCompanyAccess(user.id, company.id, admin.accessLevel);
+				let user;
+				if (existingUsers.data?.length > 0) {
+					// Update existing user
+					user = existingUsers.data[0];
+					await client.models.User.update({
+						id: user.id,
+						contactId: contact.id,
+						lastLogin: new Date().toISOString(),
+					});
+				} else {
+					// Create new user
+					const userResponse = await client.models.User.create({
+						cognitoId: admin.cognitoId,
+						email: admin.email,
+						name: `${admin.firstName} ${admin.lastName}`,
+						phone: admin.phone,
+						contactId: contact.id,
+						status: "ACTIVE",
+						lastLogin: new Date().toISOString(),
+					});
+					user = userResponse.data;
+				}
 
-				// Create team member entry
-				const contact = contacts.find((c) => c.email === admin.email || c.contactEmail === admin.email);
-				if (contact) {
-					await createTeamMember(contact.id, team.id, contact.role);
+				// Create or update user-company access
+				const existingAccess = await client.models.UserCompanyAccess.list({
+					filter: {
+						and: [{ userId: { eq: user.id } }, { companyId: { eq: company.id } }],
+					},
+				});
+
+				if (!existingAccess.data?.length) {
+					await client.models.UserCompanyAccess.create({
+						userId: user.id,
+						companyId: company.id,
+						access: admin.accessLevel,
+						status: "ACTIVE",
+					});
+				}
+
+				// Create team member if not exists
+				const existingMember = await client.models.TeamMember.list({
+					filter: {
+						and: [{ contactId: { eq: contact.id } }, { teamId: { eq: team.id } }],
+					},
+				});
+
+				if (!existingMember.data?.length) {
+					await client.models.TeamMember.create({
+						contactId: contact.id,
+						teamId: team.id,
+						role: contact.role || "Other",
+					});
 				}
 
 				return user;
 			})
 		);
-		console.log("Created admin users:", adminUsers);
+		console.log("Created/Updated admin users:", adminUsers);
 
 		// 5. Create team members for remaining contacts
 		const remainingContacts = contacts.filter(
-			(contact) => !adminUsers.some((user) => user.email === contact.email || user.email === contact.contactEmail)
+			(contact) => !adminUsers.some((user) => user.email === contact.contactEmail || user.email === contact.email)
 		);
 
 		await Promise.all(
-			remainingContacts.map((contact) => createTeamMember(contact.id, team.id, contact.role || "Other"))
+			remainingContacts.map(async (contact) => {
+				const existingMember = await client.models.TeamMember.list({
+					filter: {
+						and: [{ contactId: { eq: contact.id } }, { teamId: { eq: team.id } }],
+					},
+				});
+
+				if (!existingMember.data?.length) {
+					await client.models.TeamMember.create({
+						contactId: contact.id,
+						teamId: team.id,
+						role: contact.role || "Other",
+					});
+				}
+			})
 		);
 
 		return {
@@ -76,12 +128,10 @@ export async function setupCompany({ companyData, contactsData, adminData, teamD
 	}
 }
 
-// Helper functions for individual entity creation
+// Helper functions remain the same
 async function createCompany(companyData) {
 	const initializedData = initializeCompanyData(companyData);
-
 	const response = await client.models.Company.create(initializedData);
-	console.log("******company****", response);
 	if (!response?.data?.id) throw new Error("Failed to create company");
 	return response.data;
 }
@@ -96,37 +146,12 @@ async function createContacts(contacts, companyId) {
 	});
 
 	const responses = await Promise.all(contactPromises);
-	console.log("******contacts****", responses);
 	return responses.map((response) => response.data);
 }
 
 async function createTeam(teamData, companyId) {
 	const initializedTeam = initializeTeamData(teamData, companyId);
 	const response = await client.models.Team.create(initializedTeam);
-	console.log("******team****", response);
 	if (!response?.data?.id) throw new Error("Failed to create team");
-	return response.data;
-}
-
-async function createUser(userData, contacts) {
-	const initializedUser = initializeUserData(userData);
-	const response = await client.models.User.create(initializedUser);
-	console.log("******user****", response);
-	if (!response?.data?.id) throw new Error("Failed to create user");
-	return response.data;
-}
-
-async function createUserCompanyAccess(userId, companyId, access) {
-	const accessData = initializeUserCompanyAccess(userId, companyId, access);
-	const response = await client.models.UserCompanyAccess.create(accessData);
-	if (!response?.data?.id) throw new Error("Failed to create user company access");
-	return response.data;
-}
-
-async function createTeamMember(contactId, teamId, role) {
-	const memberData = initializeTeamMemberData(contactId, teamId, role);
-	const response = await client.models.TeamMember.create(memberData);
-	console.log("******team member****", response);
-	if (!response?.data?.id) throw new Error("Failed to create team member");
 	return response.data;
 }
