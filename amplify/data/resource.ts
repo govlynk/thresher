@@ -166,6 +166,16 @@ const schema = a.schema({
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 
+	TeamMember: a
+		.model({
+			teamId: a.string().required(),
+			contactId: a.string().required(),
+			role: a.enum(COMPANY_ROLES),
+			team: a.belongsTo("Team", "teamId"),
+			contact: a.belongsTo("Contact", "contactId"),
+		})
+		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+
 	Contact: a
 		.model({
 			firstName: a.string().required(),
@@ -189,16 +199,6 @@ const schema = a.schema({
 			companyId: a.string().required(),
 			users: a.hasMany("User", "contactId"), // Inverse relationship to User
 			teamMembers: a.hasMany("TeamMember", "contactId"),
-		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
-
-	TeamMember: a
-		.model({
-			teamId: a.string().required(),
-			contactId: a.string().required(),
-			role: a.enum(COMPANY_ROLES),
-			team: a.belongsTo("Team", "teamId"),
-			contact: a.belongsTo("Contact", "contactId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 

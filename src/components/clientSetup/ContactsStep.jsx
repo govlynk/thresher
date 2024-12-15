@@ -17,24 +17,26 @@ export function ContactsStep() {
 			const initialContacts = [];
 			if (companyData.EBfirstName) {
 				initialContacts.push({
-					id: "EB",
+					rowId: "EB",
 					firstName: companyData.EBfirstName,
 					lastName: companyData.EBlastName,
 					email: companyData.EBemail,
 					phone: companyData.EBphone,
 					dateLastContacted: new Date().toISOString(),
+					companyId: companyData.id,
 					role: "Executive",
 					notes: `Initial contact created during company setup. Role: Electronic Business POC`,
 				});
 			}
 			if (companyData.GBfirstName) {
 				initialContacts.push({
-					id: "GB",
+					rowId: "GB",
 					firstName: companyData.GBfirstName,
 					lastName: companyData.GBlastName,
 					email: companyData.GBemail,
 					phone: companyData.GBphone,
 					dateLastContacted: new Date().toISOString(),
+					companyId: companyData.id,
 					role: "Executive",
 					notes: `Initial contact created during company setup. Role: Government Business POC`,
 				});
@@ -45,13 +47,14 @@ export function ContactsStep() {
 
 	const handleSaveContact = (formData) => {
 		const newContact = {
-			id: editContact?.id || Date.now().toString(),
+			rowId: editContact?.rowId || Date.now().toString(),
+			companyId: companyData.id,
 			...formData,
 		};
 
 		setContactsData(
 			editContact
-				? contactsData.map((c) => (c.id === editContact.id ? newContact : c))
+				? contactsData.map((c) => (c.rowId === editContact.rowId ? newContact : c))
 				: [...contactsData, newContact]
 		);
 
@@ -73,6 +76,9 @@ export function ContactsStep() {
 		setDialogOpen(false);
 		setEditContact(null);
 	};
+
+	// Check if at least one contact has an email address
+	const hasContactWithEmail = contactsData.some((contact) => contact.email || contact.contactEmail);
 
 	return (
 		<Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
@@ -96,10 +102,16 @@ export function ContactsStep() {
 
 			<Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
 				<Button onClick={prevStep}>Back</Button>
-				<Button variant='contained' onClick={nextStep} disabled={contactsData.length === 0}>
+				<Button variant='contained' onClick={nextStep} disabled={contactsData.length === 0 || !hasContactWithEmail}>
 					Continue
 				</Button>
 			</Box>
+
+			{contactsData.length > 0 && !hasContactWithEmail && (
+				<Alert severity='warning' sx={{ mt: 2 }}>
+					At least one contact must have an email address to continue.
+				</Alert>
+			)}
 
 			<ContactDialog
 				open={dialogOpen}

@@ -4,7 +4,9 @@ import { generateClient } from "aws-amplify/data";
 import { useGlobalStore } from "./globalStore";
 import { getUsersByCompany, createUserWithCompanyRole, deleteUserAndRoles } from "../utils/userUtils";
 
-const client = generateClient();
+const client = generateClient({
+	authMode: "userPool",
+});
 
 export const useUserStore = create((set, get) => ({
 	users: [],

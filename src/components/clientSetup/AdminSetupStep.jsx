@@ -4,23 +4,29 @@ import { useSetupWorkflowStore } from "../../stores/setupWorkflowStore";
 import { useUserStore } from "../../stores/userStore";
 import { useTeamStore } from "../../stores/teamStore";
 import { AdminTable } from "./admin/AdminTable";
+import { filterContactsWithEmail } from "../../utils/contactUtils";
 
 export function AdminSetupStep() {
 	const { contactsData, setAdminData, nextStep, prevStep } = useSetupWorkflowStore();
 	const { addUser } = useUserStore();
 	const { addTeamMember } = useTeamStore();
+	const [error, setError] = useState(null);
+	const [loading, setLoading] = useState(false);
+
+	// Filter contacts to only show those with email addresses
+	const contactsWithEmail = filterContactsWithEmail(contactsData);
+
 	const [rows, setRows] = useState(
-		contactsData.map((contact) => ({
+		contactsWithEmail.map((contact) => ({
 			...contact,
-			email: contact.email || "",
-			phone: contact.phone || "",
+			contactId: contact.id,
+			email: contact.email || contact.contactEmail || "",
+			phone: contact.phone || contact.contactMobilePhone || "",
 			cognitoId: "",
 			accessLevel: "",
 			isAuthorized: false,
 		}))
 	);
-	const [error, setError] = useState(null);
-	const [loading, setLoading] = useState(false);
 
 	const handleAuthorizeUser = async (row) => {
 		if (!row.cognitoId || !row.accessLevel) {
@@ -31,13 +37,14 @@ export function AdminSetupStep() {
 		setLoading(true);
 		try {
 			const userData = {
+				contactId: row.id,
 				cognitoId: row.cognitoId,
 				email: row.email,
 				name: `${row.firstName} ${row.lastName}`,
 				phone: row.phone,
 				status: "ACTIVE",
 			};
-			/******************************** */
+
 			const newUser = await addUser(userData);
 			setRows(rows.map((r) => (r.id === row.id ? { ...r, isAuthorized: true } : r)));
 			setError(null);
@@ -58,6 +65,19 @@ export function AdminSetupStep() {
 		nextStep();
 	};
 
+	if (contactsWithEmail.length === 0) {
+		return (
+			<Box sx={{ p: 3 }}>
+				<Alert severity='warning'>
+					No contacts with email addresses found. Please go back and add contacts with valid email addresses.
+				</Alert>
+				<Box sx={{ mt: 2 }}>
+					<Button onClick={prevStep}>Back</Button>
+				</Box>
+			</Box>
+		);
+	}
+
 	return (
 		<Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
 			<Typography variant='h5' gutterBottom>
@@ -74,9 +94,6 @@ export function AdminSetupStep() {
 				rows={rows}
 				onCognitoIdChange={(id, value) => {
 					setRows(rows.map((row) => (row.id === id ? { ...row, cognitoId: value } : row)));
-				}}
-				onEMailChange={(id, value) => {
-					setRows(rows.map((row) => (row.id === id ? { ...row, email: value } : row)));
 				}}
 				onAccessLevelChange={(id, value) => {
 					setRows(rows.map((row) => (row.id === id ? { ...row, accessLevel: value } : row)));

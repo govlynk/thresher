@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
 
-const client = generateClient();
+const client = generateClient({
+	authMode: "userPool",
+});
 
 export const useTeamStore = create((set, get) => ({
 	teams: [],

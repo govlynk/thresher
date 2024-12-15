@@ -1,43 +1,68 @@
-import React from 'react';
-import { Box, IconButton } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-import { Edit, Trash2 } from 'lucide-react';
+import React from "react";
+import {
+  Box,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
+import { Edit, Trash2, Mail, Phone } from "lucide-react";
 
 export function ContactsTable({ contacts, onEdit, onDelete }) {
-  const columns = [
-    { field: 'firstName', headerName: 'First Name', flex: 1 },
-    { field: 'lastName', headerName: 'Last Name', flex: 1 },
-    { field: 'email', headerName: 'Email', flex: 1 },
-    { field: 'phone', headerName: 'Phone', flex: 1 },
-    { field: 'role', headerName: 'Role', flex: 1 },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 120,
-      renderCell: (params) => (
-        <Box>
-          <IconButton size="small" onClick={() => onEdit(params.row)}>
-            <Edit size={18} />
-          </IconButton>
-          <IconButton 
-            size="small" 
-            onClick={() => onDelete(params.row.id)}
-            color="error"
-          >
-            <Trash2 size={18} />
-          </IconButton>
-        </Box>
-      ),
-    },
-  ];
-
   return (
-    <DataGrid
-      rows={contacts}
-      columns={columns}
-      autoHeight
-      disableSelectionOnClick
-      sx={{ mb: 3 }}
-    />
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Email</TableCell>
+            <TableCell>Phone</TableCell>
+            <TableCell>Role</TableCell>
+            <TableCell align="right">Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {contacts.map((contact) => (
+            <TableRow key={contact.id} hover>
+              <TableCell>{`${contact.firstName} ${contact.lastName}`}</TableCell>
+              <TableCell>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Mail size={16} />
+                  {contact.email || contact.contactEmail || "-"}
+                </Box>
+              </TableCell>
+              <TableCell>
+                {(contact.phone || contact.contactMobilePhone) && (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Phone size={16} />
+                    {contact.phone || contact.contactMobilePhone}
+                  </Box>
+                )}
+              </TableCell>
+              <TableCell>{contact.role || "-"}</TableCell>
+              <TableCell align="right">
+                <IconButton onClick={() => onEdit(contact)} size="small">
+                  <Edit size={18} />
+                </IconButton>
+                <IconButton onClick={() => onDelete(contact.id)} size="small" color="error">
+                  <Trash2 size={18} />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          ))}
+          {contacts.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={5} align="center">
+                No contacts added yet
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

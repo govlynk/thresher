@@ -24,11 +24,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 	const { addTeamMember } = useTeamMemberStore();
 	const { addUserCompanyAccess } = useUserCompanyAccessStore();
 	const { user } = useAuthStore();
-	// const { setActiveCompany, setActiveTeam, setActiveUser } = useGlobalStore();
-	const [newCompany, setCompany] = useState(null);
-	const [newTeam, setTeam] = useState(null);
-	const [newUser, setUser] = useState([]);
-	const [newContact, setContact] = useState([]);
+	const { setActiveCompany, setActiveTeam, setActiveUser } = useGlobalStore();
 
 	const handleSetup = async () => {
 		setLoading(true);
@@ -129,7 +125,7 @@ export function SetupReview({ setupData, onBack, onComplete }) {
 			if (!company.data?.id) {
 				throw new Error("Failed to create company");
 			}
-			setCompany(company.data.id);
+			setActiveCompany(company.data.id);
 
 			// 2. Create Contact
 			const contactData = {
