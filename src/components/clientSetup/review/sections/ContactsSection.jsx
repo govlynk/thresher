@@ -12,7 +12,7 @@ export function ContactsSection({ contacts }) {
 			<SectionHeader icon={Contact2} title='Contact Information' />
 
 			{contacts.map((contact, index) => (
-				<React.Fragment key={contact.id}>
+				<React.Fragment key={contact.rowId}>
 					{index > 0 && <Divider sx={{ my: 3 }} />}
 
 					<Box sx={{ display: "grid", gap: 2, gridTemplateColumns: "1fr 1fr" }}>

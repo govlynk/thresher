@@ -38,22 +38,10 @@ export const mapPointsOfContact = (POC) => {
 		EBfirstName: POC.electronicBusinessPOC.firstName || null,
 		EBlastName: POC.electronicBusinessPOC.lastName || null,
 		EBtitle: POC.electronicBusinessPOC.title || null,
-		EBaddressLine1: POC.electronicBusinessPOC.addressLine1 || null,
-		EBaddressLine2: POC.electronicBusinessPOC.addressLine2 || null,
-		EBcity: POC.electronicBusinessPOC.city || null,
-		EBcountryCode: POC.electronicBusinessPOC.countryCode || null,
-		EBstateOrProvinceCode: POC.electronicBusinessPOC.stateOrProvinceCode || null,
-		EBzipCode: POC.electronicBusinessPOC.zipCode || null,
 		//
 		GBfirstName: POC.governmentBusinessPOC.firstName || null,
 		GBlastName: POC.governmentBusinessPOC.lastName || null,
 		GBtitle: POC.governmentBusinessPOC.title || null,
-		GBaddressLine1: POC.governmentBusinessPOC.addressLine1 || null,
-		GBaddressLine2: POC.governmentBusinessPOC.addressLine2 || null,
-		GBcity: POC.governmentBusinessPOC.city || null,
-		GBcountryCode: POC.governmentBusinessPOC.countryCode || null,
-		GBstateOrProvinceCode: POC.governmentBusinessPOC.stateOrProvinceCode || null,
-		GBzipCode: POC.governmentBusinessPOC.zipCode || null,
 	};
 };
 

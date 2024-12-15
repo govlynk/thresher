@@ -22,6 +22,8 @@ export async function setupCompany({ companyData, contactsData, adminData, teamD
 		// 4. Create admin users and their associations
 		const adminUsers = await Promise.all(
 			adminData.map(async (admin) => {
+				console.log("+++++++admin++++++", admin);
+
 				// Find matching contact
 				const contact = contacts.find((c) => c.contactEmail === admin.email || c.email === admin.email);
 
@@ -139,7 +141,21 @@ async function createCompany(companyData) {
 async function createContacts(contacts, companyId) {
 	const contactPromises = contacts.map((contact) => {
 		const initializedContact = initializeContactData({
-			...contact,
+			firstName: contact.firstName,
+			lastName: contact.lastName,
+			title: contact.title || null,
+			department: contact.department || null,
+			contactEmail: contact.contactEmail,
+			contactMobilePhone: contact.contactMobilePhone || null,
+			contactBusinessPhone: contact.contactBusinessPhone || null,
+			workAddressStreetLine1: contact.workAddressStreetLine1 || null,
+			workAddressStreetLine2: contact.workAddressStreetLine2 || null,
+			workAddressCity: contact.workAddressCity || null,
+			workAddressStateCode: contact.workAddressStateCode || null,
+			workAddressZipCode: contact.workAddressZipCode || null,
+			workAddressCountryCode: contact.workAddressCountryCode || "USA",
+			dateLastContacted: new Date().toISOString(),
+			notes: `Initial contact created during company setup. Role: ${contact.roleId}`,
 			companyId,
 		});
 		return client.models.Contact.create(initializedContact);

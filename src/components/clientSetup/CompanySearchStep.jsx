@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Paper, useTheme, CircularProgress, Alert } from "@mui/material";
 import { Search, ArrowRight, Building2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { getEntity } from "../../utils/samApi";
 import { useSetupWorkflowStore } from "../../stores/setupWorkflowStore";
 import { formatCompanyData } from "../../utils/companyDataMapper";
@@ -13,7 +12,6 @@ export function CompanySearchStep() {
 	const [uei, setUei] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
-	const [searchResult, setSearchResult] = useState(null);
 
 	const handleSearch = async () => {
 		if (!uei.trim()) {
@@ -32,7 +30,6 @@ export function CompanySearchStep() {
 				throw new Error("No data found for the provided UEI");
 			}
 			setCompanyData(formattedData);
-			// setSearchResult(formattedData);
 			console.log("Raw entity data:", entityData);
 			console.log("Formatted company data:", formattedData);
 			setSelectedCompany(formattedData);
@@ -43,12 +40,6 @@ export function CompanySearchStep() {
 			setLoading(false);
 		}
 	};
-
-	// const handleCompanySelect = (company) => {
-	// 	setSelectedCompany(company);
-	// 	const formattedData = formatCompanyData(company);
-	// 	setCompanyData(formattedData);
-	// };
 
 	const handleContinue = () => {
 		if (selectedCompany) {

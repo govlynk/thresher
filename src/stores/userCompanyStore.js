@@ -38,7 +38,7 @@ export const useUserCompanyStore = create((set, get) => ({
 
 					return {
 						...companyResponse.data,
-						roleId: ucr.roleId,
+						access: ucr.access,
 						UserCompanyAccessId: ucr.id,
 						status: ucr.status,
 					};
