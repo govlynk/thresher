@@ -61,7 +61,7 @@ export async function setupCompany({ companyData, contactsData, adminData, teamD
 		);
 
 		await Promise.all(
-			remainingContacts.map((contact) => createTeamMember(contact.id, team.id, contact.role || "MEMBER"))
+			remainingContacts.map((contact) => createTeamMember(contact.id, team.id, contact.role || "Other"))
 		);
 
 		return {

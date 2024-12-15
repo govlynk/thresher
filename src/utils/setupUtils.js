@@ -120,7 +120,7 @@ export function initializeTeamMemberData(contactId, teamId, role) {
 	return {
 		contactId,
 		teamId,
-		role: role || "Sales",
+		role: role || "Other",
 	};
 }
 
