@@ -2471,10 +2471,8 @@
           "name": "UserCompanyAccessAccess",
           "values": [
             "COMPANY_ADMIN",
-            "MANAGER",
-            "MEMBER",
+            "COMPANY_USER",
             "GOVLYNK_ADMIN",
-            "GOVLYNK_MEMBER",
             "GOVLYNK_USER"
           ]
         },
