@@ -6,7 +6,7 @@ const client = generateClient({
 	authMode: "userPool",
 });
 
-export const usePastPerformanceStore = create((set) => ({
+export const usePastPerformanceStore = create((set, get) => ({
 	performances: [],
 	loading: false,
 	error: null,
@@ -64,6 +64,22 @@ export const usePastPerformanceStore = create((set) => ({
 			return response.data;
 		} catch (err) {
 			console.error("Error saving past performance:", err);
+			set({ error: err.message, loading: false });
+			throw err;
+		}
+	},
+
+	deletePerformance: async (id) => {
+		set({ loading: true, error: null });
+		try {
+			await client.models.PastPerformance.delete({ id });
+			set((state) => ({
+				performances: state.performances.filter((p) => p.id !== id),
+				loading: false,
+				error: null,
+			}));
+		} catch (err) {
+			console.error("Error deleting past performance:", err);
 			set({ error: err.message, loading: false });
 			throw err;
 		}

@@ -1,13 +1,12 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
 import { useGlobalStore } from "./globalStore";
-// import client from "../utils/amplifyClient";
 
 const client = generateClient({
 	authMode: "userPool",
 });
 
-export const useCertificationStore = create((set) => ({
+export const useCertificationStore = create((set, get) => ({
 	certifications: [],
 	loading: false,
 	error: null,
@@ -21,7 +20,6 @@ export const useCertificationStore = create((set) => ({
 
 		set({ loading: true, error: null });
 		try {
-			A;
 			const response = await client.models.Certification.list({
 				filter: { companyId: { eq: activeCompanyId } },
 			});
@@ -66,6 +64,22 @@ export const useCertificationStore = create((set) => ({
 			return response.data;
 		} catch (err) {
 			console.error("Error saving certification:", err);
+			set({ error: err.message, loading: false });
+			throw err;
+		}
+	},
+
+	deleteCertification: async (id) => {
+		set({ loading: true, error: null });
+		try {
+			await client.models.Certification.delete({ id });
+			set((state) => ({
+				certifications: state.certifications.filter((c) => c.id !== id),
+				loading: false,
+				error: null,
+			}));
+		} catch (err) {
+			console.error("Error deleting certification:", err);
 			set({ error: err.message, loading: false });
 			throw err;
 		}

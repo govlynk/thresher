@@ -13,6 +13,8 @@ import {
 } from "@mui/material";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useCapabilityStatementStore } from "../../stores/capabilityStatementStore";
+import { usePastPerformanceStore } from "../../stores/pastPerformanceStore";
+import { useCertificationStore } from "../../stores/certificationStore";
 import { AboutSection } from "./sections/AboutSection";
 import { CapabilitiesSection } from "./sections/CapabilitiesSection";
 import { CompetitiveSection } from "./sections/CompetitiveSection";
@@ -40,31 +42,48 @@ export function CapabilityStatementForm() {
 		competitiveAdvantage: "",
 		mission: "",
 		vision: "",
-		pastPerformance: [],
-		certifications: [],
 	});
 
-	const { capabilityStatement, loading, error, fetchCapabilityStatement, saveCapabilityStatement } =
-		useCapabilityStatementStore();
+	const {
+		statement,
+		loading: statementLoading,
+		error: statementError,
+		fetchCapabilityStatement,
+		saveCapabilityStatement,
+	} = useCapabilityStatementStore();
+
+	const {
+		performances,
+		loading: performancesLoading,
+		error: performancesError,
+		fetchPerformances,
+	} = usePastPerformanceStore();
+
+	const {
+		certifications,
+		loading: certificationsLoading,
+		error: certificationsError,
+		fetchCertifications,
+	} = useCertificationStore();
 
 	useEffect(() => {
 		fetchCapabilityStatement();
-	}, [fetchCapabilityStatement]);
+		fetchPerformances();
+		fetchCertifications();
+	}, [fetchCapabilityStatement, fetchPerformances, fetchCertifications]);
 
 	useEffect(() => {
-		if (capabilityStatement) {
+		if (statement) {
 			setFormData({
-				aboutUs: capabilityStatement.aboutUs || "",
-				keywords: capabilityStatement.keywords || "",
-				keyCapabilities: capabilityStatement.keyCapabilities || [],
-				competitiveAdvantage: capabilityStatement.competitiveAdvantage || "",
-				mission: capabilityStatement.mission || "",
-				vision: capabilityStatement.vision || "",
-				pastPerformance: capabilityStatement.pastPerformance || [],
-				certifications: capabilityStatement.certifications || [],
+				aboutUs: statement.aboutUs || "",
+				keywords: statement.keywords || "",
+				keyCapabilities: statement.keyCapabilities || [],
+				competitiveAdvantage: statement.competitiveAdvantage || "",
+				mission: statement.mission || "",
+				vision: statement.vision || "",
 			});
 		}
-	}, [capabilityStatement]);
+	}, [statement]);
 
 	const handleNext = () => {
 		setActiveStep((prev) => prev + 1);
@@ -76,75 +95,14 @@ export function CapabilityStatementForm() {
 
 	const handleSave = async () => {
 		try {
-			console.log("+++saving capability data", formData);
 			await saveCapabilityStatement(formData);
-			// Show success message or handle completion
 		} catch (err) {
-			// Handle error
+			console.error("Error saving capability statement:", err);
 		}
 	};
 
-	const updateFormData = (field, value) => {
-		setFormData((prev) => ({
-			...prev,
-			[field]: value,
-		}));
-	};
-
-	const renderStepContent = () => {
-		switch (activeStep) {
-			case 0:
-				return (
-					<AboutSection
-						aboutUs={formData.aboutUs}
-						keywords={formData.keywords}
-						onAboutUsChange={(value) => updateFormData("aboutUs", value)}
-						onKeywordsChange={(value) => updateFormData("keywords", value)}
-					/>
-				);
-			case 1:
-				return (
-					<CapabilitiesSection
-						value={formData.keyCapabilities}
-						onChange={(value) => updateFormData("keyCapabilities", value)}
-					/>
-				);
-			case 2:
-				return (
-					<CompetitiveSection
-						value={formData.competitiveAdvantage}
-						onChange={(value) => updateFormData("competitiveAdvantage", value)}
-					/>
-				);
-			case 3:
-				return (
-					<MissionVisionSection
-						mission={formData.mission}
-						vision={formData.vision}
-						onMissionChange={(value) => updateFormData("mission", value)}
-						onVisionChange={(value) => updateFormData("vision", value)}
-					/>
-				);
-			case 4:
-				return (
-					<PastPerformanceSection
-						value={formData.pastPerformance}
-						onChange={(value) => updateFormData("pastPerformance", value)}
-					/>
-				);
-			case 5:
-				return (
-					<CertificationsSection
-						value={formData.certifications}
-						onChange={(value) => updateFormData("certifications", value)}
-					/>
-				);
-			case 6:
-				return <ReviewSection formData={formData} />;
-			default:
-				return null;
-		}
-	};
+	const loading = statementLoading || performancesLoading || certificationsLoading;
+	const error = statementError || performancesError || certificationsError;
 
 	if (loading) {
 		return (
@@ -162,8 +120,57 @@ export function CapabilityStatementForm() {
 		);
 	}
 
+	const renderStepContent = () => {
+		switch (activeStep) {
+			case 0:
+				return (
+					<AboutSection
+						aboutUs={formData.aboutUs}
+						keywords={formData.keywords}
+						onAboutUsChange={(value) => setFormData((prev) => ({ ...prev, aboutUs: value }))}
+						onKeywordsChange={(value) => setFormData((prev) => ({ ...prev, keywords: value }))}
+					/>
+				);
+			case 1:
+				return (
+					<CapabilitiesSection
+						value={formData.keyCapabilities}
+						onChange={(value) => setFormData((prev) => ({ ...prev, keyCapabilities: value }))}
+					/>
+				);
+			case 2:
+				return (
+					<CompetitiveSection
+						value={formData.competitiveAdvantage}
+						onChange={(value) => setFormData((prev) => ({ ...prev, competitiveAdvantage: value }))}
+					/>
+				);
+			case 3:
+				return (
+					<MissionVisionSection
+						mission={formData.mission}
+						vision={formData.vision}
+						onMissionChange={(value) => setFormData((prev) => ({ ...prev, mission: value }))}
+						onVisionChange={(value) => setFormData((prev) => ({ ...prev, vision: value }))}
+					/>
+				);
+			case 4:
+				return (
+					<PastPerformanceSection
+						onChange={(value) => setFormData((prev) => ({ ...prev, performances: value }))}
+					/>
+				);
+			case 5:
+				return <CertificationsSection />;
+			case 6:
+				return <ReviewSection formData={formData} performances={performances} certifications={certifications} />;
+			default:
+				return null;
+		}
+	};
+
 	return (
-		<Box sx={{ mx: "auto", p: 3 }}>
+		<Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
 			<Typography variant='h4' gutterBottom>
 				Capability Statement
 			</Typography>

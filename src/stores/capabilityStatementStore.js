@@ -10,7 +10,6 @@ export const useCapabilityStatementStore = create((set, get) => ({
 	statement: null,
 	loading: false,
 	error: null,
-	history: [],
 
 	fetchCapabilityStatement: async () => {
 		const { activeCompanyId } = useGlobalStore.getState();
@@ -25,7 +24,7 @@ export const useCapabilityStatementStore = create((set, get) => ({
 				filter: { companyId: { eq: activeCompanyId } },
 				limit: 1,
 			});
-			console.log(response);
+
 			set({
 				statement: response?.data?.[0] || null,
 				loading: false,
@@ -39,32 +38,50 @@ export const useCapabilityStatementStore = create((set, get) => ({
 
 	saveCapabilityStatement: async (data) => {
 		const { activeCompanyId } = useGlobalStore.getState();
+		const currentStatement = get().statement;
+
 		if (!activeCompanyId) {
-			set({ error: "No active company selected" });
-			return;
+			throw new Error("No active company selected");
 		}
-		console.log("+++saving capability data", data);
+
 		set({ loading: true, error: null });
 		try {
-			const response = await client.models.CapabilityStatement.create({
-				aboutUs: data.aboutUs,
-				keyCapabilities: data.keyCapabilities,
-				competitiveAdvantage: data.competitiveAdvantage,
-				mission: data.mission,
-				vision: data.vision,
-				keywords: data.keywords,
-				lastModified: new Date().toISOString(),
+			let response;
+			const statementData = {
+				...data,
 				companyId: activeCompanyId,
-			});
-			console.log(response);
+				lastModified: new Date().toISOString(),
+			};
+
+			if (currentStatement?.id) {
+				// Update existing statement
+				response = await client.models.CapabilityStatement.update({
+					id: currentStatement.id,
+					...statementData,
+				});
+			} else {
+				// Create new statement
+				response = await client.models.CapabilityStatement.create(statementData);
+			}
+
 			set({
-				statement: response?.data || null,
+				statement: response.data,
 				loading: false,
 				error: null,
 			});
+
+			return response.data;
 		} catch (err) {
 			console.error("Error saving capability statement:", err);
 			set({ error: err.message, loading: false });
+			throw err;
 		}
 	},
+
+	reset: () =>
+		set({
+			statement: null,
+			loading: false,
+			error: null,
+		}),
 }));
