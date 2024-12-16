@@ -1,172 +1,97 @@
 import React, { useState } from 'react';
 import {
   Box,
-  TextField,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Paper
+  Button,
+  TextField,
+  Grid,
+  List,
+  Paper,
+  IconButton,
 } from '@mui/material';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Plus } from 'lucide-react';
+import { CertificationDialog } from './certifications/CertificationDialog';
+import { CertificationList } from './certifications/CertificationList';
+import { useCertificationStore } from '../../../stores/certificationStore';
 
-export function CertificationsSection({ value = [], onChange }) {
+export function CertificationsSection() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editIndex, setEditIndex] = useState(-1);
-  const [formData, setFormData] = useState({
-    name: '',
-    issuer: '',
-    dateObtained: '',
-    expirationDate: '',
-    description: ''
-  });
+  const [editCertification, setEditCertification] = useState(null);
+  const { certifications, saveCertification, deleteCertification, loading, error } = useCertificationStore();
 
-  const handleAdd = () => {
-    setEditIndex(-1);
-    setFormData({
-      name: '',
-      issuer: '',
-      dateObtained: '',
-      expirationDate: '',
-      description: ''
-    });
+  const handleAddClick = () => {
+    setEditCertification(null);
     setDialogOpen(true);
   };
 
-  const handleEdit = (index) => {
-    setEditIndex(index);
-    setFormData(value[index]);
+  const handleEditClick = (certification) => {
+    setEditCertification(certification);
     setDialogOpen(true);
   };
 
-  const handleDelete = (index) => {
-    onChange(value.filter((_, i) => i !== index));
-  };
-
-  const handleSave = () => {
-    const newValue = [...value];
-    if (editIndex === -1) {
-      newValue.push(formData);
-    } else {
-      newValue[editIndex] = formData;
+  const handleDeleteClick = async (certificationId) => {
+    if (window.confirm('Are you sure you want to delete this certification?')) {
+      try {
+        await deleteCertification(certificationId);
+      } catch (err) {
+        console.error('Error deleting certification:', err);
+      }
     }
-    onChange(newValue);
-    setDialogOpen(false);
+  };
+
+  const handleSave = async (certificationData) => {
+    try {
+      await saveCertification(certificationData);
+      setDialogOpen(false);
+      setEditCertification(null);
+    } catch (err) {
+      console.error('Error saving certification:', err);
+    }
   };
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        Certifications
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        List your company's certifications and qualifications.
-      </Typography>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6" gutterBottom>
+          Certifications
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<Plus size={20} />}
+          onClick={handleAddClick}
+          disabled={loading}
+        >
+          Add Certification
+        </Button>
+      </Box>
 
-      <Button
-        startIcon={<Plus size={20} />}
-        onClick={handleAdd}
-        variant="contained"
-        sx={{ mb: 3 }}
-      >
-        Add Certification
-      </Button>
+      {error && (
+        <Typography color="error" sx={{ mb: 2 }}>
+          {error}
+        </Typography>
+      )}
 
-      <List>
-        {value.map((cert, index) => (
-          <Paper key={index} sx={{ mb: 2, p: 2 }}>
-            <ListItem
-              disablePadding
-              secondaryAction={
-                <Box>
-                  <IconButton onClick={() => handleEdit(index)}>
-                    <Edit size={18} />
-                  </IconButton>
-                  <IconButton onClick={() => handleDelete(index)}>
-                    <Trash2 size={18} />
-                  </IconButton>
-                </Box>
-              }
-            >
-              <ListItemText
-                primary={cert.name}
-                secondary={
-                  <Box>
-                    <Typography variant="body2">
-                      Issuer: {cert.issuer}
-                    </Typography>
-                    <Typography variant="body2">
-                      Obtained: {cert.dateObtained}
-                    </Typography>
-                    <Typography variant="body2">
-                      Expires: {cert.expirationDate}
-                    </Typography>
-                    <Typography variant="body2">
-                      {cert.description}
-                    </Typography>
-                  </Box>
-                }
-              />
-            </ListItem>
-          </Paper>
-        ))}
-      </List>
+      <CertificationList
+        certifications={certifications}
+        onEdit={handleEditClick}
+        onDelete={handleDeleteClick}
+        loading={loading}
+      />
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {editIndex === -1 ? 'Add Certification' : 'Edit Certification'}
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="Certification Name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Issuing Organization"
-              value={formData.issuer}
-              onChange={(e) => setFormData({ ...formData, issuer: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Date Obtained"
-              type="date"
-              value={formData.dateObtained}
-              onChange={(e) => setFormData({ ...formData, dateObtained: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              fullWidth
-              label="Expiration Date"
-              type="date"
-              value={formData.expirationDate}
-              onChange={(e) => setFormData({ ...formData, expirationDate: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              fullWidth
-              multiline
-              rows={2}
-              label="Description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained">Save</Button>
-        </DialogActions>
-      </Dialog>
+      <CertificationDialog
+        open={dialogOpen}
+        onClose={() => {
+          setDialogOpen(false);
+          setEditCertification(null);
+        }}
+        onSave={handleSave}
+        certification={editCertification}
+        loading={loading}
+      />
     </Box>
   );
 }

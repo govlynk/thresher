@@ -1,4 +1,3 @@
-// src/components/capability/sections/PastPerformanceSection.jsx
 import React, { useState } from "react";
 import {
 	Box,
@@ -40,28 +39,29 @@ export function PastPerformanceSection({ value = [], onChange }) {
 	const handleEditClick = (index) => {
 		setEditIndex(index);
 		setFormData({
-			projectName: performances[index]?.projectName || "",
-			description: performances[index]?.description || "",
-			client: performances[index]?.client || "",
-			contractValue: performances[index]?.contractValue || "",
-			startDate: performances[index]?.startDate || "",
-			endDate: performances[index]?.endDate || "",
+			projectName: value[index]?.projectName || "",
+			description: value[index]?.description || "",
+			client: value[index]?.client || "",
+			contractValue: value[index]?.contractValue || "",
+			startDate: value[index]?.startDate || "",
+			endDate: value[index]?.endDate || "",
 		});
 		setDialogOpen(true);
 	};
 
 	const handleDeleteClick = (index) => {
-		onChange(value.filter((_, i) => i !== index));
+		const newPerformances = value.filter((_, i) => i !== index);
+		onChange(newPerformances);
 	};
 
 	const handleSave = () => {
-		const newValue = [...value];
+		const newPerformances = [...value];
 		if (editIndex === -1) {
-			newValue.push(formData);
+			newPerformances.push(formData);
 		} else {
-			newValue[editIndex] = formData;
+			newPerformances[editIndex] = formData;
 		}
-		onChange(newValue);
+		onChange(newPerformances);
 		setDialogOpen(false);
 		setFormData(initialFormData);
 	};

@@ -1995,10 +1995,17 @@
               "isRequired": false,
               "attributes": []
             },
-            "period": {
-              "name": "period",
+            "startDate": {
+              "name": "startDate",
               "isArray": false,
-              "type": "String",
+              "type": "AWSDate",
+              "isRequired": false,
+              "attributes": []
+            },
+            "endDate": {
+              "name": "endDate",
+              "isArray": false,
+              "type": "AWSDate",
               "isRequired": false,
               "attributes": []
             },

@@ -1,207 +1,206 @@
 import React, { useState, useEffect } from "react";
 import {
-	Box,
-	Button,
-	Card,
-	CardContent,
-	LinearProgress,
-	Stepper,
-	Step,
-	StepLabel,
-	Typography,
-	Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  LinearProgress,
+  Stepper,
+  Step,
+  StepLabel,
+  Typography,
+  Alert,
 } from "@mui/material";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useCapabilityStatementStore } from "../../stores/capabilityStatementStore";
 import { usePastPerformanceStore } from "../../stores/pastPerformanceStore";
 import { useCertificationStore } from "../../stores/certificationStore";
-import { AboutSection } from "./sections/AboutSection";
-import { CapabilitiesSection } from "./sections/CapabilitiesSection";
-import { CompetitiveSection } from "./sections/CompetitiveSection";
-import { MissionVisionSection } from "./sections/MissionVisionSection";
-import { PastPerformanceSection } from "./sections/PastPerformanceSection";
-import { CertificationsSection } from "./sections/CertificationsSection";
-import { ReviewSection } from "./sections/ReviewSection";
+import { StepContent } from "./components/StepContent";
+import { StepNavigation } from "./components/StepNavigation";
+import { useLogger } from "../../hooks/useLogger";
 
 const steps = [
-	"About Us",
-	"Key Capabilities",
-	"Competitive Advantage",
-	"Mission & Vision",
-	"Past Performance",
-	"Certifications",
-	"Review",
+  "About Us",
+  "Key Capabilities", 
+  "Competitive Advantage",
+  "Mission & Vision",
+  "Past Performance",
+  "Certifications",
+  "Review",
 ];
 
+const initialFormState = {
+  aboutUs: "",
+  keywords: "",
+  keyCapabilities: [],
+  competitiveAdvantage: "",
+  mission: "",
+  vision: "",
+  performances: [],
+};
+
 export function CapabilityStatementForm() {
-	const [activeStep, setActiveStep] = useState(0);
-	const [formData, setFormData] = useState({
-		aboutUs: "",
-		keywords: "",
-		keyCapabilities: [],
-		competitiveAdvantage: "",
-		mission: "",
-		vision: "",
-	});
+  const logger = useLogger('CapabilityStatementForm');
+  const [activeStep, setActiveStep] = useState(0);
+  const [formData, setFormData] = useState(initialFormState);
+  const [savingError, setSavingError] = useState(null);
 
-	const {
-		statement,
-		loading: statementLoading,
-		error: statementError,
-		fetchCapabilityStatement,
-		saveCapabilityStatement,
-	} = useCapabilityStatementStore();
+  // Store hooks
+  const {
+    statement,
+    loading: statementLoading,
+    error: statementError,
+    fetchCapabilityStatement,
+    saveCapabilityStatement,
+  } = useCapabilityStatementStore();
 
-	const {
-		performances,
-		loading: performancesLoading,
-		error: performancesError,
-		fetchPerformances,
-	} = usePastPerformanceStore();
+  const {
+    performances,
+    loading: performancesLoading,
+    error: performancesError,
+    fetchPerformances,
+    savePerformance,
+    deletePerformance,
+  } = usePastPerformanceStore();
 
-	const {
-		certifications,
-		loading: certificationsLoading,
-		error: certificationsError,
-		fetchCertifications,
-	} = useCertificationStore();
+  const {
+    certifications,
+    loading: certificationsLoading,
+    error: certificationsError,
+    fetchCertifications,
+  } = useCertificationStore();
 
-	useEffect(() => {
-		fetchCapabilityStatement();
-		fetchPerformances();
-		fetchCertifications();
-	}, [fetchCapabilityStatement, fetchPerformances, fetchCertifications]);
+  // Initial data fetch
+  useEffect(() => {
+    logger.debug('Fetching initial data');
+    Promise.all([
+      fetchCapabilityStatement(),
+      fetchPerformances(),
+      fetchCertifications(),
+    ]).catch(err => {
+      logger.error('Error fetching initial data:', err);
+    });
+  }, [fetchCapabilityStatement, fetchPerformances, fetchCertifications]);
 
-	useEffect(() => {
-		if (statement) {
-			setFormData({
-				aboutUs: statement.aboutUs || "",
-				keywords: statement.keywords || "",
-				keyCapabilities: statement.keyCapabilities || [],
-				competitiveAdvantage: statement.competitiveAdvantage || "",
-				mission: statement.mission || "",
-				vision: statement.vision || "",
-			});
-		}
-	}, [statement]);
+  // Update form data when statement or performances change
+  useEffect(() => {
+    if (statement) {
+      logger.debug('Updating form data from statement:', statement);
+      setFormData({
+        aboutUs: statement.aboutUs || "",
+        keywords: statement.keywords || "",
+        keyCapabilities: statement.keyCapabilities || [],
+        competitiveAdvantage: statement.competitiveAdvantage || "",
+        mission: statement.mission || "",
+        vision: statement.vision || "",
+        performances: performances || [],
+      });
+    }
+  }, [statement, performances]);
 
-	const handleNext = () => {
-		setActiveStep((prev) => prev + 1);
-	};
+  const handleNext = () => {
+    setActiveStep((prev) => prev + 1);
+  };
 
-	const handleBack = () => {
-		setActiveStep((prev) => prev - 1);
-	};
+  const handleBack = () => {
+    setActiveStep((prev) => prev - 1);
+  };
 
-	const handleSave = async () => {
-		try {
-			await saveCapabilityStatement(formData);
-		} catch (err) {
-			console.error("Error saving capability statement:", err);
-		}
-	};
+  const handleSave = async () => {
+    logger.debug('Starting save process');
+    setSavingError(null);
+    try {
+      // Save capability statement
+      await saveCapabilityStatement({
+        ...formData,
+        lastModified: new Date().toISOString(),
+      });
 
-	const loading = statementLoading || performancesLoading || certificationsLoading;
-	const error = statementError || performancesError || certificationsError;
+      // Save past performances
+      if (formData.performances?.length > 0) {
+        logger.debug('Saving performances:', formData.performances);
+        const existingPerformanceIds = performances.map(p => p.id);
+        
+        // Handle new and updated performances
+        for (const performance of formData.performances) {
+          await savePerformance(performance);
+        }
 
-	if (loading) {
-		return (
-			<Box sx={{ width: "100%", mt: 4 }}>
-				<LinearProgress />
-			</Box>
-		);
-	}
+        // Handle deleted performances
+        const newPerformanceIds = formData.performances.map(p => p.id).filter(Boolean);
+        const deletedPerformanceIds = existingPerformanceIds.filter(
+          id => !newPerformanceIds.includes(id)
+        );
 
-	if (error) {
-		return (
-			<Alert severity='error' sx={{ mt: 4 }}>
-				{error}
-			</Alert>
-		);
-	}
+        for (const id of deletedPerformanceIds) {
+          await deletePerformance(id);
+        }
+      }
 
-	const renderStepContent = () => {
-		switch (activeStep) {
-			case 0:
-				return (
-					<AboutSection
-						aboutUs={formData.aboutUs}
-						keywords={formData.keywords}
-						onAboutUsChange={(value) => setFormData((prev) => ({ ...prev, aboutUs: value }))}
-						onKeywordsChange={(value) => setFormData((prev) => ({ ...prev, keywords: value }))}
-					/>
-				);
-			case 1:
-				return (
-					<CapabilitiesSection
-						value={formData.keyCapabilities}
-						onChange={(value) => setFormData((prev) => ({ ...prev, keyCapabilities: value }))}
-					/>
-				);
-			case 2:
-				return (
-					<CompetitiveSection
-						value={formData.competitiveAdvantage}
-						onChange={(value) => setFormData((prev) => ({ ...prev, competitiveAdvantage: value }))}
-					/>
-				);
-			case 3:
-				return (
-					<MissionVisionSection
-						mission={formData.mission}
-						vision={formData.vision}
-						onMissionChange={(value) => setFormData((prev) => ({ ...prev, mission: value }))}
-						onVisionChange={(value) => setFormData((prev) => ({ ...prev, vision: value }))}
-					/>
-				);
-			case 4:
-				return (
-					<PastPerformanceSection
-						onChange={(value) => setFormData((prev) => ({ ...prev, performances: value }))}
-					/>
-				);
-			case 5:
-				return <CertificationsSection />;
-			case 6:
-				return <ReviewSection formData={formData} performances={performances} certifications={certifications} />;
-			default:
-				return null;
-		}
-	};
+      logger.debug('Save completed successfully');
+    } catch (err) {
+      logger.error('Error saving capability statement:', err);
+      setSavingError(err.message || "Failed to save capability statement");
+    }
+  };
 
-	return (
-		<Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
-			<Typography variant='h4' gutterBottom>
-				Capability Statement
-			</Typography>
+  const handlePerformanceChange = (updatedPerformances) => {
+    logger.debug('Updating performances:', updatedPerformances);
+    setFormData(prev => ({
+      ...prev,
+      performances: updatedPerformances,
+    }));
+  };
 
-			<Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-				{steps.map((label) => (
-					<Step key={label}>
-						<StepLabel>{label}</StepLabel>
-					</Step>
-				))}
-			</Stepper>
+  const loading = statementLoading || performancesLoading || certificationsLoading;
+  const error = statementError || performancesError || certificationsError || savingError;
 
-			<Card>
-				<CardContent>{renderStepContent()}</CardContent>
-			</Card>
+  return (
+    <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        Capability Statement
+      </Typography>
 
-			<Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-				<Button startIcon={<ArrowLeft />} onClick={handleBack} disabled={activeStep === 0}>
-					Back
-				</Button>
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
 
-				{activeStep === steps.length - 1 ? (
-					<Button variant='contained' onClick={handleSave} disabled={loading}>
-						Save Capability Statement
-					</Button>
-				) : (
-					<Button endIcon={<ArrowRight />} variant='contained' onClick={handleNext}>
-						Next
-					</Button>
-				)}
-			</Box>
-		</Box>
-	);
+      <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+
+      <Card>
+        <CardContent>
+          {loading ? (
+            <Box sx={{ width: '100%', py: 4 }}>
+              <LinearProgress />
+            </Box>
+          ) : (
+            <StepContent
+              activeStep={activeStep}
+              formData={formData}
+              setFormData={setFormData}
+              handlePerformanceChange={handlePerformanceChange}
+              certifications={certifications}
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      <StepNavigation
+        activeStep={activeStep}
+        stepsLength={steps.length}
+        loading={loading}
+        onBack={handleBack}
+        onNext={handleNext}
+        onSave={handleSave}
+      />
+    </Box>
+  );
 }
