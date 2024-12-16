@@ -56,9 +56,8 @@ export const useAuthStore = create()(
 						filter: { email: { eq: authInfo.email } },
 						limit: 1,
 					});
-
+					console.log("users", users?.[0]);
 					let userData = users?.[0];
-					console.log("users", users);
 
 					if (!userData) {
 						//throw new Error("User is not defined");

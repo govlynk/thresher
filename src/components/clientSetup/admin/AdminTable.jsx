@@ -21,10 +21,9 @@ import { UserPlus, AlertCircle } from "lucide-react";
 
 const ACCESS_LEVELS = {
 	COMPANY_ADMIN: "Company Administrator",
-	MANAGER: "Company Manager",
-	MEMBER: "Company Member",
+	COMPANY_USER: "Company User",
 	GOVLYNK_ADMIN: "Govlynk Administrator",
-	GOVLYNK_MEMBER: "Govlynk Member",
+	GOVLYNK_USER: "Govlynk User",
 };
 
 export function AdminTable({ rows, onCognitoIdChange, onAccessLevelChange, onAuthorize, loading }) {

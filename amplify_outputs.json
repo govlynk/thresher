@@ -1,9 +1,9 @@
 {
   "auth": {
-    "user_pool_id": "us-east-1_E6sGC5Vgj",
+    "user_pool_id": "us-east-1_Rf7MR58Ya",
     "aws_region": "us-east-1",
-    "user_pool_client_id": "3hug5ung7uob2kqmc15op60ue3",
-    "identity_pool_id": "us-east-1:84362001-7c74-4e38-b281-14a7417c91f4",
+    "user_pool_client_id": "tf93eu2rg6p375tkj6g9lp0bp",
+    "identity_pool_id": "us-east-1:207be94b-9c04-4f20-b71c-93b7dac850d4",
     "mfa_methods": [],
     "standard_required_attributes": [
       "email"
@@ -25,9 +25,9 @@
     "unauthenticated_identities_enabled": true
   },
   "data": {
-    "url": "https://644nkkguqrclpgzpzmnp7nacki.appsync-api.us-east-1.amazonaws.com/graphql",
+    "url": "https://teraijmxlrfpvkcxx5tyt4ufye.appsync-api.us-east-1.amazonaws.com/graphql",
     "aws_region": "us-east-1",
-    "api_key": "da2-p5dmcvy5ofhktcmpawsvjj4cjq",
+    "api_key": "da2-zk2c5nghpnepvglucm2w72om3m",
     "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
     "authorization_types": [
       "API_KEY",
@@ -1315,6 +1315,133 @@
             "sortKeyFieldNames": []
           }
         },
+        "TeamMember": {
+          "name": "TeamMember",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "teamId": {
+              "name": "teamId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "contactId": {
+              "name": "contactId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "role": {
+              "name": "role",
+              "isArray": false,
+              "type": {
+                "enum": "TeamMemberRole"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "team": {
+              "name": "team",
+              "isArray": false,
+              "type": {
+                "model": "Team"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "teamId"
+                ]
+              }
+            },
+            "contact": {
+              "name": "contact",
+              "isArray": false,
+              "type": {
+                "model": "Contact"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "contactId"
+                ]
+              }
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "TeamMembers",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "provider": "userPools",
+                    "ownerField": "owner",
+                    "allow": "owner",
+                    "identityClaim": "cognito:username",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "Admin"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
         "Contact": {
           "name": "Contact",
           "fields": {
@@ -1509,133 +1636,6 @@
           },
           "syncable": true,
           "pluralName": "Contacts",
-          "attributes": [
-            {
-              "type": "model",
-              "properties": {}
-            },
-            {
-              "type": "auth",
-              "properties": {
-                "rules": [
-                  {
-                    "provider": "userPools",
-                    "ownerField": "owner",
-                    "allow": "owner",
-                    "identityClaim": "cognito:username",
-                    "operations": [
-                      "create",
-                      "update",
-                      "delete",
-                      "read"
-                    ]
-                  },
-                  {
-                    "groupClaim": "cognito:groups",
-                    "provider": "userPools",
-                    "allow": "groups",
-                    "operations": [
-                      "create",
-                      "read",
-                      "update",
-                      "delete"
-                    ],
-                    "groups": [
-                      "Admin"
-                    ]
-                  }
-                ]
-              }
-            }
-          ],
-          "primaryKeyInfo": {
-            "isCustomPrimaryKey": false,
-            "primaryKeyFieldName": "id",
-            "sortKeyFieldNames": []
-          }
-        },
-        "TeamMember": {
-          "name": "TeamMember",
-          "fields": {
-            "id": {
-              "name": "id",
-              "isArray": false,
-              "type": "ID",
-              "isRequired": true,
-              "attributes": []
-            },
-            "teamId": {
-              "name": "teamId",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true,
-              "attributes": []
-            },
-            "contactId": {
-              "name": "contactId",
-              "isArray": false,
-              "type": "String",
-              "isRequired": true,
-              "attributes": []
-            },
-            "role": {
-              "name": "role",
-              "isArray": false,
-              "type": {
-                "enum": "TeamMemberRole"
-              },
-              "isRequired": false,
-              "attributes": []
-            },
-            "team": {
-              "name": "team",
-              "isArray": false,
-              "type": {
-                "model": "Team"
-              },
-              "isRequired": false,
-              "attributes": [],
-              "association": {
-                "connectionType": "BELONGS_TO",
-                "targetNames": [
-                  "teamId"
-                ]
-              }
-            },
-            "contact": {
-              "name": "contact",
-              "isArray": false,
-              "type": {
-                "model": "Contact"
-              },
-              "isRequired": false,
-              "attributes": [],
-              "association": {
-                "connectionType": "BELONGS_TO",
-                "targetNames": [
-                  "contactId"
-                ]
-              }
-            },
-            "createdAt": {
-              "name": "createdAt",
-              "isArray": false,
-              "type": "AWSDateTime",
-              "isRequired": false,
-              "attributes": [],
-              "isReadOnly": true
-            },
-            "updatedAt": {
-              "name": "updatedAt",
-              "isArray": false,
-              "type": "AWSDateTime",
-              "isRequired": false,
-              "attributes": [],
-              "isReadOnly": true
-            }
-          },
-          "syncable": true,
-          "pluralName": "TeamMembers",
           "attributes": [
             {
               "type": "model",

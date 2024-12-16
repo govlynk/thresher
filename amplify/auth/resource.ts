@@ -22,5 +22,5 @@ export const auth = defineAuth({
 		},
 	},
 	// User groups
-	groups: ["Admin", "CompanyAdmin", "GovLynkUser", "GovLynkConsultant", "CompanyUser"],
+	groups: ["COMPANY_ADMIN", "COMPANY_USER", "GOVLYNK_ADMIN", "GOVLYNK_USER"],
 });

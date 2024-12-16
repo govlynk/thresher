@@ -206,7 +206,7 @@ const schema = a.schema({
 		.model({
 			userId: a.string().required(),
 			companyId: a.string().required(),
-			access: a.enum(["COMPANY_ADMIN", "MANAGER", "MEMBER", "GOVLYNK_ADMIN", "GOVLYNK_MEMBER", "GOVLYNK_USER"]),
+			access: a.enum(["COMPANY_ADMIN", "COMPANY_USER", "GOVLYNK_ADMIN", "GOVLYNK_USER"]),
 			status: a.enum(["ACTIVE", "INACTIVE"]),
 			user: a.belongsTo("User", "userId"),
 			company: a.belongsTo("Company", "companyId"),
