@@ -24,7 +24,7 @@ export function PastPerformanceSection({ value = [], onChange }) {
 		projectName: "",
 		client: "",
 		contractValue: 0,
-		startDate: new Date(),
+		startDate: new Date().toISOString().split("T")[0],
 		endDate: null,
 		description: "",
 	});
@@ -35,7 +35,7 @@ export function PastPerformanceSection({ value = [], onChange }) {
 			projectName: "",
 			client: "",
 			contractValue: 0,
-			startDate: new Date(),
+			startDate: new Date().toISOString().split("T")[0],
 			endDate: null,
 			description: "",
 		});

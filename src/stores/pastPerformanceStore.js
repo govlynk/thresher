@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
 import { useGlobalStore } from "./globalStore";
-// import client from "../utils/amplifyClient";
 
 const client = generateClient({
 	authMode: "userPool",
