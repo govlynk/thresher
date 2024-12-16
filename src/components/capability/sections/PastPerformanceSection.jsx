@@ -23,8 +23,9 @@ export function PastPerformanceSection({ value = [], onChange }) {
 	const [formData, setFormData] = useState({
 		projectName: "",
 		client: "",
-		contractValue: "",
-		period: "",
+		contractValue: 0,
+		startDate: new Date(),
+		endDate: null,
 		description: "",
 	});
 
@@ -33,8 +34,9 @@ export function PastPerformanceSection({ value = [], onChange }) {
 		setFormData({
 			projectName: "",
 			client: "",
-			contractValue: "",
-			period: "",
+			contractValue: 0,
+			startDate: new Date(),
+			endDate: null,
 			description: "",
 		});
 		setDialogOpen(true);
@@ -94,16 +96,19 @@ export function PastPerformanceSection({ value = [], onChange }) {
 								<Typography variant='subtitle1'>{performance.projectName}</Typography>
 								<Box component='div' sx={{ mt: 1 }}>
 									<Typography variant='body2' component='div'>
+										{performance.description}
+									</Typography>
+									<Typography variant='body2' component='div'>
 										Client: {performance.client}
 									</Typography>
 									<Typography variant='body2' component='div'>
 										Value: {performance.contractValue}
 									</Typography>
 									<Typography variant='body2' component='div'>
-										Period: {performance.period}
+										Start Date: {performance.startDate}
 									</Typography>
 									<Typography variant='body2' component='div'>
-										{performance.description}
+										End Date: {performance.endDate}
 									</Typography>
 								</Box>
 							</Box>
@@ -124,6 +129,14 @@ export function PastPerformanceSection({ value = [], onChange }) {
 						/>
 						<TextField
 							fullWidth
+							multiline
+							rows={3}
+							label='Description'
+							value={formData.description}
+							onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+						/>
+						<TextField
+							fullWidth
 							label='Client'
 							value={formData.client}
 							onChange={(e) => setFormData({ ...formData, client: e.target.value })}
@@ -136,17 +149,19 @@ export function PastPerformanceSection({ value = [], onChange }) {
 						/>
 						<TextField
 							fullWidth
-							label='Period of Performance'
-							value={formData.period}
-							onChange={(e) => setFormData({ ...formData, period: e.target.value })}
+							label='Start Date'
+							type='date'
+							value={formData.startDate}
+							onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+							InputLabelProps={{ shrink: true }}
 						/>
 						<TextField
 							fullWidth
-							multiline
-							rows={3}
-							label='Description'
-							value={formData.description}
-							onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+							label='End Date'
+							type='date'
+							value={formData.endDate}
+							onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+							InputLabelProps={{ shrink: true }}
 						/>
 					</Box>
 				</DialogContent>

@@ -14,6 +14,7 @@ export function CompanySelector() {
 		if (user?.id) {
 			fetchUserCompanies();
 		}
+		console.log("usercompanies", userCompanies);
 	}, [user?.id, fetchUserCompanies]);
 
 	useEffect(() => {

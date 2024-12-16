@@ -35,6 +35,7 @@ export function CapabilityStatementForm() {
 	const [activeStep, setActiveStep] = useState(0);
 	const [formData, setFormData] = useState({
 		aboutUs: "",
+		keywords: "",
 		keyCapabilities: [],
 		competitiveAdvantage: "",
 		mission: "",
@@ -54,6 +55,7 @@ export function CapabilityStatementForm() {
 		if (capabilityStatement) {
 			setFormData({
 				aboutUs: capabilityStatement.aboutUs || "",
+				keywords: capabilityStatement.keywords || "",
 				keyCapabilities: capabilityStatement.keyCapabilities || [],
 				competitiveAdvantage: capabilityStatement.competitiveAdvantage || "",
 				mission: capabilityStatement.mission || "",
@@ -74,6 +76,7 @@ export function CapabilityStatementForm() {
 
 	const handleSave = async () => {
 		try {
+			console.log("+++saving capability data", formData);
 			await saveCapabilityStatement(formData);
 			// Show success message or handle completion
 		} catch (err) {
@@ -91,7 +94,14 @@ export function CapabilityStatementForm() {
 	const renderStepContent = () => {
 		switch (activeStep) {
 			case 0:
-				return <AboutSection value={formData.aboutUs} onChange={(value) => updateFormData("aboutUs", value)} />;
+				return (
+					<AboutSection
+						aboutUs={formData.aboutUs}
+						keywords={formData.keywords}
+						onAboutUsChange={(value) => updateFormData("aboutUs", value)}
+						onKeywordsChange={(value) => updateFormData("keywords", value)}
+					/>
+				);
 			case 1:
 				return (
 					<CapabilitiesSection

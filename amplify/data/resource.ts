@@ -232,7 +232,8 @@ const schema = a.schema({
 			projectName: a.string().required(),
 			client: a.string().required(),
 			contractValue: a.float(), // Changed to `a.float()` for numerical values
-			period: a.string(),
+			startDate: a.date(),
+			endDate: a.date(),
 			description: a.string(),
 			companyId: a.id().required(), // Changed to `a.id()` for proper unique identifier type
 			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship

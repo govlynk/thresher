@@ -37,17 +37,23 @@ export const useCapabilityStatementStore = create((set, get) => ({
 		}
 	},
 
-	saveStatement: async (data) => {
+	saveCapabilityStatement: async (data) => {
 		const { activeCompanyId } = useGlobalStore.getState();
 		if (!activeCompanyId) {
 			set({ error: "No active company selected" });
 			return;
 		}
-
+		console.log("+++saving capability data", data);
 		set({ loading: true, error: null });
 		try {
 			const response = await client.models.CapabilityStatement.create({
-				...data,
+				aboutUs: data.aboutUs,
+				keyCapabilities: data.keyCapabilities,
+				competitiveAdvantage: data.competitiveAdvantage,
+				mission: data.mission,
+				vision: data.vision,
+				keywords: data.keywords,
+				lastModified: new Date().toISOString(),
 				companyId: activeCompanyId,
 			});
 			console.log(response);

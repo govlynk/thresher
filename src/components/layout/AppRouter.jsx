@@ -4,7 +4,6 @@ import ClienSetupScreen from "../../screens/ClientSetupScreen";
 import UserScreen from "../../screens/UserScreen";
 import CompanyScreen from "../../screens/CompanyScreen";
 import TeamScreen from "../../screens/TeamScreen";
-import AdminScreen from "../../screens/AdminScreen";
 import UserCompanyAccessScreen from "../../screens/UserCompanyAccessScreen";
 import ContactsScreen from "../../screens/ContactsScreen";
 import ContactAdminScreen from "../../screens/ContactAdminScreen";
@@ -29,7 +28,6 @@ const AppRouter = ({ signOut, user }) => {
 				<Route path='company' element={<CompanyScreen />} />
 				<Route path='company/:companyId/team' element={<TeamScreen />} />
 				<Route path='team' element={<TeamScreen />} />
-				<Route path='admin' element={<AdminScreen />} />
 				<Route path='user-company-access' element={<UserCompanyAccessScreen />} />
 				<Route path='client-setup' element={<ClienSetupScreen />} />
 				<Route path='contacts' element={<ContactsScreen />} />

@@ -46,6 +46,7 @@ export const mapPointsOfContact = (POC) => {
 };
 
 export const formatCompanyData = (entityData) => {
+	console.log("******************", entityData);
 	if (!entityData) return null;
 
 	const entityRegistrationData = entityData.entityRegistration || {};

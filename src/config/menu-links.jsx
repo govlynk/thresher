@@ -116,10 +116,6 @@ export const menuLinks = [
 				path: "/client-setup",
 			},
 			{
-				title: "Company Admin",
-				path: "/admin",
-			},
-			{
 				title: "User Admin",
 				path: "/user-admin",
 			},
