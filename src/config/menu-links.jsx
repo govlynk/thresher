@@ -103,17 +103,6 @@ export const menuLinks = [
 		],
 	},
 	{
-		id: "finance",
-		title: "Finance",
-		icon: Receipt,
-		links: [
-			{
-				title: "Invoices Balances",
-				path: "/invoices",
-			},
-		],
-	},
-	{
 		id: "govlynk",
 		title: "GovLynk",
 		icon: Settings,

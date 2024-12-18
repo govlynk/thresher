@@ -1,5 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 
+import MainLayout from "../layout/MainLayout";
+import NotFoundPage from "../../screens/NotFoundPage";
+
 import ClienSetupScreen from "../../screens/ClientSetupScreen";
 import UserScreen from "../../screens/UserScreen";
 import CompanyScreen from "../../screens/CompanyScreen";
@@ -9,15 +12,13 @@ import ContactsScreen from "../../screens/ContactsScreen";
 import ContactAdminScreen from "../../screens/ContactAdminScreen";
 import SAMRegistrationScreen from "../../screens/SAMRegistrationScreen";
 import OpportunitiesScreen from "../../screens/OpportunitiesScreen";
-import SpendingAnalysisScreen from "../../screens/SpendingAnalysisScreen";
-import NotFoundPage from "../../screens/NotFoundPage";
-import MainLayout from "../layout/MainLayout";
 import TodoScreen from "../../screens/TodoScreen";
-import TestScreen from "../../screens/TestScreen";
 import PipelineScreen from "../../screens/PipelineScreen";
+import SpendingAnalysisScreen from "../../screens/SpendingAnalysisScreen";
 import AssessmentScreen from "../../screens/AssessmentScreen";
 import CapabilityStatementScreen from "../../screens/CapabilityStatementScreen";
 import RegulationManagement from "../../screens/RegulationManagement";
+import TestScreen from "../../screens/TestScreen";
 
 const AppRouter = ({ signOut, user }) => {
 	return (
