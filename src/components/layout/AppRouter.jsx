@@ -17,6 +17,7 @@ import TestScreen from "../../screens/TestScreen";
 import PipelineScreen from "../../screens/PipelineScreen";
 import AssessmentScreen from "../../screens/AssessmentScreen";
 import CapabilityStatementScreen from "../../screens/CapabilityStatementScreen";
+import RegulationManagement from "../../screens/RegulationManagement";
 
 const AppRouter = ({ signOut, user }) => {
 	return (
@@ -39,6 +40,7 @@ const AppRouter = ({ signOut, user }) => {
 				<Route path='spending-analysis' element={<SpendingAnalysisScreen />} />
 				<Route path='pipeline' element={<PipelineScreen />} />
 				<Route path='test' element={<TestScreen />} />
+				<Route path='far' element={<RegulationManagement />} />
 				<Route path='*' element={<NotFoundPage />} />
 			</Route>
 		</Routes>

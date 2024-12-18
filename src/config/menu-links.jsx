@@ -81,6 +81,17 @@ export const menuLinks = [
 		],
 	},
 	{
+		id: "Regulations",
+		title: "Regulations",
+		icon: Medal,
+		links: [
+			{
+				title: "FAR/DFARS",
+				path: "/far",
+			},
+		],
+	},
+	{
 		id: "awards",
 		title: "Awards",
 		icon: Medal,

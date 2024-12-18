@@ -252,6 +252,46 @@ const schema = a.schema({
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 
+	// Main regulation model
+	FederalRegulation: a
+		.model({
+			companyId: a.string().required(),
+			type: a.enum(["FAR", "DFAR"]),
+			provisionId: a.string().required(),
+			lastUpdated: a.datetime(),
+			status: a.string(),
+			FinAsstCertifierFirstName: a.string(),
+			FinAsstCertifierLastName: a.string(),
+			FinAsstGrantsCertificationStatus: a.enum(["Y", "N"]),
+			FinAsstGrantsCertifyingResponse: a.enum(["Y", "N"]),
+			company: a.belongsTo("Company", "companyId"),
+			answers: a.hasMany("RegulationAnswer", "regulationId"),
+		})
+		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+
+	// Answers model
+	RegulationAnswer: a
+		.model({
+			regulationId: a.string().required(),
+			section: a.string(),
+			questionText: a.string(),
+			answerText: a.string(),
+			answerId: a.string(),
+			regulation: a.belongsTo("FederalRegulation", "regulationId"),
+		})
+		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+
+	// PDF Links model
+	RegulationDocument: a
+		.model({
+			companyId: a.string().required(),
+			type: a.enum(["FAR", "COMBINED", "FINANCIAL", "ARCHITECT"]),
+			documentUrl: a.string().required(),
+			lastUpdated: a.datetime(),
+			company: a.belongsTo("Company", "companyId"),
+		})
+		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+
 	Todo: a
 		.model({
 			title: a.string().required(),
