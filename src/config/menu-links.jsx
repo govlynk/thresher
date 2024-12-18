@@ -37,10 +37,6 @@ export const menuLinks = [
 		icon: Users,
 		links: [
 			{
-				title: "Readieness Assessment",
-				path: "/assessment",
-			},
-			{
 				title: "Capability Statement",
 				path: "/capability",
 			},
@@ -126,6 +122,10 @@ export const menuLinks = [
 			{
 				title: "User Company Access",
 				path: "/user-company-access",
+			},
+			{
+				title: "Form Components Example",
+				path: "/assessment",
 			},
 			{
 				title: "Test",
