@@ -1,47 +1,205 @@
 import { Routes, Route } from "react-router-dom";
-
 import MainLayout from "../layout/MainLayout";
 import NotFoundPage from "../../screens/NotFoundPage";
 
-import ClienSetupScreen from "../../screens/ClientSetupScreen";
-import UserScreen from "../../screens/UserScreen";
-import CompanyScreen from "../../screens/CompanyScreen";
-import TeamScreen from "../../screens/TeamScreen";
-import UserCompanyAccessScreen from "../../screens/UserCompanyAccessScreen";
-import ContactsScreen from "../../screens/ContactsScreen";
-import ContactAdminScreen from "../../screens/ContactAdminScreen";
-import SAMRegistrationScreen from "../../screens/SAMRegistrationScreen";
-import OpportunitiesScreen from "../../screens/OpportunitiesScreen";
-import TodoScreen from "../../screens/TodoScreen";
-import PipelineScreen from "../../screens/PipelineScreen";
-import SpendingAnalysisScreen from "../../screens/SpendingAnalysisScreen";
-import AssessmentScreen from "../../screens/AssessmentScreen";
-import CapabilityStatementScreen from "../../screens/CapabilityStatementScreen";
-import RegulationManagement from "../../screens/RegulationManagement";
-import TestScreen from "../../screens/TestScreen";
+// Lazy load screens for better performance
+import React, { lazy, Suspense } from "react";
+import { Box, CircularProgress } from "@mui/material";
+
+// Loading component for suspense fallback
+const LoadingScreen = () => (
+	<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+		<CircularProgress />
+	</Box>
+);
+
+// Lazy loaded components
+const ClientSetupScreen = lazy(() => import("../../screens/ClientSetupScreen"));
+const UserScreen = lazy(() => import("../../screens/UserScreen"));
+const CompanyScreen = lazy(() => import("../../screens/CompanyScreen"));
+const TeamScreen = lazy(() => import("../../screens/TeamScreen"));
+const UserCompanyAccessScreen = lazy(() => import("../../screens/UserCompanyAccessScreen"));
+const ContactsScreen = lazy(() => import("../../screens/ContactsScreen"));
+const ContactAdminScreen = lazy(() => import("../../screens/ContactAdminScreen"));
+const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
+const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen"));
+const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
+const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
+const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
+const SpendingReportsScreen = lazy(() => import("../../screens/SpendingReportsScreen"));
+const AssessmentScreen = lazy(() => import("../../screens/AssessmentScreen"));
+const CapabilityStatementScreen = lazy(() => import("../../screens/CapabilityStatementScreen"));
+const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
+const TestScreen = lazy(() => import("../../screens/TestScreen"));
 
 const AppRouter = ({ signOut, user }) => {
 	return (
 		<Routes>
 			<Route path='/' element={<MainLayout signOut={signOut} />}>
-				<Route index element={<TodoScreen />} />
-				<Route path='todos' element={<TodoScreen />} />
-				<Route path='user-admin' element={<UserScreen />} />
-				<Route path='company' element={<CompanyScreen />} />
-				<Route path='company/:companyId/team' element={<TeamScreen />} />
-				<Route path='team' element={<TeamScreen />} />
-				<Route path='user-company-access' element={<UserCompanyAccessScreen />} />
-				<Route path='client-setup' element={<ClienSetupScreen />} />
-				<Route path='contacts' element={<ContactsScreen />} />
-				<Route path='contact-admin' element={<ContactAdminScreen />} />
-				<Route path='sam' element={<SAMRegistrationScreen />} />
-				<Route path='opportunities' element={<OpportunitiesScreen />} />
-				<Route path='assessment' element={<AssessmentScreen />} />
-				<Route path='capability' element={<CapabilityStatementScreen />} />
-				<Route path='spending-analysis' element={<SpendingAnalysisScreen />} />
-				<Route path='pipeline' element={<PipelineScreen />} />
-				<Route path='test' element={<TestScreen />} />
-				<Route path='far' element={<RegulationManagement />} />
+				<Route
+					index
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<TodoScreen />
+						</Suspense>
+					}
+				/>
+
+				{/* Market Intelligence Routes */}
+				<Route
+					path='opportunities'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<OpportunitiesScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='spending-analysis'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<SpendingAnalysisScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='spending-reports'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<SpendingReportsScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='pipeline'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<PipelineScreen />
+						</Suspense>
+					}
+				/>
+
+				{/* Management Routes */}
+				<Route
+					path='todos'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<TodoScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='user-admin'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<UserScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='company'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<CompanyScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='company/:companyId/team'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<TeamScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='team'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<TeamScreen />
+						</Suspense>
+					}
+				/>
+
+				{/* Administration Routes */}
+				<Route
+					path='user-company-access'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<UserCompanyAccessScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='client-setup'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<ClientSetupScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='contacts'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<ContactsScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='contact-admin'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<ContactAdminScreen />
+						</Suspense>
+					}
+				/>
+
+				{/* Profile Routes */}
+				<Route
+					path='sam'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<SAMRegistrationScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='assessment'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<AssessmentScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='capability'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<CapabilityStatementScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='far'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<RegulationManagement />
+						</Suspense>
+					}
+				/>
+
+				{/* Development Routes */}
+				<Route
+					path='test'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<TestScreen />
+						</Suspense>
+					}
+				/>
+
+				{/* 404 Route */}
 				<Route path='*' element={<NotFoundPage />} />
 			</Route>
 		</Routes>
