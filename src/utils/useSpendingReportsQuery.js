@@ -1,82 +1,61 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-// Setup SearchFields
-const SearchReturnFields = [
-	"Award ID",
-	"Recipient Name",
-	"Recipient Id",
-	"Description",
-	"Start Date",
-	"End Date",
-	"Last Modified Date",
-	"Award Amount",
-	"Awarding Agency",
-	"Awarding Sub Agency",
-	"Contract Award Type",
-	"Award Type",
-	"Funding Agency",
-	"Funding Sub Agency",
-	"Prime Award ID",
-	"Prime Recipient Name",
-	"Recipient Name",
-	"Sub-Award Amount",
-];
-
 const spendingApi = axios.create({
-	baseURL: "https://api.usaspending.gov/api/v2/search/",
+	baseURL: "https://api.usaspending.gov/api/v2",
+	headers: {
+		"Content-Type": "application/json",
+	},
 });
 
 // Helper function to format date range
 const getDateRange = () => {
 	const date = new Date();
-	const endDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-		date.getDate()
-	).padStart(2, "0")}`;
-	const startDate = `${date.getFullYear() - 1}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-		date.getDate()
-	).padStart(2, "0")}`;
-	console.log("startDate", startDate);
-	console.log("endDate", endDate);
+	const endDate = date.toISOString().split("T")[0];
+	const startDate = new Date(date.setFullYear(date.getFullYear() - 1)).toISOString().split("T")[0];
 	return { startDate, endDate };
-};
-
-// Invoke USASpending API
-const url = spendingApi.defaults.baseURL + "spending_by_award/";
-const headers = {
-	"Content-Type": "application/json",
 };
 
 // Fetch NAICS spending data
 async function getNaicsSpending(naicsCodes) {
 	const { startDate, endDate } = getDateRange();
 
-	// Setup filters using Map
-	const filters = {
-		time_period: [
-			{
-				start_date: startDate,
-				end_date: endDate,
-			},
-		],
-		award_type_codes: ["IDV_D", "IDV_B_A", "A", "IDV_E", "IDV_B_B", "B", "02", "IDV_B_C", "C", "03", "D"],
-		naics_codes: naicsCodes,
-	};
-
-	// Setup parameters
 	const params = {
-		category: "naics",
-		subawards: "false",
-		limit: 10,
+		filters: {
+			time_period: [
+				{
+					start_date: startDate,
+					end_date: endDate,
+				},
+			],
+			award_type_codes: [
+				"A",
+				"B",
+				"C",
+				"D", // All contract types
+			],
+			naics_codes: naicsCodes,
+		},
+		fields: [
+			"Award ID",
+			"Recipient Name",
+			"Description",
+			"Start Date",
+			"End Date",
+			"Award Amount",
+			"Awarding Agency",
+			"Awarding Sub Agency",
+			"NAICS Code",
+			"NAICS Description",
+		],
 		page: 1,
-		fields: SearchReturnFields,
-		filters: filters,
+		limit: 100,
+		sort: "Award Amount",
+		order: "desc",
+		subawards: false,
 	};
 
-	// const response = await spendingApi.post("/search/spending_by_category/", params);
-	const response = await spendingApi.post(url, params, { headers: headers });
-	console.log("---->", params);
-	console.log("---->", response.data);
+	const response = await spendingApi.post("/search/spending_by_award/", params);
 	return response.data;
 }
 
@@ -86,11 +65,18 @@ async function getAgencySpending(naicsCodes) {
 
 	const params = {
 		filters: {
-			time_period: [{ start_date: startDate, end_date: endDate }],
+			time_period: [
+				{
+					start_date: startDate,
+					end_date: endDate,
+				},
+			],
+			award_type_codes: ["A", "B", "C", "D"],
 			naics_codes: naicsCodes,
 		},
-		group: "awarding_agency",
-		subawards: false,
+		category: "awarding_agency",
+		limit: 10,
+		page: 1,
 	};
 
 	const response = await spendingApi.post("/search/spending_by_category/", params);
@@ -103,11 +89,19 @@ async function getGeographicSpending(naicsCodes) {
 
 	const params = {
 		filters: {
-			time_period: [{ start_date: startDate, end_date: endDate }],
+			time_period: [
+				{
+					start_date: startDate,
+					end_date: endDate,
+				},
+			],
+			award_type_codes: ["A", "B", "C", "D"],
 			naics_codes: naicsCodes,
 		},
-		group: "recipient_location",
-		subawards: false,
+		scope: "place_of_performance",
+		geo_layer: "state",
+		page: 1,
+		limit: 100,
 	};
 
 	const response = await spendingApi.post("/search/spending_by_geography/", params);
@@ -120,11 +114,18 @@ async function getCompetitorData(naicsCodes) {
 
 	const params = {
 		filters: {
-			time_period: [{ start_date: startDate, end_date: endDate }],
+			time_period: [
+				{
+					start_date: startDate,
+					end_date: endDate,
+				},
+			],
+			award_type_codes: ["A", "B", "C", "D"],
 			naics_codes: naicsCodes,
 		},
-		group: "recipient_duns",
-		subawards: false,
+		category: "recipient_duns",
+		limit: 10,
+		page: 1,
 	};
 
 	const response = await spendingApi.post("/search/spending_by_category/", params);
@@ -137,10 +138,30 @@ async function getVendorPerformance(naicsCodes) {
 
 	const params = {
 		filters: {
-			time_period: [{ start_date: startDate, end_date: endDate }],
+			time_period: [
+				{
+					start_date: startDate,
+					end_date: endDate,
+				},
+			],
+			award_type_codes: ["A", "B", "C", "D"],
 			naics_codes: naicsCodes,
 		},
-		fields: ["Award ID", "Recipient Name", "Award Amount", "Start Date", "End Date", "Award Type", "Description"],
+		fields: [
+			"Award ID",
+			"Recipient Name",
+			"Award Amount",
+			"Start Date",
+			"End Date",
+			"Period of Performance Current End Date",
+			"Period of Performance Start Date",
+			"Contract Award Type",
+			"Description",
+		],
+		page: 1,
+		limit: 100,
+		sort: "Award Amount",
+		order: "desc",
 	};
 
 	const response = await spendingApi.post("/search/spending_by_award/", params);
@@ -153,11 +174,37 @@ async function getSubcontractingData(naicsCodes) {
 
 	const params = {
 		filters: {
-			time_period: [{ start_date: startDate, end_date: endDate }],
+			time_period: [
+				{
+					start_date: startDate,
+					end_date: endDate,
+				},
+			],
+			award_type_codes: ["A", "B", "C", "D"],
 			naics_codes: naicsCodes,
-			award_amount: [5000000, null], // Contracts over $5M likely to have subcontracting
+			award_amounts: [
+				{
+					lower_bound: 5000000, // Contracts over $5M likely to have subcontracting
+				},
+			],
 		},
-		fields: ["Award ID", "Recipient Name", "Award Amount", "Description", "NAICS Code", "NAICS Description"],
+		fields: [
+			"Award ID",
+			"Recipient Name",
+			"Award Amount",
+			"Description",
+			"NAICS Code",
+			"NAICS Description",
+			"Awarding Agency",
+			"Awarding Sub Agency",
+			"Place of Performance City Name",
+			"Place of Performance State Code",
+			"Place of Performance Country Code",
+		],
+		page: 1,
+		limit: 100,
+		sort: "Award Amount",
+		order: "desc",
 	};
 
 	const response = await spendingApi.post("/search/spending_by_award/", params);
@@ -166,7 +213,6 @@ async function getSubcontractingData(naicsCodes) {
 
 // Main query hook
 export function useSpendingReportsQuery(company) {
-	console.log("company", company);
 	return useQuery({
 		queryKey: ["spendingReports", company?.naicsCode],
 		queryFn: async () => {
@@ -174,33 +220,40 @@ export function useSpendingReportsQuery(company) {
 				throw new Error("No NAICS codes available");
 			}
 
-			const [
-				naicsSpending,
-				// agencySpending,
-				// geographicSpending,
-				// competitorData,
-				// vendorPerformance,
-				// subcontractingData,
-			] = await Promise.all([
-				getNaicsSpending(company.naicsCode),
-				// getAgencySpending(company.naicsCode),
-				// getGeographicSpending(company.naicsCode),
-				// getCompetitorData(company.naicsCode),
-				// getVendorPerformance(company.naicsCode),
-				// getSubcontractingData(company.naicsCode),
-			]);
+			try {
+				const [
+					naicsSpending,
+					agencySpending,
+					geographicSpending,
+					competitorData,
+					vendorPerformance,
+					subcontractingData,
+				] = await Promise.all([
+					getNaicsSpending(company.naicsCode),
+					getAgencySpending(company.naicsCode),
+					getGeographicSpending(company.naicsCode),
+					getCompetitorData(company.naicsCode),
+					getVendorPerformance(company.naicsCode),
+					getSubcontractingData(company.naicsCode),
+				]);
 
-			return {
-				naicsSpending,
-				// agencySpending,
-				// geographicSpending,
-				// competitorData,
-				// vendorPerformance,
-				// subcontractingData,
-			};
+				return {
+					naicsSpending,
+					agencySpending,
+					geographicSpending,
+					competitorData,
+					vendorPerformance,
+					subcontractingData,
+				};
+			} catch (error) {
+				console.error("Error fetching spending reports:", error);
+				throw new Error(error.response?.data?.message || "Failed to fetch spending reports");
+			}
 		},
 		staleTime: 1000 * 60 * 15, // 15 minutes
 		cacheTime: 1000 * 60 * 60, // 1 hour
 		enabled: !!company?.naicsCode?.length,
+		retry: 2,
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 	});
 }

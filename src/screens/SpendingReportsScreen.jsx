@@ -5,19 +5,12 @@ import { useSpendingReportsQuery } from "../utils/useSpendingReportsQuery";
 import NaicsSpendingChart from "../components/spending/reports/NaicsSpendingChart";
 import AgencySpendingChart from "../components/spending/reports/AgencySpendingChart";
 import GeographicSpendingMap from "../components/spending/reports/GeographicSpendingMap";
-import CompetitorAnalysis from "../components/spending/reports/CompetitorAnalysis";
-import VendorPerformance from "../components/spending/reports/VendorPerformance";
-import SubcontractingOpportunities from "../components/spending/reports/SubcontractingOpportunities";
 
 export default function SpendingReportsScreen() {
-	const { activeCompanyId, activeCompanyData } = useGlobalStore.getState();
+	// Get active company data from global store
+	const { activeCompanyId, activeCompanyData } = useGlobalStore();
 
-	const {
-		data: reportsData,
-		isLoading: reportsLoading,
-		error: reportsError,
-	} = useSpendingReportsQuery(activeCompanyData);
-
+	// Early return if no company is selected
 	if (!activeCompanyId) {
 		return (
 			<Box sx={{ p: 3 }}>
@@ -26,6 +19,16 @@ export default function SpendingReportsScreen() {
 		);
 	}
 
+	// Early return if company data is not loaded
+	if (!activeCompanyData) {
+		return (
+			<Box sx={{ p: 3 }}>
+				<Alert severity='info'>Loading company data...</Alert>
+			</Box>
+		);
+	}
+
+	// Early return if company has no NAICS codes
 	if (!activeCompanyData.naicsCode?.length) {
 		return (
 			<Box sx={{ p: 3 }}>
@@ -36,7 +39,10 @@ export default function SpendingReportsScreen() {
 		);
 	}
 
-	if (reportsLoading) {
+	// Now we can safely use the spending reports query
+	const { data: reportsData, isLoading, error } = useSpendingReportsQuery(activeCompanyData);
+
+	if (isLoading) {
 		return (
 			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
 				<CircularProgress />
@@ -44,10 +50,12 @@ export default function SpendingReportsScreen() {
 		);
 	}
 
-	if (reportsError) {
+	if (error) {
 		return (
 			<Box sx={{ p: 3 }}>
-				<Alert severity='error'>{reportsError?.message || "Failed to fetch spending reports data"}</Alert>
+				<Alert severity='error'>
+					{error instanceof Error ? error.message : "Failed to fetch spending reports data"}
+				</Alert>
 			</Box>
 		);
 	}
@@ -86,36 +94,6 @@ export default function SpendingReportsScreen() {
 							Geographic Spending Distribution
 						</Typography>
 						<GeographicSpendingMap data={reportsData?.geographicSpending} />
-					</Paper>
-				</Grid>
-
-				{/* Competitor Analysis */}
-				<Grid item xs={12} md={6}>
-					<Paper sx={{ p: 3, height: "100%" }}>
-						<Typography variant='h6' gutterBottom>
-							Competitor Analysis
-						</Typography>
-						<CompetitorAnalysis data={reportsData?.competitorData} />
-					</Paper>
-				</Grid>
-
-				{/* Vendor Performance */}
-				<Grid item xs={12} md={6}>
-					<Paper sx={{ p: 3, height: "100%" }}>
-						<Typography variant='h6' gutterBottom>
-							Vendor Performance Metrics
-						</Typography>
-						<VendorPerformance data={reportsData?.vendorPerformance} />
-					</Paper>
-				</Grid>
-
-				{/* Subcontracting Opportunities */}
-				<Grid item xs={12}>
-					<Paper sx={{ p: 3 }}>
-						<Typography variant='h6' gutterBottom>
-							Subcontracting Opportunities
-						</Typography>
-						<SubcontractingOpportunities data={reportsData?.subcontractingData} />
 					</Paper>
 				</Grid>
 			</Grid>
