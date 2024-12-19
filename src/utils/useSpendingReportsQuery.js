@@ -40,7 +40,7 @@ export function useSpendingReportsQuery(company) {
 			try {
 				// Execute all queries in parallel
 				const [naicsSpending, agencySpending, geographicSpending] = await Promise.all([
-					spendingApi.post("/search/spending_by_award/", {
+					spendingApi.post("/search/spending_by_award/naics", {
 						filters: baseFilters,
 						fields: [
 							"Award ID",
@@ -55,7 +55,7 @@ export function useSpendingReportsQuery(company) {
 						sort: "Award Amount",
 						order: "desc",
 					}),
-					spendingApi.post("/search/spending_by_category/", {
+					spendingApi.post("/search/spending_by_category/awarding_agency", {
 						filters: baseFilters,
 						category: "awarding_agency",
 						limit: 10,
