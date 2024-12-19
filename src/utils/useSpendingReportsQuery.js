@@ -1,6 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
+// Setup SearchFields
+const SearchReturnFields = [
+	"Award ID",
+	"Recipient Name",
+	"Recipient Id",
+	"Description",
+	"Start Date",
+	"End Date",
+	"Last Modified Date",
+	"Award Amount",
+	"Awarding Agency",
+	"Awarding Sub Agency",
+	"Contract Award Type",
+	"Award Type",
+	"Funding Agency",
+	"Funding Sub Agency",
+	"Prime Award ID",
+	"Prime Recipient Name",
+	"Recipient Name",
+	"Sub-Award Amount",
+];
+
 const spendingApi = axios.create({
 	baseURL: "https://api.usaspending.gov/api/v2",
 	headers: {
@@ -42,26 +64,21 @@ export function useSpendingReportsQuery(company) {
 				const [naicsSpending, agencySpending, geographicSpending] = await Promise.all([
 					spendingApi.post("/search/spending_by_award/naics", {
 						filters: baseFilters,
-						fields: [
-							"Award ID",
-							"Recipient Name",
-							"Description",
-							"Award Amount",
-							"NAICS Code",
-							"NAICS Description",
-						],
+						fields: SearchReturnFields,
 						page: 1,
 						limit: 100,
-						sort: "Award Amount",
+						sort: "amount",
 						order: "desc",
 					}),
 					spendingApi.post("/search/spending_by_category/awarding_agency", {
 						filters: baseFilters,
+						fields: SearchReturnFields,
 						category: "awarding_agency",
 						limit: 10,
 					}),
 					spendingApi.post("/search/spending_by_geography/", {
 						filters: baseFilters,
+						fields: SearchReturnFields,
 						scope: "place_of_performance",
 						geo_layer: "state",
 					}),

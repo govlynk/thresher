@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Typography, Alert, CircularProgress, Grid, Paper } from "@mui/material";
 import { useGlobalStore } from "../stores/globalStore";
 import { useSpendingReportsQuery } from "../utils/useSpendingReportsQuery";
@@ -9,25 +9,14 @@ import GeographicSpendingMap from "../components/spending/reports/GeographicSpen
 export default function SpendingReportsScreen() {
 	// Get active company data from global store with loading state
 	const { activeCompanyId, activeCompanyData } = useGlobalStore();
-	const [isInitializing, setIsInitializing] = React.useState(true);
+	const { reportsData, isLoading, error } = useSpendingReportsQuery(activeCompanyData);
 
-	// Handle initial loading state
-	React.useEffect(() => {
-		const timer = setTimeout(() => {
-			setIsInitializing(false);
-		}, 1000); // Give store time to initialize
-
-		return () => clearTimeout(timer);
-	}, []);
-
-	// Show loading state during initial store load
-	if (isInitializing) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-				<CircularProgress />
-			</Box>
-		);
-	}
+	useEffect(() => {
+		if (activeCompanyData?.uei) {
+			console.log("Fetching Spending for company:", activeCompanyData.uei);
+			// Now we can safely use the spending reports query
+		}
+	}, [activeCompanyData?.uei]);
 
 	// Early return if no company is selected
 	if (!activeCompanyId) {
@@ -53,27 +42,6 @@ export default function SpendingReportsScreen() {
 			<Box sx={{ p: 3 }}>
 				<Alert severity='info'>
 					No NAICS codes found for this company. NAICS codes are required for spending analysis.
-				</Alert>
-			</Box>
-		);
-	}
-
-	// Now we can safely use the spending reports query
-	const { data: reportsData, isLoading, error } = useSpendingReportsQuery(activeCompanyData);
-
-	if (isLoading) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-				<CircularProgress />
-			</Box>
-		);
-	}
-
-	if (error) {
-		return (
-			<Box sx={{ p: 3 }}>
-				<Alert severity='error'>
-					{error instanceof Error ? error.message : "Failed to fetch spending reports data"}
 				</Alert>
 			</Box>
 		);
