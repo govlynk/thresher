@@ -7,8 +7,27 @@ import AgencySpendingChart from "../components/spending/reports/AgencySpendingCh
 import GeographicSpendingMap from "../components/spending/reports/GeographicSpendingMap";
 
 export default function SpendingReportsScreen() {
-	// Get active company data from global store
+	// Get active company data from global store with loading state
 	const { activeCompanyId, activeCompanyData } = useGlobalStore();
+	const [isInitializing, setIsInitializing] = React.useState(true);
+
+	// Handle initial loading state
+	React.useEffect(() => {
+		const timer = setTimeout(() => {
+			setIsInitializing(false);
+		}, 1000); // Give store time to initialize
+
+		return () => clearTimeout(timer);
+	}, []);
+
+	// Show loading state during initial store load
+	if (isInitializing) {
+		return (
+			<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+				<CircularProgress />
+			</Box>
+		);
+	}
 
 	// Early return if no company is selected
 	if (!activeCompanyId) {
