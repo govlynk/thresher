@@ -1,62 +1,89 @@
 import { useQuery } from "@tanstack/react-query";
-import { getNaicsSpending } from "./spending/queries/naicsSpending";
-import { getAgencySpending } from "./spending/queries/agencySpending";
-import { getGeographicSpending } from "./spending/queries/geographicSpending";
+import axios from "axios";
+
+const api = axios.create({
+	baseURL: "https://api.usaspending.gov/api/v2",
+	headers: {
+		"Content-Type": "application/json",
+	},
+});
 
 const getDateRange = () => {
-  const date = new Date();
-  const endDate = date.toISOString().split("T")[0];
-  const startDate = new Date(date.setFullYear(date.getFullYear() - 1)).toISOString().split("T")[0];
-  return { startDate, endDate };
+	const date = new Date();
+	const endDate = date.toISOString().split("T")[0];
+	const startDate = new Date(date.setFullYear(date.getFullYear() - 1)).toISOString().split("T")[0];
+	return { startDate, endDate };
 };
 
+async function fetchSpendingData(filters) {
+	try {
+		const [naicsResponse, agencyResponse, geoResponse, spendingResponse] = await Promise.all([
+			// NAICS spending
+			api.post("/search/spending_by_category/naics", {
+				filters,
+				category: "naics",
+				limit: 100,
+			}),
+			// Agency spending
+			api.post("/search/spending_by_category/awarding_agency", {
+				filters,
+				category: "awarding_agency",
+				limit: 10,
+			}),
+			// Geographic spending
+			api.post("/search/spending_by_geography", {
+				filters,
+				scope: "place_of_performance",
+				geo_layer: "state",
+			}),
+			// Overall spending
+			api.post("/search/spending_by_award", {
+				filters,
+				fields: [
+					"Award ID",
+					"Recipient Name",
+					"Description",
+					"Start Date",
+					"End Date",
+					"Award Amount",
+					"Awarding Agency",
+					"Awarding Sub Agency",
+				],
+				limit: 100,
+			}),
+		]);
+
+		return {
+			naicsSpending: naicsResponse.data,
+			agencySpending: agencyResponse.data,
+			geographicSpending: geoResponse.data,
+			spendingData: spendingResponse.data,
+		};
+	} catch (error) {
+		console.error("Error fetching spending data:", error);
+		throw error;
+	}
+}
+
 export function useSpendingReportsQuery(company) {
-  return useQuery({
-    queryKey: ["spendingReports", company?.naicsCode],
-    queryFn: async () => {
-      if (!company) {
-        throw new Error("Company data is required");
-      }
+	return useQuery({
+		queryKey: ["spendingReports", company?.naicsCode],
+		queryFn: async () => {
+			if (!company?.naicsCode?.length) {
+				throw new Error("Company must have at least one NAICS code");
+			}
 
-      if (!Array.isArray(company.naicsCode) || company.naicsCode.length === 0) {
-        throw new Error("Company must have at least one NAICS code");
-      }
+			const { startDate, endDate } = getDateRange();
+			const filters = {
+				time_period: [{ start_date: startDate, end_date: endDate }],
+				award_type_codes: ["A", "B", "C", "D"],
+				naics_codes: company.naicsCode,
+			};
 
-      const { startDate, endDate } = getDateRange();
-      const baseFilters = {
-        time_period: [{ start_date: startDate, end_date: endDate }],
-        award_type_codes: ["A", "B", "C", "D"],
-        naics_codes: company.naicsCode,
-      };
-
-      try {
-        console.log("[USASpending API] Starting queries with filters:", baseFilters);
-
-        const [naicsSpending, agencySpending, geographicSpending] = await Promise.all([
-          getNaicsSpending(baseFilters),
-          getAgencySpending(baseFilters),
-          getGeographicSpending(baseFilters),
-        ]);
-
-        return {
-          naicsSpending,
-          agencySpending,
-          geographicSpending,
-        };
-      } catch (error) {
-        console.error("[USASpending API] Query Execution Error:", error);
-        throw new Error(
-          error.response?.data?.detail || 
-          error.response?.data?.message || 
-          error.message || 
-          "Failed to fetch spending reports"
-        );
-      }
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
-    retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    enabled: Boolean(company?.naicsCode?.length),
-  });
+			return fetchSpendingData(filters);
+		},
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		cacheTime: 30 * 60 * 1000, // 30 minutes
+		enabled: Boolean(company?.naicsCode?.length),
+	});
 }

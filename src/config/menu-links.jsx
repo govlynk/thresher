@@ -31,10 +31,6 @@ const marketIntelligenceLinks = {
 			path: "/spending-analysis",
 		},
 		{
-			title: "Spending Reports",
-			path: "/spending-reports",
-		},
-		{
 			title: "Pipeline",
 			path: "/pipeline",
 		},

@@ -1,19 +1,17 @@
 import React from "react";
-import { Box, Typography, Alert, CircularProgress, Grid } from "@mui/material";
+import { Box, Typography, Alert, CircularProgress, Grid, Paper } from "@mui/material";
 import { useGlobalStore } from "../stores/globalStore";
-import { useSpendingQuery, useAwardingAgencyQuery } from "../utils/useSpendingQuery";
 import { useSpendingReportsQuery } from "../utils/useSpendingReportsQuery";
 import SpendingOverview from "../components/spending/SpendingOverview";
 import AgencyBreakdown from "../components/spending/AgencyBreakdown";
 import SpendingTimeline from "../components/spending/SpendingTimeline";
+import NaicsSpendingChart from "../components/spending/reports/NaicsSpendingChart";
+import AgencySpendingChart from "../components/spending/reports/AgencySpendingChart";
+import GeographicSpendingMap from "../components/spending/reports/GeographicSpendingMap";
 
 export default function SpendingAnalysisScreen() {
-	const { activeCompanyId, activeCompanyData } = useGlobalStore();
-
-	const { data: spendingData, isLoading: spendingLoading, error: spendingError } = useSpendingQuery(activeCompanyData);
-
-	const { data: agencyData, isLoading: agencyLoading, error: agencyError } = useAwardingAgencyQuery(activeCompanyData);
-	const { data: reportsData, isLoading: naicsLoading, error: naicsError } = useSpendingReportsQuery(activeCompanyData);
+	const { activeCompanyData } = useGlobalStore();
+	const { data, isLoading, error } = useSpendingReportsQuery(activeCompanyData);
 
 	if (!activeCompanyData) {
 		return (
@@ -33,7 +31,7 @@ export default function SpendingAnalysisScreen() {
 		);
 	}
 
-	if (spendingLoading || agencyLoading) {
+	if (isLoading) {
 		return (
 			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
 				<CircularProgress />
@@ -41,12 +39,10 @@ export default function SpendingAnalysisScreen() {
 		);
 	}
 
-	if (spendingError || agencyError) {
+	if (error) {
 		return (
 			<Box sx={{ p: 3 }}>
-				<Alert severity='error'>
-					{spendingError?.message || agencyError?.message || "Failed to fetch spending data"}
-				</Alert>
+				<Alert severity='error'>{error?.message || "Failed to fetch spending data"}</Alert>
 			</Box>
 		);
 	}
@@ -58,16 +54,57 @@ export default function SpendingAnalysisScreen() {
 			</Typography>
 
 			<Grid container spacing={3}>
+				{/* Overview Section */}
 				<Grid item xs={12}>
-					<SpendingOverview data={spendingData} company={activeCompanyData} />
+					<SpendingOverview data={data?.spendingData} company={activeCompanyData} />
 				</Grid>
 
+				{/* Agency Breakdown */}
 				<Grid item xs={12} md={6}>
-					<AgencyBreakdown data={agencyData} />
+					<Paper sx={{ p: 3, height: "100%", minHeight: 400 }}>
+						<Typography variant='h6' gutterBottom>
+							Agency Spending Distribution
+						</Typography>
+						<Box sx={{ height: 350 }}>
+							<AgencySpendingChart data={data?.agencySpending} />
+						</Box>
+					</Paper>
 				</Grid>
 
+				{/* Timeline */}
 				<Grid item xs={12} md={6}>
-					<SpendingTimeline data={spendingData} />
+					<Paper sx={{ p: 3, height: "100%", minHeight: 400 }}>
+						<Typography variant='h6' gutterBottom>
+							Spending Timeline
+						</Typography>
+						<Box sx={{ height: 350 }}>
+							<SpendingTimeline data={data?.spendingData} />
+						</Box>
+					</Paper>
+				</Grid>
+
+				{/* NAICS Spending */}
+				<Grid item xs={12}>
+					<Paper sx={{ p: 3, minHeight: 400 }}>
+						<Typography variant='h6' gutterBottom>
+							Spending by NAICS Codes
+						</Typography>
+						<Box sx={{ height: 350 }}>
+							<NaicsSpendingChart data={data?.naicsSpending} />
+						</Box>
+					</Paper>
+				</Grid>
+
+				{/* Geographic Distribution */}
+				<Grid item xs={12}>
+					<Paper sx={{ p: 3, minHeight: 400 }}>
+						<Typography variant='h6' gutterBottom>
+							Geographic Distribution
+						</Typography>
+						<Box sx={{ height: 350 }}>
+							<GeographicSpendingMap data={data?.geographicSpending} />
+						</Box>
+					</Paper>
 				</Grid>
 			</Grid>
 		</Box>
