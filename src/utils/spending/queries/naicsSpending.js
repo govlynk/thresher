@@ -1,26 +1,20 @@
-import { spendingApi } from '../../api/spendingApi';
-import { SPENDING_ENDPOINTS } from '../../api/spendingEndpoints';
-import { getBaseFilters, AWARD_FIELDS } from '../queryParams';
+import { spendingApi, logApiResponse, logApiError } from "../api";
 
-export async function getNaicsSpending(naicsCodes) {
-  const params = {
-    filters: getBaseFilters(naicsCodes),
-    fields: AWARD_FIELDS,
-    page: 1,
-    limit: 100,
-    sort: "Award Amount",
-    order: "desc",
-    subawards: false
-  };
-
+export async function getNaicsSpending(filters) {
   try {
-    const response = await spendingApi.post(
-      SPENDING_ENDPOINTS.SPENDING_BY_AWARD,
-      params
-    );
-    return response.data;
+    const response = await spendingApi.post("/search/spending_by_category/naics", {
+      filters,
+      category: "naics",
+      limit: 100,
+      page: 1,
+    });
+    logApiResponse("NAICS Spending", response);
+    return {
+      results: response.data.results || [],
+      total: response.data.total || 0,
+    };
   } catch (error) {
-    console.error('NAICS spending query failed:', error);
+    logApiError("NAICS Spending", error);
     throw error;
   }
 }

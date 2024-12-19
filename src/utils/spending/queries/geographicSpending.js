@@ -1,24 +1,20 @@
-import { spendingApi } from '../../api/spendingApi';
-import { SPENDING_ENDPOINTS } from '../../api/spendingEndpoints';
-import { getBaseFilters } from '../queryParams';
+import { spendingApi, logApiResponse, logApiError } from "../api";
 
-export async function getGeographicSpending(naicsCodes) {
-  const params = {
-    filters: getBaseFilters(naicsCodes),
-    scope: "place_of_performance",
-    geo_layer: "state",
-    page: 1,
-    limit: 100
-  };
-
-  try {
-    const response = await spendingApi.post(
-      SPENDING_ENDPOINTS.SPENDING_BY_GEOGRAPHY,
-      params
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Geographic spending query failed:', error);
-    throw error;
-  }
+export async function getGeographicSpending(filters) {
+	try {
+		const response = await spendingApi.post("/search/spending_by_geography", {
+			filters,
+			scope: "place_of_performance",
+			geo_layer: "state",
+			// geo_layer_filters: [],
+		});
+		logApiResponse("Geographic Spending", response);
+		return {
+			results: response.data.results || [],
+			total: response.data.total || 0,
+		};
+	} catch (error) {
+		logApiError("Geographic Spending", error);
+		throw error;
+	}
 }

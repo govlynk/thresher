@@ -7,18 +7,22 @@ import AgencySpendingChart from "../components/spending/reports/AgencySpendingCh
 import GeographicSpendingMap from "../components/spending/reports/GeographicSpendingMap";
 
 export default function SpendingReportsScreen() {
-	// Get active company data from global store with loading state
-	const { activeCompanyId, activeCompanyData } = useGlobalStore();
-	const { reportsData, isLoading, error } = useSpendingReportsQuery(activeCompanyData);
+	// Get both the active company ID and data using separate selectors
+	const activeCompanyId = useGlobalStore((state) => state.activeCompanyId);
+	const activeCompanyData = useGlobalStore((state) => state.activeCompanyData);
+	const getActiveCompany = useGlobalStore((state) => state.getActiveCompany);
 
+	// Effect to log store state for debugging
 	useEffect(() => {
-		if (activeCompanyData?.uei) {
-			console.log("Fetching Spending for company:", activeCompanyData.uei);
-			// Now we can safely use the spending reports query
-		}
-	}, [activeCompanyData?.uei]);
+		console.log("[SpendingReportsScreen] Active Company ID:", activeCompanyId);
+		console.log("[SpendingReportsScreen] Active Company Data:", activeCompanyData);
+		const company = getActiveCompany();
+		console.log("[SpendingReportsScreen] Get Active Company Result:", company);
+	}, [activeCompanyId, activeCompanyData, getActiveCompany]);
 
-	// Early return if no company is selected
+	// Get spending data
+	const { data, isLoading, error } = useSpendingReportsQuery(activeCompanyData);
+
 	if (!activeCompanyId) {
 		return (
 			<Box sx={{ p: 3 }}>
@@ -27,22 +31,36 @@ export default function SpendingReportsScreen() {
 		);
 	}
 
-	// Early return if company data is not loaded
 	if (!activeCompanyData) {
 		return (
 			<Box sx={{ p: 3 }}>
-				<Alert severity='info'>Loading company data...</Alert>
+				<Alert severity='warning'>Loading company data...</Alert>
 			</Box>
 		);
 	}
 
-	// Early return if company has no NAICS codes
 	if (!activeCompanyData.naicsCode?.length) {
 		return (
 			<Box sx={{ p: 3 }}>
 				<Alert severity='info'>
 					No NAICS codes found for this company. NAICS codes are required for spending analysis.
 				</Alert>
+			</Box>
+		);
+	}
+
+	if (isLoading) {
+		return (
+			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+				<CircularProgress />
+			</Box>
+		);
+	}
+
+	if (error) {
+		return (
+			<Box sx={{ p: 3 }}>
+				<Alert severity='error'>{error.message || "Failed to fetch spending data"}</Alert>
 			</Box>
 		);
 	}
@@ -60,7 +78,7 @@ export default function SpendingReportsScreen() {
 						<Typography variant='h6' gutterBottom>
 							Spending by NAICS Codes
 						</Typography>
-						<NaicsSpendingChart data={reportsData?.naicsSpending} />
+						<NaicsSpendingChart data={data?.naicsSpending} />
 					</Paper>
 				</Grid>
 
@@ -70,7 +88,7 @@ export default function SpendingReportsScreen() {
 						<Typography variant='h6' gutterBottom>
 							Agency-Specific Contracting
 						</Typography>
-						<AgencySpendingChart data={reportsData?.agencySpending} />
+						<AgencySpendingChart data={data?.agencySpending} />
 					</Paper>
 				</Grid>
 
@@ -80,7 +98,7 @@ export default function SpendingReportsScreen() {
 						<Typography variant='h6' gutterBottom>
 							Geographic Spending Distribution
 						</Typography>
-						<GeographicSpendingMap data={reportsData?.geographicSpending} />
+						<GeographicSpendingMap data={data?.geographicSpending} />
 					</Paper>
 				</Grid>
 			</Grid>
