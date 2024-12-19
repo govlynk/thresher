@@ -37,9 +37,9 @@ export async function getRepsAndCerts(uei) {
 		if (response.status !== 200) {
 			throw new Error("Network response was not ok");
 		}
-		console.log("Reps and Cert", response);
+		console.log("Reps and Cert", response.data.entityData[0].repsAndCerts);
 		// Sanitize the data before returning
-		const sanitizedData = sanitizeData(response.data.entityData[0]);
+		const sanitizedData = sanitizeData(response.data.entityData[0].repsAndCerts);
 		return sanitizedData;
 	} catch (error) {
 		// Ensure error is serializable

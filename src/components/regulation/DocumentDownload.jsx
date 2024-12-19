@@ -1,12 +1,8 @@
-// src/components/regulation/DocumentDownload.jsx
 import React from "react";
-import { Button } from "@mui/material";
+import { Button, Tooltip, Box } from "@mui/material";
 import { Download } from "lucide-react";
-import { useDocumentStore } from "../../stores/regulation/documentationStore";
 
-export function DocumentDownload() {
-	const { documents } = useDocumentStore();
-
+export function DocumentDownload({ pdfLinks }) {
 	const handleDownload = (url) => {
 		if (url) {
 			window.open(url, "_blank");
@@ -14,13 +10,19 @@ export function DocumentDownload() {
 	};
 
 	return (
-		<Button
-			variant='contained'
-			startIcon={<Download />}
-			onClick={() => handleDownload(documents?.farPdf)}
-			disabled={!documents?.farPdf}
-		>
-			Download Documents
-		</Button>
+		<Box>
+			<Tooltip title='Download FAR/DFAR Documentation'>
+				<span>
+					<Button
+						variant='contained'
+						startIcon={<Download size={20} />}
+						onClick={() => handleDownload(pdfLinks?.farPDF)}
+						disabled={!pdfLinks?.farPDF}
+					>
+						Download Documents
+					</Button>
+				</span>
+			</Tooltip>
+		</Box>
 	);
 }

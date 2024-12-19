@@ -1,5 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { generateClient } from "aws-amplify/data";
+
+const client = generateClient();
 
 export const useGlobalStore = create(
 	persist(
@@ -8,6 +11,7 @@ export const useGlobalStore = create(
 			activeUserId: null,
 			activeCompanyId: null,
 			activeTeamId: null,
+			activeCompanyData: null, // Add this to store full company data
 
 			// User methods
 			setActiveUser: (userId) => {
@@ -19,16 +23,33 @@ export const useGlobalStore = create(
 			},
 
 			// Company methods
-			setActiveCompany: (companyId) => {
-				set({
-					activeCompanyId: companyId,
-					// Reset team when company changes
-					activeTeamId: null,
-				});
+			setActiveCompany: async (companyId) => {
+				try {
+					// Fetch full company data
+					const response = await client.models.Company.get({ id: companyId });
+					const companyData = response?.data;
+
+					if (!companyData) {
+						throw new Error("Company data not found");
+					}
+
+					set({
+						activeCompanyId: companyId,
+						activeCompanyData: companyData,
+						// Reset team when company changes
+						activeTeamId: null,
+					});
+
+					return companyData;
+				} catch (err) {
+					console.error("Error setting active company:", err);
+					throw err;
+				}
 			},
 
 			getActiveCompany: () => {
-				return get().activeCompanyId;
+				const state = get();
+				return state.activeCompanyData || null;
 			},
 
 			// Team methods
@@ -46,6 +67,7 @@ export const useGlobalStore = create(
 					activeUserId: null,
 					activeCompanyId: null,
 					activeTeamId: null,
+					activeCompanyData: null,
 				});
 			},
 		}),
@@ -56,6 +78,7 @@ export const useGlobalStore = create(
 				activeUserId: state.activeUserId,
 				activeCompanyId: state.activeCompanyId,
 				activeTeamId: state.activeTeamId,
+				activeCompanyData: state.activeCompanyData,
 			}),
 		}
 	)

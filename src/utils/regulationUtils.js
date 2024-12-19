@@ -13,39 +13,48 @@ export const processRegulationResponses = (repsAndCerts) => {
 	const regulations = [];
 
 	// Process FAR responses
-	if (repsAndCerts.repsAndCerts?.certifications?.FARResponses) {
-		regulations.push(
-			...processResponses(repsAndCerts.repsAndCerts.certifications.FARResponses, REGULATION_TYPES.FAR)
-		);
+	if (repsAndCerts?.certifications?.fARResponses) {
+		regulations.push(...processResponses(repsAndCerts.certifications.fARResponses, REGULATION_TYPES.FAR));
 	}
 
 	// Process DFAR responses
-	if (repsAndCerts.repsAndCerts?.certifications?.dFARResponses) {
-		regulations.push(
-			...processResponses(repsAndCerts.repsAndCerts.certifications.dFARResponses, REGULATION_TYPES.DFAR)
-		);
+	if (repsAndCerts?.certifications?.dFARResponses) {
+		regulations.push(...processResponses(repsAndCerts.certifications.dFARResponses, REGULATION_TYPES.DFAR));
 	}
 
 	return regulations;
 };
 
 const processResponses = (responses, type) => {
+	if (!Array.isArray(responses)) return [];
+
 	return responses.map((response) => ({
 		type,
 		provisionId: response.provisionId,
-		answers: response.listOfAnswers.map((answer) => ({
-			answerId: answer.answerId,
-			questionText: answer.questionText,
-			answerText: answer.answerText,
-			section: answer.section,
-		})),
+		listOfAnswers:
+			response.listOfAnswers?.map((answer) => ({
+				answerId: answer.answerId,
+				questionText: answer.questionText,
+				answerText: answer.answerText,
+				section: answer.section,
+			})) || [],
 	}));
 };
 
 export const processDocumentLinks = (repsAndCerts) => {
-	const { pdfLinks } = repsAndCerts.repsAndCerts.certifications;
+	const api_key = import.meta.env.VITE_SAM_API_KEY;
+	if (!api_key) {
+		console.error("SAM API key is not configured");
+		return {
+			farPDF: null,
+			dfarPDF: null,
+		};
+	}
+
+	const pdfLinks = repsAndCerts?.pdfLinks || {};
+
 	return {
-		farPdf: pdfLinks?.farPDF || null,
-		dfarPdf: pdfLinks?.farAndDfarsPDF || null,
+		farPDF: pdfLinks.farPDF?.replace("REPLACE_WITH_API_KEY", api_key) || null,
+		dfarPDF: pdfLinks.farAndDfarsPDF?.replace("REPLACE_WITH_API_KEY", api_key) || null,
 	};
 };

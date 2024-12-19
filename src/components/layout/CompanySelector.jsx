@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Box, Select, MenuItem, FormControl, Typography, Chip, CircularProgress } from "@mui/material";
+import { Box, Select, MenuItem, FormControl, Typography, Chip, CircularProgress, Alert } from "@mui/material";
 import { Building2 } from "lucide-react";
 import { useUserCompanyStore } from "../../stores/userCompanyStore";
 import { useGlobalStore } from "../../stores/globalStore";
@@ -9,23 +9,39 @@ export function CompanySelector() {
 	const { userCompanies, fetchUserCompanies, loading } = useUserCompanyStore();
 	const { activeCompanyId, setActiveCompany } = useGlobalStore();
 	const { user } = useAuthStore();
+	const [error, setError] = React.useState(null);
 
 	useEffect(() => {
 		if (user?.id) {
 			fetchUserCompanies();
 		}
-		console.log("usercompanies", userCompanies);
 	}, [user?.id, fetchUserCompanies]);
 
 	useEffect(() => {
-		if (userCompanies.length > 0 && !activeCompanyId) {
-			setActiveCompany(userCompanies[0].id);
-		}
+		const initializeActiveCompany = async () => {
+			if (userCompanies.length > 0 && !activeCompanyId) {
+				try {
+					await setActiveCompany(userCompanies[0].id);
+					setError(null);
+				} catch (err) {
+					console.error("Error initializing active company:", err);
+					setError("Failed to set active company");
+				}
+			}
+		};
+
+		initializeActiveCompany();
 	}, [userCompanies, activeCompanyId, setActiveCompany]);
 
-	const handleCompanyChange = (event) => {
+	const handleCompanyChange = async (event) => {
 		const newCompanyId = event.target.value;
-		setActiveCompany(newCompanyId);
+		try {
+			await setActiveCompany(newCompanyId);
+			setError(null);
+		} catch (err) {
+			console.error("Error changing company:", err);
+			setError("Failed to change company");
+		}
 	};
 
 	if (loading) {
@@ -36,22 +52,17 @@ export function CompanySelector() {
 		);
 	}
 
+	if (error) {
+		return (
+			<Alert severity='error' sx={{ maxWidth: 300 }}>
+				{error}
+			</Alert>
+		);
+	}
+
 	if (!userCompanies?.length) {
 		return null;
 	}
-
-	const renderCompanyDisplay = (company) => {
-		if (!company) return <Typography color='text.secondary'>Select a company</Typography>;
-
-		return (
-			<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-				<Typography variant='body2' noWrap>
-					{company.legalBusinessName}
-				</Typography>
-				<Chip label={company.access} size='small' sx={{ ml: "auto" }} />
-			</Box>
-		);
-	};
 
 	return (
 		<Box sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 300, maxWidth: 400 }}>
@@ -63,15 +74,14 @@ export function CompanySelector() {
 					displayEmpty
 					renderValue={(selected) => {
 						const company = userCompanies.find((c) => c.id === selected);
-						return renderCompanyDisplay(company || userCompanies[0]);
-					}}
-					sx={{
-						"& .MuiSelect-select": {
-							display: "flex",
-							alignItems: "center",
-							gap: 1,
-							py: 1,
-						},
+						return (
+							<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+								<Typography variant='body2' noWrap>
+									{company?.legalBusinessName || "Select a company"}
+								</Typography>
+								{company?.uei && <Chip label={`UEI: ${company.uei}`} size='small' variant='outlined' />}
+							</Box>
+						);
 					}}
 				>
 					{userCompanies.map((company) => (
@@ -88,7 +98,7 @@ export function CompanySelector() {
 							<Typography variant='body2' noWrap>
 								{company.legalBusinessName}
 							</Typography>
-							<Chip label={company.access} size='small' sx={{ ml: "auto" }} />
+							{company.uei && <Chip label={`UEI: ${company.uei}`} size='small' variant='outlined' />}
 						</MenuItem>
 					))}
 				</Select>

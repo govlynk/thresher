@@ -1,40 +1,32 @@
-import React, { useEffect, useState } from "react";
-import { Box, Paper, List, Typography, CircularProgress, Alert, Button } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Typography, Alert, CircularProgress } from "@mui/material";
 import { useRegulationStore } from "../stores/regulation/regulationStore";
 import { useDocumentStore } from "../stores/regulation/documentationStore";
-import { useGlobalStore } from "../stores/globalStore";
-import { RegulationList } from "../components/regulation/RegulationList";
+import { useUserCompanyStore } from "../stores/userCompanyStore";
+import { RegulationTabs } from "../components/regulation/RegulationTabs";
 import { RegulationDetails } from "../components/regulation/RegulationDetails";
 import { DocumentDownload } from "../components/regulation/DocumentDownload";
-import { Book, Download } from "lucide-react";
 
 export default function RegulationManagement() {
 	const [selectedRegulation, setSelectedRegulation] = useState(null);
+	const { getActiveCompany } = useUserCompanyStore();
+	const activeCompany = getActiveCompany();
 	const { regulations, loading, error, fetchRegulations } = useRegulationStore();
-	const { fetchDocuments } = useDocumentStore();
-	const activeCompany = useGlobalStore((state) => state.getActiveCompany());
+	const { documents, fetchDocuments } = useDocumentStore();
 
 	useEffect(() => {
-		if (activeCompany?.id) {
+		if (activeCompany?.uei) {
+			console.log("Fetching regulations for company:", activeCompany.uei);
 			fetchRegulations();
 			fetchDocuments();
 		}
-	}, [activeCompany?.id]);
-
-	const handleDownloadPdfs = () => {
-		if (pdfLinks?.farPDF) {
-			window.open(pdfLinks.farPDF, "_blank");
-		}
-		if (pdfLinks?.farAndDfarsPDF) {
-			window.open(pdfLinks.farAndDfarsPDF, "_blank");
-		}
-	};
+	}, [activeCompany?.uei, fetchRegulations, fetchDocuments]);
 
 	if (!activeCompany) {
 		return (
-			<Alert severity='warning' sx={{ m: 2 }}>
-				Please select a company to view FAR certifications
-			</Alert>
+			<Box sx={{ p: 3 }}>
+				<Alert severity='warning'>Please select a company to view FAR certifications</Alert>
+			</Box>
 		);
 	}
 
@@ -48,54 +40,37 @@ export default function RegulationManagement() {
 
 	if (error) {
 		return (
-			<Alert severity='error' sx={{ m: 2 }}>
-				{error}
-			</Alert>
+			<Box sx={{ p: 3 }}>
+				<Alert severity='error'>{error}</Alert>
+			</Box>
 		);
 	}
 
 	return (
 		<Box sx={{ p: 3 }}>
-			<Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+			<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
 				<Typography variant='h4' sx={{ fontWeight: "bold" }}>
 					Federal Acquisition Regulations
 				</Typography>
-				<Button variant='contained' startIcon={<Download />} onClick={handleDownloadPdfs}>
-					Download PDFs
-				</Button>
+				<DocumentDownload pdfLinks={documents} />
 			</Box>
 
 			<Box sx={{ display: "flex", gap: 3 }}>
-				<Paper sx={{ width: 300, flexShrink: 0 }}>
-					<List>
-						{regulations.map((regulation) => (
-							<ListItem
-								key={regulation.provisionId}
-								button
-								selected={selectedFar?.provisionId === regulation.provisionId}
-								onClick={() => setSelectedRegulation(regulation)}
-							>
-								<ListItemText
-									primary={regulation.provisionId}
-									secondary={`${regulation.answers.length} certifications`}
-								/>
-							</ListItem>
-						))}
-					</List>
-				</Paper>
+				<RegulationTabs
+					regulations={regulations || []}
+					selectedRegulation={selectedRegulation}
+					onRegulationSelect={setSelectedRegulation}
+				/>
 
-				<Box sx={{ flexGrow: 1 }}>
-					{selectedRegulation ? (
-						<RegulationDetails regulation={selectedRegulation} />
-					) : (
-						<Paper sx={{ p: 3, textAlign: "center" }}>
-							<Book size={48} />
-							<Typography variant='h6' sx={{ mt: 2 }}>
-								Select a Regulation provision to view details
-							</Typography>
-						</Paper>
-					)}
-				</Box>
+				{selectedRegulation ? (
+					<RegulationDetails regulation={selectedRegulation} />
+				) : (
+					<Box sx={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+						<Typography variant='body1' color='text.secondary'>
+							Select a regulation to view details
+						</Typography>
+					</Box>
+				)}
 			</Box>
 		</Box>
 	);
