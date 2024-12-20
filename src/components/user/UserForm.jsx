@@ -29,8 +29,9 @@ export function UserForm({ formData, onChange, errors = {}, disabled = false }) 
 				name='cognitoId'
 				value={formData.cognitoId || ""}
 				onChange={handleChange}
+				required
 				disabled={disabled}
-				helperText='Optional - Enter if user already exists in Cognito'
+				helperText='Must be setup in AWS Cognito - ask admin for help'
 			/>
 
 			<TextField

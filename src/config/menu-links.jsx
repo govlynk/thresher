@@ -67,7 +67,7 @@ const administrationLinks = {
 			path: "/team",
 		},
 		{
-			title: "User Admin",
+			title: "Manage Users",
 			path: "/user-admin",
 		},
 	],

@@ -23,7 +23,7 @@ import { Search, UserPlus, ArrowRight } from "lucide-react";
 import { useContactStore } from "../../stores/contactStore";
 import { useUserStore } from "../../stores/userStore";
 
-export function ContactSelectionDialog({ open, onClose, onContactSelected }) {
+export function ContactSelectionDialog({ open, onClose, onContactSelected, companyId }) {
 	const [searchTerm, setSearchTerm] = useState("");
 	const { contacts, fetchContacts, loading, error } = useContactStore();
 	const { users } = useUserStore();
@@ -31,7 +31,8 @@ export function ContactSelectionDialog({ open, onClose, onContactSelected }) {
 
 	useEffect(() => {
 		if (open) {
-			fetchContacts();
+			fetchContacts(companyId);
+			console.log("fetchContacts", contacts);
 		}
 	}, [open, fetchContacts]);
 

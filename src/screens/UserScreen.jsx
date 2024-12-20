@@ -163,6 +163,7 @@ export default function UserScreen() {
 				open={contactSelectionOpen}
 				onClose={() => setContactSelectionOpen(false)}
 				onContactSelected={handleContactSelected}
+				companyId={activeCompanyId}
 			/>
 
 			<ContactCreationDialog

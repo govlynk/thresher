@@ -44,6 +44,7 @@ export async function createOrUpdateUserCompanyAccess(userId, companyId, accessL
 			and: [{ userId: { eq: userId } }, { companyId: { eq: companyId } }],
 		},
 	});
+	console.log("existing", existingAccess);
 
 	if (existingAccess.data?.length > 0) {
 		// Update existing access
