@@ -3,8 +3,7 @@ import { Box, TextField, Alert, FormControl, InputLabel, Select, MenuItem } from
 
 const ACCESS_LEVELS = {
 	COMPANY_ADMIN: "Company Administrator",
-	MANAGER: "Company Manager",
-	MEMBER: "Company Member",
+	COMPANY_USER: "Company User",
 	GOVLYNK_ADMIN: "Govlynk Administrator",
 	GOVLYNK_USER: "Govlynk User",
 };

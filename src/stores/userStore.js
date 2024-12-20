@@ -69,9 +69,11 @@ export const useUserStore = create((set, get) => ({
 			if (!user) {
 				throw new Error("Failed to create/update user");
 			}
+			console.log("user", user, userData);
 
 			// Create or update company access
 			const access = await createOrUpdateUserCompanyAccess(user.id, activeCompanyId, userData.accessLevel);
+
 			if (!access?.data) {
 				throw new Error("Failed to create company access");
 			}
