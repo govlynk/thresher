@@ -1,6 +1,6 @@
 import React from "react";
 import { BaseFormDialog } from "../common/BaseFormDialog";
-import { UserRegistrationForm } from "./UserRegistrationForm";
+import { UserForm } from "./UserForm";
 import { useUserStore } from "../../stores/userStore";
 
 export function UserDialog({ open, onClose, editUser }) {
@@ -48,7 +48,7 @@ export function UserDialog({ open, onClose, editUser }) {
 			initialData={initialData}
 			validateForm={validateForm}
 			onSave={addUser}
-			FormComponent={UserRegistrationForm}
+			FormComponent={UserForm}
 		/>
 	);
 }

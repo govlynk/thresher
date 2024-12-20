@@ -1,10 +1,7 @@
 import { create } from "zustand";
-import { generateClient } from "aws-amplify/data";
-import { useGlobalStore } from "./globalStore";
+import { generateClient } from "aws-amplify/api";
 
-const client = generateClient({
-	authMode: "userPool",
-});
+const client = generateClient();
 
 export const useContactStore = create((set, get) => ({
 	contacts: [],
@@ -22,29 +19,13 @@ export const useContactStore = create((set, get) => ({
 		set({ loading: true, error: null });
 
 		try {
-			// If no companyId provided, use active company
-			const activeCompanyId = useGlobalStore.getState().activeCompanyId;
-			const targetCompanyId = companyId || activeCompanyId;
-
-			if (!targetCompanyId) {
-				set({
-					error: "No active company selected",
-					loading: false,
-					contacts: [],
-				});
-				return;
-			}
-
-			// Create new subscription with company filter
+			// Create new subscription
 			const subscription = client.models.Contact.observeQuery({
-				filter: { companyId: { eq: targetCompanyId } },
+				filter: { companyId: { eq: companyId } },
 			}).subscribe({
 				next: ({ items }) => {
-					// Ensure unique contacts
-					const uniqueContacts = Array.from(new Map(items.map((contact) => [contact.id, contact])).values());
-
 					set({
-						contacts: uniqueContacts,
+						contacts: items,
 						loading: false,
 						error: null,
 					});
@@ -54,7 +35,6 @@ export const useContactStore = create((set, get) => ({
 					set({
 						error: err.message || "Failed to fetch contacts",
 						loading: false,
-						contacts: [],
 					});
 				},
 			});
@@ -66,27 +46,16 @@ export const useContactStore = create((set, get) => ({
 			set({
 				error: err.message || "Failed to load contacts",
 				loading: false,
-				contacts: [],
 			});
 		}
 	},
 
 	addContact: async (contactData) => {
-		if (!contactData.companyId) {
-			throw new Error("Company ID is required");
-		}
-
 		set({ loading: true, error: null });
 		try {
-			const response = await client.models.Contact.create(contactData);
-
-			if (!response?.data) {
-				throw new Error("Failed to create contact");
-			}
-
-			// Let subscription handle state update
+			await client.models.Contact.create(contactData);
+			// Don't manually update the contacts array - let the subscription handle it
 			set({ loading: false });
-			return response.data;
 		} catch (err) {
 			console.error("Error creating contact:", err);
 			set({
@@ -97,5 +66,51 @@ export const useContactStore = create((set, get) => ({
 		}
 	},
 
-	// ... rest of the store implementation remains the same
+	updateContact: async (id, updates) => {
+		set({ loading: true, error: null });
+		try {
+			await client.models.Contact.update({
+				id,
+				...updates,
+			});
+			// Don't manually update the contacts array - let the subscription handle it
+			set({ loading: false });
+		} catch (err) {
+			console.error("Error updating contact:", err);
+			set({
+				error: err.message || "Failed to update contact",
+				loading: false,
+			});
+			throw err;
+		}
+	},
+
+	removeContact: async (id) => {
+		set({ loading: true, error: null });
+		try {
+			await client.models.Contact.delete({ id });
+			// Don't manually update the contacts array - let the subscription handle it
+			set({ loading: false });
+		} catch (err) {
+			console.error("Error removing contact:", err);
+			set({
+				error: err.message || "Failed to remove contact",
+				loading: false,
+			});
+			throw err;
+		}
+	},
+
+	cleanup: () => {
+		const { subscription } = get();
+		if (subscription) {
+			subscription.unsubscribe();
+		}
+		set({
+			contacts: [],
+			subscription: null,
+			loading: false,
+			error: null,
+		});
+	},
 }));

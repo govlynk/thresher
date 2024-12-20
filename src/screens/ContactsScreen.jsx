@@ -11,15 +11,11 @@ import {
 	TableRow,
 	Typography,
 	IconButton,
-	FormControl,
-	InputLabel,
-	Select,
-	MenuItem,
 	Alert,
 	CircularProgress,
 } from "@mui/material";
-import { UserPlus, Edit, Trash2, Mail, Phone } from "lucide-react";
-import { ContactDialog } from "../components/clientSetup/contacts/ContactDialog";
+import { UserPlus, Edit, Trash2 } from "lucide-react";
+import { ContactDialog } from "../components/contacts/ContactDialog";
 import { useContactStore } from "../stores/contactStore";
 import { useUserCompanyStore } from "../stores/userCompanyStore";
 
@@ -27,15 +23,14 @@ export default function ContactsScreen() {
 	const { contacts, fetchContacts, loading, error, removeContact } = useContactStore();
 	const { getActiveCompany } = useUserCompanyStore();
 	const activeCompany = getActiveCompany();
-	const [selectedCompany, setSelectedCompany] = useState(activeCompany?.id || "");
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editContact, setEditContact] = useState(null);
 
 	useEffect(() => {
-		if (selectedCompany) {
-			fetchContacts(selectedCompany);
+		if (activeCompany?.id) {
+			fetchContacts(activeCompany.id);
 		}
-	}, [selectedCompany, fetchContacts]);
+	}, [activeCompany?.id, fetchContacts]);
 
 	const handleAddContact = () => {
 		setEditContact(null);
@@ -57,8 +52,31 @@ export default function ContactsScreen() {
 		}
 	};
 
+	if (!activeCompany) {
+		return (
+			<Box sx={{ p: 3 }}>
+				<Alert severity='warning'>Please select a company to manage contacts</Alert>
+			</Box>
+		);
+	}
+
 	return (
-		<Box>
+		<Box sx={{ p: 3 }}>
+			<Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+				<Typography variant='h4' sx={{ fontWeight: "bold" }}>
+					Contacts
+				</Typography>
+				<Button variant='contained' startIcon={<UserPlus />} onClick={handleAddContact}>
+					Add Contact
+				</Button>
+			</Box>
+
+			{error && (
+				<Alert severity='error' sx={{ mb: 3 }}>
+					{error}
+				</Alert>
+			)}
+
 			{loading ? (
 				<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
 					<CircularProgress />
@@ -71,6 +89,7 @@ export default function ContactsScreen() {
 								<TableCell>Name</TableCell>
 								<TableCell>Email</TableCell>
 								<TableCell>Phone</TableCell>
+								<TableCell>Title</TableCell>
 								<TableCell align='right'>Actions</TableCell>
 							</TableRow>
 						</TableHead>
@@ -80,30 +99,37 @@ export default function ContactsScreen() {
 									<TableCell>{`${contact.firstName} ${contact.lastName}`}</TableCell>
 									<TableCell>{contact.contactEmail}</TableCell>
 									<TableCell>{contact.contactMobilePhone || contact.contactBusinessPhone}</TableCell>
+									<TableCell>{contact.title}</TableCell>
 									<TableCell align='right'>
-										<IconButton onClick={() => handleEditContact(contact)} size='small' color='primary'>
-											<Edit size={16} />
+										<IconButton onClick={() => handleEditContact(contact)} size='small'>
+											<Edit size={18} />
 										</IconButton>
-										<IconButton
-											onClick={() => handleDeleteContact(contact.id)}
-											size='small'
-											color='secondary'
-										>
-											<Trash2 size={16} />
+										<IconButton onClick={() => handleDeleteContact(contact.id)} size='small' color='error'>
+											<Trash2 size={18} />
 										</IconButton>
 									</TableCell>
 								</TableRow>
 							))}
+							{contacts.length === 0 && (
+								<TableRow>
+									<TableCell colSpan={5} align='center'>
+										No contacts found
+									</TableCell>
+								</TableRow>
+							)}
 						</TableBody>
 					</Table>
 				</TableContainer>
 			)}
 
-			<Button variant='contained' color='primary' startIcon={<UserPlus />} onClick={handleAddContact} sx={{ mt: 3 }}>
-				Add Contact
-			</Button>
-
-			<ContactDialog open={dialogOpen} onClose={() => setDialogOpen(false)} contact={editContact} />
+			<ContactDialog
+				open={dialogOpen}
+				onClose={() => {
+					setDialogOpen(false);
+					setEditContact(null);
+				}}
+				contact={editContact}
+			/>
 		</Box>
 	);
 }

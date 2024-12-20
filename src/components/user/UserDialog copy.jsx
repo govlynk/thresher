@@ -23,8 +23,7 @@ const initialFormState = {
 	companyRole: "",
 	contactId: null,
 };
-
-export function UserDialog({ open, onClose, contactData }) {
+export function UserDialog({ open, onClose, onSave, contactData, error }) {
 	const [formData, setFormData] = useState(initialFormState);
 	const [errors, setErrors] = useState({});
 	const [loading, setLoading] = useState(false);
