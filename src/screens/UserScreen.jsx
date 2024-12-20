@@ -64,7 +64,7 @@ export default function UserScreen() {
 	const handleContactCreated = (newContact) => {
 		setContactCreationOpen(false);
 		setSelectedContact(newContact);
-		setUserCreationOpen(true);
+		setContactSelectionOpen(true); // Return to contact selection with updated list
 	};
 
 	const handleEditClick = (user) => {
