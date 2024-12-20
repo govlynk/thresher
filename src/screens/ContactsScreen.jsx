@@ -1,93 +1,109 @@
-import React, { useState, useEffect } from "react";
-import { Box, Button, CircularProgress, Alert } from "@mui/material";
-import { ContactList } from "../components/contacts/ContactList";
-import { ContactDialog } from "../components/contacts/ContactDialog";
+import React, { useEffect, useState } from "react";
+import {
+	Box,
+	Button,
+	Paper,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	Typography,
+	IconButton,
+	FormControl,
+	InputLabel,
+	Select,
+	MenuItem,
+	Alert,
+	CircularProgress,
+} from "@mui/material";
+import { UserPlus, Edit, Trash2, Mail, Phone } from "lucide-react";
+import { ContactDialog } from "../components/clientSetup/contacts/ContactDialog";
 import { useContactStore } from "../stores/contactStore";
+import { useUserCompanyStore } from "../stores/userCompanyStore";
 
-export function ContactsScreen() {
+export default function ContactsScreen() {
+	const { contacts, fetchContacts, loading, error, removeContact } = useContactStore();
+	const { getActiveCompany } = useUserCompanyStore();
+	const activeCompany = getActiveCompany();
+	const [selectedCompany, setSelectedCompany] = useState(activeCompany?.id || "");
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [selectedContact, setSelectedContact] = useState(null);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState(null);
-
-	const { contacts, fetchContacts, deleteContact } = useContactStore();
+	const [editContact, setEditContact] = useState(null);
 
 	useEffect(() => {
-		const loadContacts = async () => {
-			try {
-				setLoading(true);
-				await fetchContacts();
-			} catch (err) {
-				console.error("Error loading contacts:", err);
-				setError(err.message || "Failed to load contacts");
-			} finally {
-				setLoading(false);
-			}
-		};
-		loadContacts();
-	}, [fetchContacts]);
+		if (selectedCompany) {
+			fetchContacts(selectedCompany);
+		}
+	}, [selectedCompany, fetchContacts]);
 
 	const handleAddContact = () => {
-		setSelectedContact(null);
+		setEditContact(null);
 		setDialogOpen(true);
 	};
 
 	const handleEditContact = (contact) => {
-		if (contact && typeof contact === "object") {
-			setSelectedContact(contact);
-			setDialogOpen(true);
-		}
+		setEditContact(contact);
+		setDialogOpen(true);
 	};
 
 	const handleDeleteContact = async (contactId) => {
-		if (contactId) {
+		if (window.confirm("Are you sure you want to delete this contact?")) {
 			try {
-				await deleteContact(contactId);
+				await removeContact(contactId);
 			} catch (err) {
-				console.error("Error deleting contact:", err);
-				setError(err.message || "Failed to delete contact");
+				console.error("Failed to remove contact:", err);
 			}
 		}
 	};
 
-	const handleCloseDialog = () => {
-		setDialogOpen(false);
-		setSelectedContact(null);
-	};
-
-	if (loading) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-				<CircularProgress />
-			</Box>
-		);
-	}
-
-	if (error) {
-		return (
-			<Box sx={{ p: 3 }}>
-				<Alert severity='error' sx={{ mb: 2 }}>
-					{error}
-				</Alert>
-			</Box>
-		);
-	}
-
 	return (
-		<Box sx={{ p: 3 }}>
-			<Box sx={{ mb: 3 }}>
-				<Button variant='contained' onClick={handleAddContact}>
-					Add Contact
-				</Button>
-			</Box>
-
-			{Array.isArray(contacts) ? (
-				<ContactList contacts={contacts} onEditContact={handleEditContact} onDeleteContact={handleDeleteContact} />
+		<Box>
+			{loading ? (
+				<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+					<CircularProgress />
+				</Box>
 			) : (
-				<Alert severity='warning'>No contacts available</Alert>
+				<TableContainer component={Paper}>
+					<Table>
+						<TableHead>
+							<TableRow>
+								<TableCell>Name</TableCell>
+								<TableCell>Email</TableCell>
+								<TableCell>Phone</TableCell>
+								<TableCell align='right'>Actions</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{contacts.map((contact) => (
+								<TableRow key={contact.id} hover>
+									<TableCell>{`${contact.firstName} ${contact.lastName}`}</TableCell>
+									<TableCell>{contact.contactEmail}</TableCell>
+									<TableCell>{contact.contactMobilePhone || contact.contactBusinessPhone}</TableCell>
+									<TableCell align='right'>
+										<IconButton onClick={() => handleEditContact(contact)} size='small' color='primary'>
+											<Edit size={16} />
+										</IconButton>
+										<IconButton
+											onClick={() => handleDeleteContact(contact.id)}
+											size='small'
+											color='secondary'
+										>
+											<Trash2 size={16} />
+										</IconButton>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</TableContainer>
 			)}
 
-			<ContactDialog open={dialogOpen} onClose={handleCloseDialog} contact={selectedContact} />
+			<Button variant='contained' color='primary' startIcon={<UserPlus />} onClick={handleAddContact} sx={{ mt: 3 }}>
+				Add Contact
+			</Button>
+
+			<ContactDialog open={dialogOpen} onClose={() => setDialogOpen(false)} contact={editContact} />
 		</Box>
 	);
 }

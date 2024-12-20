@@ -8,24 +8,10 @@ export function ContactDialog({ open, onClose, contact }) {
 	const { addContact, updateContact } = useContactStore();
 	const { activeCompanyId } = useGlobalStore();
 
-	const initialData = contact
-		? {
-				firstName: contact.firstName || "",
-				lastName: contact.lastName || "",
-				contactEmail: contact.contactEmail || "",
-				contactMobilePhone: contact.contactMobilePhone || "",
-				contactBusinessPhone: contact.contactBusinessPhone || "",
-				title: contact.title || "",
-				department: contact.department || "",
-				workAddressStreetLine1: contact.workAddressStreetLine1 || "",
-				workAddressStreetLine2: contact.workAddressStreetLine2 || "",
-				workAddressCity: contact.workAddressCity || "",
-				workAddressStateCode: contact.workAddressStateCode || "",
-				workAddressZipCode: contact.workAddressZipCode || "",
-				workAddressCountryCode: contact.workAddressCountryCode || "USA",
-				notes: contact.notes || "",
-		  }
-		: {
+	// Properly structure the initial data
+	const initialData = React.useMemo(() => {
+		if (!contact)
+			return {
 				firstName: "",
 				lastName: "",
 				contactEmail: "",
@@ -40,7 +26,25 @@ export function ContactDialog({ open, onClose, contact }) {
 				workAddressZipCode: "",
 				workAddressCountryCode: "USA",
 				notes: "",
-		  };
+			};
+
+		return {
+			firstName: contact.firstName || "",
+			lastName: contact.lastName || "",
+			contactEmail: contact.contactEmail || "",
+			contactMobilePhone: contact.contactMobilePhone || "",
+			contactBusinessPhone: contact.contactBusinessPhone || "",
+			title: contact.title || "",
+			department: contact.department || "",
+			workAddressStreetLine1: contact.workAddressStreetLine1 || "",
+			workAddressStreetLine2: contact.workAddressStreetLine2 || "",
+			workAddressCity: contact.workAddressCity || "",
+			workAddressStateCode: contact.workAddressStateCode || "",
+			workAddressZipCode: contact.workAddressZipCode || "",
+			workAddressCountryCode: contact.workAddressCountryCode || "USA",
+			notes: contact.notes || "",
+		};
+	}, [contact]);
 
 	const validateForm = (data) => {
 		const errors = {};

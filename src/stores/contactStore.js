@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
-import { useUserCompanyStore } from "./userCompanyStore";
+import { useGlobalStore } from "./globalStore";
 
 const client = generateClient({
 	authMode: "userPool",
@@ -23,12 +23,12 @@ export const useContactStore = create((set, get) => ({
 
 		try {
 			// If no companyId provided, use active company
-			const activeCompany = useUserCompanyStore.getState().getActiveCompany();
-			const targetCompanyId = companyId || activeCompany?.id;
+			const activeCompanyId = useGlobalStore.getState().activeCompanyId;
+			const targetCompanyId = companyId || activeCompanyId;
 
 			if (!targetCompanyId) {
 				set({
-					error: "No company selected",
+					error: "No active company selected",
 					loading: false,
 					contacts: [],
 				});
