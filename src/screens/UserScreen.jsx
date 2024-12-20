@@ -1,4 +1,3 @@
-// src/screens/UserScreen.jsx
 import React, { useState, useEffect } from "react";
 import {
 	Box,
@@ -113,6 +112,7 @@ export default function UserScreen() {
 							<TableCell>Name</TableCell>
 							<TableCell>Email</TableCell>
 							<TableCell>Phone</TableCell>
+							<TableCell>Access Level</TableCell>
 							<TableCell>Status</TableCell>
 							<TableCell>Last Login</TableCell>
 							<TableCell align='right'>Actions</TableCell>
@@ -124,6 +124,14 @@ export default function UserScreen() {
 								<TableCell>{user.name}</TableCell>
 								<TableCell>{user.email}</TableCell>
 								<TableCell>{user.phone || "-"}</TableCell>
+								<TableCell>
+									<Chip
+										label={user.companyRole?.access || "MEMBER"}
+										color='primary'
+										size='small'
+										variant='outlined'
+									/>
+								</TableCell>
 								<TableCell>
 									<Chip
 										label={user.status}

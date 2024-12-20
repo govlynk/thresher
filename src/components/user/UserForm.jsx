@@ -1,46 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { Box, TextField, Alert, Autocomplete } from "@mui/material";
-import { useGlobalStore } from "../../stores/globalStore";
+import React from "react";
+import { Box, TextField, Alert, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
-const initialFormState = {
-	cognitoId: "",
-	email: "",
-	name: "",
-	phone: "",
-	status: "ACTIVE",
-	selectedCompanies: [],
+const ACCESS_LEVELS = {
+	COMPANY_ADMIN: "Company Administrator",
+	MANAGER: "Company Manager",
+	MEMBER: "Company Member",
+	GOVLYNK_ADMIN: "Govlynk Administrator",
+	GOVLYNK_USER: "Govlynk User",
 };
 
-export function UserForm({ formData = initialFormState, onChange, errors = {}, disabled = false }) {
-	const [isInitialized, setIsInitialized] = useState(false);
-	const [companies, setCompanies] = useState([]);
-	const { activeCompanyId } = useGlobalStore();
-
-	useEffect(() => {
-		if (!isInitialized) {
-			setIsInitialized(true);
-		}
-	}, []);
-
+export function UserForm({ formData, onChange, errors = {}, disabled = false }) {
 	const handleChange = (e) => {
 		const { name, value } = e.target;
-		onChange(name, value || "");
-	};
-
-	const handleCompanyChange = (event, newValue) => {
-		onChange("selectedCompanies", newValue || []);
-	};
-
-	const getErrorMessages = () => {
-		if (!errors) return null;
-		return Object.values(errors).filter(Boolean).join(", ");
+		onChange(name, value);
 	};
 
 	return (
-		<Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-			{getErrorMessages() && (
+		<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+			{errors.submit && (
 				<Alert severity='error' sx={{ mb: 2 }}>
-					{getErrorMessages()}
+					{errors.submit}
 				</Alert>
 			)}
 
@@ -88,22 +67,24 @@ export function UserForm({ formData = initialFormState, onChange, errors = {}, d
 				disabled={disabled}
 			/>
 
-			<Autocomplete
-				multiple
-				options={companies}
-				getOptionLabel={(option) => option.name}
-				value={formData.selectedCompanies || []}
-				onChange={handleCompanyChange}
-				renderInput={(params) => (
-					<TextField
-						{...params}
-						label='Companies'
-						error={Boolean(errors?.companies)}
-						helperText={errors?.companies}
-					/>
-				)}
-				disabled={disabled}
-			/>
+			<FormControl fullWidth required error={Boolean(errors?.accessLevel)} disabled={disabled}>
+				<InputLabel>Access Level</InputLabel>
+				<Select name='accessLevel' value={formData.accessLevel || ""} onChange={handleChange} label='Access Level'>
+					{Object.entries(ACCESS_LEVELS).map(([value, label]) => (
+						<MenuItem key={value} value={value}>
+							{label}
+						</MenuItem>
+					))}
+				</Select>
+			</FormControl>
+
+			<FormControl fullWidth disabled={disabled}>
+				<InputLabel>Status</InputLabel>
+				<Select name='status' value={formData.status || "ACTIVE"} onChange={handleChange} label='Status'>
+					<MenuItem value='ACTIVE'>Active</MenuItem>
+					<MenuItem value='INACTIVE'>Inactive</MenuItem>
+				</Select>
+			</FormControl>
 		</Box>
 	);
 }
