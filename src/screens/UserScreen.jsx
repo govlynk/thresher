@@ -1,5 +1,5 @@
 // src/screens/UserScreen.jsx
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Box,
 	Button,
@@ -18,21 +18,20 @@ import {
 } from "@mui/material";
 import { Edit, Trash2, UserPlus } from "lucide-react";
 import { useUserStore } from "../stores/userStore";
-import { UserDialog } from "../components/UserDialog";
+import { UserDialog } from "../components/user/UserDialog";
 import { ContactSelectionDialog } from "../components/user/ContactSelectionDialog";
-import { UserCreationDialog } from "../components/user/UserCreationDialog";
 import { ContactCreationDialog } from "../components/user/ContactCreationDialog";
 import { useGlobalStore } from "../stores/globalStore";
 
 export default function UserScreen() {
 	const { users, fetchUsers, removeUser, loading, error, cleanup } = useUserStore();
 	const { activeCompanyId } = useGlobalStore();
-	const [dialogOpen, setDialogOpen] = React.useState(false);
-	const [contactSelectionOpen, setContactSelectionOpen] = React.useState(false);
-	const [contactCreationOpen, setContactCreationOpen] = React.useState(false);
-	const [userCreationOpen, setUserCreationOpen] = React.useState(false);
-	const [selectedContact, setSelectedContact] = React.useState(null);
-	const [editUser, setEditUser] = React.useState(null);
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const [contactSelectionOpen, setContactSelectionOpen] = useState(false);
+	const [contactCreationOpen, setContactCreationOpen] = useState(false);
+	const [userCreationOpen, setUserCreationOpen] = useState(false);
+	const [selectedContact, setSelectedContact] = useState(null);
+	const [editUser, setEditUser] = useState(null);
 
 	useEffect(() => {
 		if (activeCompanyId) {
@@ -164,7 +163,7 @@ export default function UserScreen() {
 				onContactCreated={handleContactCreated}
 			/>
 
-			<UserCreationDialog
+			<UserDialog
 				open={userCreationOpen}
 				onClose={() => {
 					setUserCreationOpen(false);

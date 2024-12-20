@@ -66,6 +66,10 @@ const administrationLinks = {
 			title: "Manage Team",
 			path: "/team",
 		},
+		{
+			title: "User Admin",
+			path: "/user-admin",
+		},
 	],
 };
 
@@ -90,10 +94,7 @@ const systemLinks = {
 			title: "Client Setup",
 			path: "/client-setup",
 		},
-		{
-			title: "User Admin",
-			path: "/user-admin",
-		},
+
 		{
 			title: "Contact Admin",
 			path: "/contact-admin",

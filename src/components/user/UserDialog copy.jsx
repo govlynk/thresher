@@ -7,16 +7,11 @@ import {
 	TextField,
 	Button,
 	Box,
-	FormControl,
-	InputLabel,
-	Select,
-	MenuItem,
 	Alert,
 	CircularProgress,
 } from "@mui/material";
+import { UserRegistrationForm } from "./UserRegistrationForm-wrong";
 import { useUserStore } from "../../stores/userStore";
-import { useAuthStore } from "../../stores/authStore";
-import { UserRegistrationForm } from "./UserRegistrationForm";
 
 const initialFormState = {
 	cognitoId: "",
@@ -26,25 +21,52 @@ const initialFormState = {
 	status: "ACTIVE",
 	accessLevel: "",
 	companyRole: "",
+	contactId: null,
 };
 
-export function UserCreationDialog({ open, onClose, contactData }) {
+export function UserDialog({ open, onClose, contactData }) {
 	const [formData, setFormData] = useState(initialFormState);
 	const [errors, setErrors] = useState({});
 	const [loading, setLoading] = useState(false);
 	const { addUser } = useUserStore();
-	const currentUser = useAuthStore((state) => state.user);
 
 	useEffect(() => {
 		if (contactData) {
-			setFormData({
-				...initialFormState,
+			setFormData((prev) => ({
+				...prev,
 				email: contactData.contactEmail || "",
 				name: `${contactData.firstName} ${contactData.lastName}`,
 				phone: contactData.contactMobilePhone || contactData.contactBusinessPhone || "",
-			});
+				contactId: contactData.id,
+			}));
+		} else {
+			setFormData(initialFormState);
 		}
 	}, [contactData]);
+
+	const validateForm = () => {
+		const errors = {};
+
+		if (!formData.email?.trim()) {
+			errors.email = "Email is required";
+		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+			errors.email = "Invalid email format";
+		}
+
+		if (!formData.name?.trim()) {
+			errors.name = "Name is required";
+		}
+
+		if (!formData.accessLevel) {
+			errors.accessLevel = "Access level is required";
+		}
+
+		if (!formData.companyRole) {
+			errors.companyRole = "Company role is required";
+		}
+
+		return Object.keys(errors).length > 0 ? errors : null;
+	};
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -55,6 +77,7 @@ export function UserCreationDialog({ open, onClose, contactData }) {
 		setErrors((prev) => ({
 			...prev,
 			[name]: "",
+			submit: "",
 		}));
 	};
 
@@ -67,37 +90,20 @@ export function UserCreationDialog({ open, onClose, contactData }) {
 			...prev,
 			accessLevel: "",
 			companyRole: "",
+			submit: "",
 		}));
 	};
 
-	const validateForm = () => {
-		const newErrors = {};
-		if (!formData.email?.trim()) newErrors.email = "Email is required";
-		if (!formData.name?.trim()) newErrors.name = "Name is required";
-		if (!formData.accessLevel) newErrors.accessLevel = "Access level is required";
-		if (!formData.companyRole) newErrors.companyRole = "Company role is required";
-
-		setErrors(newErrors);
-		return Object.keys(newErrors).length === 0;
-	};
-
 	const handleSubmit = async () => {
-		if (!validateForm()) return;
+		const validationErrors = validateForm(formData);
+		if (validationErrors) {
+			setErrors(validationErrors);
+			return;
+		}
 
 		setLoading(true);
 		try {
-			const userData = {
-				cognitoId: formData.cognitoId || currentUser?.sub,
-				email: formData.email.trim(),
-				name: formData.name.trim(),
-				phone: formData.phone?.trim() || null,
-				status: formData.status,
-				lastLogin: new Date().toISOString(),
-				accessLevel: formData.accessLevel,
-				roleId: formData.companyRole,
-			};
-
-			await addUser(userData);
+			await addUser(formData);
 			onClose();
 		} catch (err) {
 			console.error("Error creating user:", err);
@@ -127,7 +133,6 @@ export function UserCreationDialog({ open, onClose, contactData }) {
 						name='cognitoId'
 						value={formData.cognitoId}
 						onChange={handleChange}
-						helperText='Optional - Enter if user already exists in Cognito'
 					/>
 
 					<TextField
@@ -164,14 +169,6 @@ export function UserCreationDialog({ open, onClose, contactData }) {
 						disabled={loading}
 					/>
 
-					<FormControl fullWidth disabled={loading}>
-						<InputLabel>Status</InputLabel>
-						<Select name='status' value={formData.status} onChange={handleChange} label='Status'>
-							<MenuItem value='ACTIVE'>Active</MenuItem>
-							<MenuItem value='INACTIVE'>Inactive</MenuItem>
-						</Select>
-					</FormControl>
-
 					<UserRegistrationForm
 						onChange={handleRegistrationChange}
 						values={{
@@ -182,6 +179,7 @@ export function UserCreationDialog({ open, onClose, contactData }) {
 							accessLevel: errors.accessLevel,
 							companyRole: errors.companyRole,
 						}}
+						disabled={loading}
 					/>
 				</Box>
 			</DialogContent>

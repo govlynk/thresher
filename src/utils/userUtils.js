@@ -1,11 +1,9 @@
-// src/utils/userUtils.js
 import { generateClient } from "aws-amplify/data";
 
 const client = generateClient();
 
 export async function getUsersByCompany(companyId) {
 	try {
-		// First get all UserCompanyAccesss for the company
 		const userRolesResponse = await client.models.UserCompanyAccess.list({
 			filter: { companyId: { eq: companyId } },
 		});
@@ -14,15 +12,10 @@ export async function getUsersByCompany(companyId) {
 			return [];
 		}
 
-		// Extract user IDs
 		const userIds = userRolesResponse.data.map((role) => role.userId);
-
-		// Fetch users with those IDs
 		const usersPromises = userIds.map((userId) => client.models.User.get({ id: userId }));
-
 		const userResponses = await Promise.all(usersPromises);
 
-		// Filter out any null responses and map to user data
 		return userResponses
 			.filter((response) => response?.data)
 			.map((response) => ({
@@ -37,31 +30,64 @@ export async function getUsersByCompany(companyId) {
 
 export async function createUserWithCompanyRole(userData, companyId) {
 	try {
-		// Create user first
-		const userResponse = await client.models.User.create(userData);
-
-		if (!userResponse?.data) {
-			throw new Error("Failed to create user");
-		}
-
-		// Create user-company association
-		await client.models.UserCompanyAccess.create({
-			userId: userResponse.data.id,
-			companyId: companyId,
-			roleId: userData.roleId || "MEMBER",
-			status: "ACTIVE",
+		// Check if user already exists with this email
+		const existingUsers = await client.models.User.list({
+			filter: { email: { eq: userData.email } },
 		});
 
-		return userResponse.data;
+		let user;
+		if (existingUsers.data?.length > 0) {
+			// Update existing user
+			user = existingUsers.data[0];
+			const updatedUser = await client.models.User.update({
+				id: user.id,
+				name: userData.name,
+				phone: userData.phone,
+				status: userData.status,
+				lastLogin: new Date().toISOString(),
+				contactId: userData.contactId, // Add contact association if provided
+			});
+			user = updatedUser.data;
+		} else {
+			// Create new user
+			const newUser = await client.models.User.create({
+				cognitoId: userData.cognitoId,
+				email: userData.email,
+				name: userData.name,
+				phone: userData.phone,
+				status: userData.status,
+				lastLogin: new Date().toISOString(),
+				contactId: userData.contactId, // Add contact association if provided
+			});
+			user = newUser.data;
+		}
+
+		// Check for existing company role
+		const existingRole = await client.models.UserCompanyAccess.list({
+			filter: {
+				and: [{ userId: { eq: user.id } }, { companyId: { eq: companyId } }],
+			},
+		});
+
+		// Create or update company role
+		if (!existingRole.data?.length) {
+			await client.models.UserCompanyAccess.create({
+				userId: user.id,
+				companyId: companyId,
+				access: userData.accessLevel || "MEMBER",
+				status: "ACTIVE",
+			});
+		}
+
+		return user;
 	} catch (err) {
-		console.error("Error creating user with company role:", err);
-		throw err;
+		console.error("Error in createUserWithCompanyRole:", err);
+		throw new Error(err.message || "Failed to create/update user");
 	}
 }
 
 export async function deleteUserAndRoles(userId) {
 	try {
-		// Delete all user-company roles first
 		const rolesResponse = await client.models.UserCompanyAccess.list({
 			filter: { userId: { eq: userId } },
 		});
@@ -70,7 +96,6 @@ export async function deleteUserAndRoles(userId) {
 			await Promise.all(rolesResponse.data.map((role) => client.models.UserCompanyAccess.delete({ id: role.id })));
 		}
 
-		// Then delete the user
 		await client.models.User.delete({ id: userId });
 	} catch (err) {
 		console.error("Error deleting user and roles:", err);

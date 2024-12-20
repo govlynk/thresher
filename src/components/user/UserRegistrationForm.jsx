@@ -36,7 +36,7 @@ const ACCESS_LEVEL_ROLE_RECOMMENDATIONS = {
 	GOVLYNK_USER: COMPANY_ROLES.map((role) => role.id),
 };
 
-export function UserRegistrationForm({ onChange, values, errors }) {
+export function UserRegistrationForm({ onChange, formData, errors, disabled }) {
 	const [localErrors, setLocalErrors] = useState({});
 
 	const handleAccessLevelChange = (event) => {
@@ -44,20 +44,20 @@ export function UserRegistrationForm({ onChange, values, errors }) {
 		onChange({
 			accessLevel: newAccessLevel,
 			companyRole:
-				values.companyRole && ACCESS_LEVEL_ROLE_RECOMMENDATIONS[newAccessLevel].includes(values.companyRole)
-					? values.companyRole
+				formData.companyRole && ACCESS_LEVEL_ROLE_RECOMMENDATIONS[newAccessLevel].includes(formData.companyRole)
+					? formData.companyRole
 					: "",
 		});
-		validateFields({ ...values, accessLevel: newAccessLevel });
+		validateFields({ ...formData, accessLevel: newAccessLevel });
 	};
 
 	const handleCompanyRoleChange = (event) => {
 		const newRole = event.target.value;
 		onChange({
-			...values,
+			...formData,
 			companyRole: newRole,
 		});
-		validateFields({ ...values, companyRole: newRole });
+		validateFields({ ...formData, companyRole: newRole });
 	};
 
 	const validateFields = (fields) => {
@@ -81,15 +81,15 @@ export function UserRegistrationForm({ onChange, values, errors }) {
 	};
 
 	const getRecommendedRoles = () => {
-		if (!values.accessLevel) return COMPANY_ROLES;
-		return COMPANY_ROLES.filter((role) => ACCESS_LEVEL_ROLE_RECOMMENDATIONS[values.accessLevel].includes(role.id));
+		if (!formData.accessLevel) return COMPANY_ROLES;
+		return COMPANY_ROLES.filter((role) => ACCESS_LEVEL_ROLE_RECOMMENDATIONS[formData.accessLevel].includes(role.id));
 	};
 
 	return (
 		<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
 			<FormControl fullWidth error={Boolean(errors?.accessLevel || localErrors.accessLevel)}>
 				<InputLabel required>Access Level</InputLabel>
-				<Select value={values.accessLevel || ""} onChange={handleAccessLevelChange} label='Access Level'>
+				<Select value={formData.accessLevel || ""} onChange={handleAccessLevelChange} label='Access Level'>
 					{Object.entries(ACCESS_LEVELS).map(([value, label]) => (
 						<MenuItem key={value} value={value}>
 							{label}
@@ -104,10 +104,10 @@ export function UserRegistrationForm({ onChange, values, errors }) {
 			<FormControl fullWidth error={Boolean(errors?.companyRole || localErrors.companyRole)}>
 				<InputLabel required>Company Role</InputLabel>
 				<Select
-					value={values.companyRole || ""}
+					value={formData.companyRole || ""}
 					onChange={handleCompanyRoleChange}
 					label='Company Role'
-					disabled={!values.accessLevel}
+					disabled={!formData.accessLevel}
 				>
 					{getRecommendedRoles().map((role) => (
 						<MenuItem key={role.id} value={role.id}>
@@ -120,11 +120,11 @@ export function UserRegistrationForm({ onChange, values, errors }) {
 				)}
 			</FormControl>
 
-			{values.accessLevel && values.companyRole && !localErrors.companyRole && (
+			{formData.accessLevel && formData.companyRole && !localErrors.companyRole && (
 				<Alert severity='info' sx={{ mt: 1 }}>
 					<Typography variant='body2'>
-						Selected combination: {ACCESS_LEVELS[values.accessLevel]} with{" "}
-						{COMPANY_ROLES.find((r) => r.id === values.companyRole)?.name} role
+						Selected combination: {ACCESS_LEVELS[formData.accessLevel]} with{" "}
+						{COMPANY_ROLES.find((r) => r.id === formData.companyRole)?.name} role
 					</Typography>
 				</Alert>
 			)}
