@@ -22,7 +22,6 @@ export function initializeCompanyData(formattedData) {
 		billingAddressStreetLine1: formattedData.billingAddressStreetLine1 || null,
 		billingAddressStreetLine2: formattedData.billingAddressStreetLine2 || null,
 		billingAddressZipCode: formattedData.billingAddressZipCode || null,
-		businessTypeDesc: formattedData.businessTypeDesc || [],
 
 		companyStartDate: formattedData.companyStartDate ? new Date(formattedData.companyStartDate).toISOString() : null,
 		congressionalDistrict: formattedData.congressionalDistrict || null,
@@ -53,14 +52,14 @@ export function initializeCompanyData(formattedData) {
 		registrationStatus: formattedData.registrationStatus || null,
 		purposeOfRegistrationDesc: formattedData.purposeOfRegistrationDesc || null,
 		stateOfIncorporationCode: formattedData.stateOfIncorporationCode || null,
-		businessTypeDesc: formattedData.businessTypeDesc || null,
-		sbabusinessTypeDesc: formattedData.sbaBusinessTypeDesc || null,
-		sbacertificationEntryDate: formattedData.sbaCertificationEntryDate
-			? new Date(formattedData.sbaCertificationEntryDate).toISOString()
-			: null,
-		sbacertificationExitDate: formattedData.sbaCertificationExitDate
-			? new Date(formattedData.sbaCertificationExitDate).toISOString()
-			: null,
+		businessTypeDesc: formattedData.businessTypeDesc || [],
+		sbaBusinessTypeDesc: formattedData.sbaBusinessTypeDesc || [],
+		// sbaCertificationEntryDate: formattedData.sbaCertificationEntryDate
+		// 	? new Date(formattedData.sbaCertificationEntryDate).toISOString()
+		// 	: null,
+		// sbaCertificationExitDate: formattedData.sbaCertificationExitDate
+		// 	? new Date(formattedData.sbaCertificationExitDate).toISOString()
+		// 	: null,
 		submissionDate: formattedData.submissionDate ? new Date(formattedData.submissionDate).toISOString() : null,
 		SAMPullDate: new Date().toISOString(),
 

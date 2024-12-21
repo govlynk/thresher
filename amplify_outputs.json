@@ -740,6 +740,14 @@
               "isRequired": false,
               "attributes": []
             },
+            "businessTypeDesc": {
+              "name": "businessTypeDesc",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
             "companyStartDate": {
               "name": "companyStartDate",
               "isArray": false,
@@ -756,6 +764,13 @@
             },
             "countryOfIncorporationCode": {
               "name": "countryOfIncorporationCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "disasterRegistryFlag": {
+              "name": "disasterRegistryFlag",
               "isArray": false,
               "type": "String",
               "isRequired": false,
@@ -922,14 +937,6 @@
               "isRequired": false,
               "attributes": []
             },
-            "certificationEntryDate": {
-              "name": "certificationEntryDate",
-              "isArray": true,
-              "type": "AWSDateTime",
-              "isRequired": false,
-              "attributes": [],
-              "isArrayNullable": true
-            },
             "keyWords": {
               "name": "keyWords",
               "isArray": true,
@@ -946,8 +953,24 @@
               "attributes": [],
               "isArrayNullable": true
             },
+            "naicsDescription": {
+              "name": "naicsDescription",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
             "pscCode": {
               "name": "pscCode",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "pscDescription": {
+              "name": "pscDescription",
               "isArray": true,
               "type": "String",
               "isRequired": false,
@@ -958,6 +981,22 @@
               "name": "sbaBusinessTypeDesc",
               "isArray": true,
               "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "sbacertificationEntryDate": {
+              "name": "sbacertificationEntryDate",
+              "isArray": true,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "sbacertificationExitDate": {
+              "name": "sbacertificationExitDate",
+              "isArray": true,
+              "type": "AWSDateTime",
               "isRequired": false,
               "attributes": [],
               "isArrayNullable": true
