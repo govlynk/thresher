@@ -4,6 +4,7 @@ import { Award } from "lucide-react";
 import InfoCard from "../InfoCard";
 
 export default function CompanyNaicsSection({ company }) {
+	console.log("CompanyNaicsSection - naics", company.naicsCode);
 	return (
 		<InfoCard title='NAICS Codes' icon={Award}>
 			<Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>

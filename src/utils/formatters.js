@@ -34,3 +34,26 @@ export const formatDate = (dateString) => {
 		return "Invalid Date";
 	}
 };
+
+export const formatUrl = (url) => {
+	if (!url) return null;
+	try {
+		// Remove whitespace
+		let formattedUrl = url.trim();
+
+		// Add protocol if missing
+		if (!formattedUrl.startsWith("http")) {
+			formattedUrl = "https://" + formattedUrl;
+		}
+
+		// Remove trailing slash
+		formattedUrl = formattedUrl.replace(/\/+$/, "");
+
+		// Validate URL
+		new URL(formattedUrl);
+		return formattedUrl;
+	} catch (e) {
+		console.warn("Invalid URL:", url);
+		return null;
+	}
+};

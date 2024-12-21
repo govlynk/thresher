@@ -1,67 +1,74 @@
 // Setup data validation and initialization utilities
-export function initializeCompanyData(companyData) {
-	console.log("company data", companyData);
+export function initializeCompanyData(formattedData) {
+	console.log("company data", formattedData);
 	return {
-		legalBusinessName: companyData.legalBusinessName.trim(),
-		dbaName: companyData.dbaName?.trim() || null,
-		uei: companyData.uei.trim(),
-		cageCode: companyData.cageCode || null,
-		ein: companyData.ein || null,
+		legalBusinessName: formattedData.legalBusinessName.trim(),
+		dbaName: formattedData.dbaName?.trim() || null,
+		uei: formattedData.uei.trim(),
+		cageCode: formattedData.cageCode || null,
+		ein: formattedData.ein || null,
 		status: "ACTIVE",
 
-		activationDate: companyData.activationDate ? new Date(companyData.activationDate).toISOString() : null,
-		shippingAddressStreetLine1: companyData.shippingAddressStreetLine1 || null,
-		shippingAddressStreetLine2: companyData.shippingAddressStreetLine2 || null,
-		shippingAddressCity: companyData.shippingAddressCity || null,
-		shippingAddressStateCode: companyData.shippingAddressStateCode || null,
-		shippingAddressZipCode: companyData.shippingAddressZipCode || null,
-		shippingAddressCountryCode: companyData.shippingAddressCountryCode || null,
-		billingAddressCity: companyData.billingAddressCity || null,
-		billingAddressCountryCode: companyData.billingAddressCountryCode || null,
-		billingAddressStateCode: companyData.billingAddressStateCode || null,
-		billingAddressStreetLine1: companyData.billingAddressStreetLine1 || null,
-		billingAddressStreetLine2: companyData.billingAddressStreetLine2 || null,
-		billingAddressZipCode: companyData.billingAddressZipCode || null,
-		businessTypeList: companyData.businessTypeList || [],
+		activationDate: formattedData.activationDate ? new Date(formattedData.activationDate).toISOString() : null,
+		shippingAddressStreetLine1: formattedData.shippingAddressStreetLine1 || null,
+		shippingAddressStreetLine2: formattedData.shippingAddressStreetLine2 || null,
+		shippingAddressCity: formattedData.shippingAddressCity || null,
+		shippingAddressStateCode: formattedData.shippingAddressStateCode || null,
+		shippingAddressZipCode: formattedData.shippingAddressZipCode || null,
+		shippingAddressCountryCode: formattedData.shippingAddressCountryCode || null,
+		billingAddressCity: formattedData.billingAddressCity || null,
+		billingAddressCountryCode: formattedData.billingAddressCountryCode || null,
+		billingAddressStateCode: formattedData.billingAddressStateCode || null,
+		billingAddressStreetLine1: formattedData.billingAddressStreetLine1 || null,
+		billingAddressStreetLine2: formattedData.billingAddressStreetLine2 || null,
+		billingAddressZipCode: formattedData.billingAddressZipCode || null,
+		businessTypeDesc: formattedData.businessTypeDesc || [],
 
-		companyStartDate: companyData.companyStartDate ? new Date(companyData.companyStartDate).toISOString() : null,
-		congressionalDistrict: companyData.congressionalDistrict || null,
-		countryOfIncorporationCode: companyData.countryOfIncorporationCode || null,
-		entityDivisionName: companyData.entityDivisionName || null,
-		entityStartDate: companyData.entityStartDate ? new Date(companyData.entityStartDate).toISOString() : null,
-		entityStructureDesc: companyData.entityStructureDesc || null,
-		entityTypeDesc: companyData.entityTypeDesc || null,
-		exclusionStatusFlag: companyData.exclusionStatusFlag || null,
-		fiscalYearEndCloseDate: companyData.fiscalYearEndCloseDate
-			? new Date(companyData.fiscalYearEndCloseDate).toISOString()
+		companyStartDate: formattedData.companyStartDate ? new Date(formattedData.companyStartDate).toISOString() : null,
+		congressionalDistrict: formattedData.congressionalDistrict || null,
+		countryOfIncorporationCode: formattedData.countryOfIncorporationCode || null,
+		disasterRegistryFlag: formattedData.disasterRegistryFlag || null,
+		entityDivisionName: formattedData.entityDivisionName || null,
+		entityStartDate: formattedData.entityStartDate ? new Date(formattedData.entityStartDate).toISOString() : null,
+		entityStructureDesc: formattedData.entityStructureDesc || null,
+		entityTypeDesc: formattedData.entityTypeDesc || null,
+		exclusionStatusFlag: formattedData.exclusionStatusFlag || null,
+		fiscalYearEndCloseDate: formattedData.fiscalYearEndCloseDate
+			? new Date(formattedData.fiscalYearEndCloseDate).toISOString()
 			: null,
-		lastUpdateDate: companyData.lastUpdateDate ? new Date(companyData.lastUpdateDate).toISOString() : null,
+		lastUpdateDate: formattedData.lastUpdateDate ? new Date(formattedData.lastUpdateDate).toISOString() : null,
 
-		companyEmail: companyData.companyEmail || null,
-		companyPhoneNumber: companyData.companyPhoneNumber || null,
-		companyWebsite: companyData.companyWebsite || null,
-		organizationStructureDesc: companyData.organizationStructureDesc || null,
-		profitStructureDesc: companyData.profitStructureDesc || null,
+		companyEmail: formattedData.companyEmail || null,
+		companyPhoneNumber: formattedData.companyPhoneNumber || null,
+		companyWebsite: formattedData.companyWebsite || null,
+		organizationStructureDesc: formattedData.organizationStructureDesc || null,
+		profitStructureDesc: formattedData.profitStructureDesc || null,
 		//
-		registrationDate: companyData.registrationDate ? new Date(companyData.registrationDate).toISOString() : null,
+		registrationDate: formattedData.registrationDate ? new Date(formattedData.registrationDate).toISOString() : null,
 		//
-		registrationExpirationDate: companyData.registrationExpirationDate
-			? new Date(companyData.registrationExpirationDate).toISOString()
+		registrationExpirationDate: formattedData.registrationExpirationDate
+			? new Date(formattedData.registrationExpirationDate).toISOString()
 			: null,
 
-		registrationStatus: companyData.registrationStatus || null,
-		purposeOfRegistrationDesc: companyData.purposeOfRegistrationDesc || null,
-		stateOfIncorporationCode: companyData.stateOfIncorporationCode || null,
-		sbabusinessTypeDesc: companyData.sbaBusinessTypeDesc || null,
-		submissionDate: companyData.submissionDate ? new Date(companyData.submissionDate).toISOString() : null,
+		registrationStatus: formattedData.registrationStatus || null,
+		purposeOfRegistrationDesc: formattedData.purposeOfRegistrationDesc || null,
+		stateOfIncorporationCode: formattedData.stateOfIncorporationCode || null,
+		businessTypeDesc: formattedData.businessTypeDesc || null,
+		sbabusinessTypeDesc: formattedData.sbaBusinessTypeDesc || null,
+		sbacertificationEntryDate: formattedData.sbaCertificationEntryDate
+			? new Date(formattedData.sbaCertificationEntryDate).toISOString()
+			: null,
+		sbacertificationExitDate: formattedData.sbaCertificationExitDate
+			? new Date(formattedData.sbaCertificationExitDate).toISOString()
+			: null,
+		submissionDate: formattedData.submissionDate ? new Date(formattedData.submissionDate).toISOString() : null,
 		SAMPullDate: new Date().toISOString(),
 
-		naicsCode: companyData.naicsCode || [],
-		pscCode: companyData.pscCode || [],
-		primaryNaics: companyData.primaryNaics || null,
-		status: "ACTIVE",
-		activationDate: new Date().toISOString(),
-		SAMPullDate: new Date().toISOString(),
+		naicsCode: formattedData.naicsCode || [],
+		naicsDescription: formattedData.naicsDescription || [],
+		pscCode: formattedData.pscCode || [],
+		pscDescription: formattedData.pscDescription || [],
+		primaryNaics: formattedData.primaryNaics || null,
 	};
 }
 

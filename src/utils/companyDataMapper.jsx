@@ -1,3 +1,5 @@
+import { formatUrl } from "./formatters";
+
 export const mapAddressData = (addressData, prefix = "") => {
 	if (!addressData) return {};
 
@@ -15,8 +17,10 @@ export const mapBusinessTypes = (businessTypes) => {
 	if (!businessTypes?.businessTypeList) return {};
 
 	return {
-		sbaBusinessTypeDesc: businessTypes.businessTypeList.map((item) => item.sbaBusinessTypeDesc || null),
-		certificationEntryDate: businessTypes.businessTypeList.map((item) => item.certificationEntryDate || null),
+		businessTypeDesc: businessTypes.businessTypeList.map((item) => item.businessTypeDesc || null),
+		sbaBusinessTypeDesc: businessTypes.sbaBusinessTypeList.map((item) => item.sbaBusinessTypeDesc || null),
+		sbacertificationEntryDate: businessTypes.sbaBusinessTypeList.map((item) => item.certificationEntryDate || null),
+		sbacertificationExitDate: businessTypes.sbaBusinessTypeList.map((item) => item.certificationExitDate || null),
 	};
 };
 
@@ -25,8 +29,10 @@ export const mapGoodsAndServices = (goodsAndServices) => {
 
 	return {
 		naicsCode: goodsAndServices.naicsList?.map((item) => item.naicsCode) || [],
+		naicsDescription: goodsAndServices.naicsList?.map((item) => item.naicsDescription) || [],
 		primaryNaics: goodsAndServices.primaryNaics || null,
 		pscCode: goodsAndServices.pscList?.map((item) => item.pscCode) || [],
+		pscDescription: goodsAndServices.pscList?.map((item) => item.pscDescription) || [],
 	};
 };
 
@@ -55,6 +61,8 @@ export const formatCompanyData = (entityData) => {
 
 	const companyData = {
 		// Entity Registration Data
+		disasterRegistryFlag: assertionsData.disasterReliefData.disasterRegistryFlag || null,
+		// Entity Registration Data
 		activationDate: entityRegistrationData.activationDate || null,
 		cageCode: entityRegistrationData.cageCode || null,
 		companyEmail: entityRegistrationData.companyEmail || null,
@@ -80,7 +88,7 @@ export const formatCompanyData = (entityData) => {
 		entityDivisionName: coreData.entityInformation?.entityDivisionName || null,
 		entityStartDate: coreData.entityInformation?.entityStartDate || null,
 
-		companyWebsite: coreData.entityInformation?.entityURL || null,
+		companyWebsite: formatUrl(coreData.entityInformation?.entityURL) || null,
 		fiscalYearEndCloseDate: coreData.entityInformation?.fiscalYearEndCloseDate || null,
 		submissionDate: coreData.entityInformation?.submissionDate || null,
 
@@ -91,10 +99,6 @@ export const formatCompanyData = (entityData) => {
 		profitStructureDesc: coreData.generalInformation?.profitStructureDesc || null,
 		stateOfIncorporationCode: coreData.generalInformation?.stateOfIncorporationCode || null,
 		countryOfIncorporationCode: coreData.generalInformation?.countryOfIncorporationCode || null,
-
-		// Core Data - Business Information
-		businessTypeList: coreData.businessTypes?.businessTypeList || null,
-		sbaBusinessTypeDesc: coreData.businessTypes?.sbaBusinessTypeDesc || null,
 
 		// Congressional District
 		congressionalDistrict: coreData.congressionalDistrict || null,
