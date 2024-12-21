@@ -32,7 +32,6 @@ export const mapGoodsAndServices = (goodsAndServices) => {
 
 export const mapPointsOfContact = (POC) => {
 	if (!POC) return {};
-	console.log(POC);
 
 	return {
 		EBfirstName: POC.electronicBusinessPOC.firstName || null,
@@ -53,10 +52,7 @@ export const formatCompanyData = (entityData) => {
 	const assertionsData = entityData.assertions || {};
 	const coreData = entityData.coreData || {};
 	const pointsOfContact = entityData.pointsOfContact || {};
-	console.log("ED", entityData);
-	console.log("poc", pointsOfContact);
 
-	console.log("entity information", coreData.entityInformation);
 	const companyData = {
 		// Entity Registration Data
 		activationDate: entityRegistrationData.activationDate || null,
@@ -95,6 +91,10 @@ export const formatCompanyData = (entityData) => {
 		profitStructureDesc: coreData.generalInformation?.profitStructureDesc || null,
 		stateOfIncorporationCode: coreData.generalInformation?.stateOfIncorporationCode || null,
 		countryOfIncorporationCode: coreData.generalInformation?.countryOfIncorporationCode || null,
+
+		// Core Data - Business Information
+		businessTypeList: coreData.businessTypes?.businessTypeList || null,
+		sbaBusinessTypeDesc: coreData.businessTypes?.sbaBusinessTypeDesc || null,
 
 		// Congressional District
 		congressionalDistrict: coreData.congressionalDistrict || null,

@@ -754,13 +754,6 @@
               "isRequired": false,
               "attributes": []
             },
-            "coreCongressionalDistrict": {
-              "name": "coreCongressionalDistrict",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
             "countryOfIncorporationCode": {
               "name": "countryOfIncorporationCode",
               "isArray": false,
@@ -800,13 +793,6 @@
               "name": "exclusionStatusFlag",
               "isArray": false,
               "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "expirationDate": {
-              "name": "expirationDate",
-              "isArray": false,
-              "type": "AWSDateTime",
               "isRequired": false,
               "attributes": []
             },

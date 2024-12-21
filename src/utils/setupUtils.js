@@ -22,17 +22,16 @@ export function initializeCompanyData(companyData) {
 		billingAddressStreetLine1: companyData.billingAddressStreetLine1 || null,
 		billingAddressStreetLine2: companyData.billingAddressStreetLine2 || null,
 		billingAddressZipCode: companyData.billingAddressZipCode || null,
+		businessTypeList: companyData.businessTypeList || [],
 
 		companyStartDate: companyData.companyStartDate ? new Date(companyData.companyStartDate).toISOString() : null,
 		congressionalDistrict: companyData.congressionalDistrict || null,
-		coreCongressionalDistrict: companyData.coreCongressionalDistrict || null,
 		countryOfIncorporationCode: companyData.countryOfIncorporationCode || null,
 		entityDivisionName: companyData.entityDivisionName || null,
 		entityStartDate: companyData.entityStartDate ? new Date(companyData.entityStartDate).toISOString() : null,
 		entityStructureDesc: companyData.entityStructureDesc || null,
 		entityTypeDesc: companyData.entityTypeDesc || null,
 		exclusionStatusFlag: companyData.exclusionStatusFlag || null,
-		expirationDate: companyData.expirationDate ? new Date(companyData.expirationDate).toISOString() : null,
 		fiscalYearEndCloseDate: companyData.fiscalYearEndCloseDate
 			? new Date(companyData.fiscalYearEndCloseDate).toISOString()
 			: null,
@@ -52,11 +51,13 @@ export function initializeCompanyData(companyData) {
 
 		registrationStatus: companyData.registrationStatus || null,
 		purposeOfRegistrationDesc: companyData.purposeOfRegistrationDesc || null,
-
+		stateOfIncorporationCode: companyData.stateOfIncorporationCode || null,
+		sbabusinessTypeDesc: companyData.sbaBusinessTypeDesc || null,
 		submissionDate: companyData.submissionDate ? new Date(companyData.submissionDate).toISOString() : null,
 		SAMPullDate: new Date().toISOString(),
 
 		naicsCode: companyData.naicsCode || [],
+		pscCode: companyData.pscCode || [],
 		primaryNaics: companyData.primaryNaics || null,
 		status: "ACTIVE",
 		activationDate: new Date().toISOString(),

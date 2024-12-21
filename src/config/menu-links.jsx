@@ -17,6 +17,22 @@ import {
 	BarChart,
 } from "lucide-react";
 
+const profileLinks = {
+	id: "profile",
+	title: "Profile",
+	icon: Users,
+	links: [
+		{
+			title: "Capability Statement",
+			path: "/capability",
+		},
+		{
+			title: "SAM Registration",
+			path: "/sam",
+		},
+	],
+};
+
 // Group related menu items
 const marketIntelligenceLinks = {
 	id: "market",
@@ -38,18 +54,14 @@ const marketIntelligenceLinks = {
 	],
 };
 
-const profileLinks = {
-	id: "profile",
-	title: "Profile",
-	icon: Users,
+const regulationLinks = {
+	id: "regulations",
+	title: "Regulations",
+	icon: Medal,
 	links: [
 		{
-			title: "Capability Statement",
-			path: "/capability",
-		},
-		{
-			title: "SAM Registration",
-			path: "/sam",
+			title: "FAR/DFARS",
+			path: "/far",
 		},
 	],
 };
@@ -70,18 +82,6 @@ const administrationLinks = {
 		{
 			title: "Manage Users",
 			path: "/user-admin",
-		},
-	],
-};
-
-const regulationLinks = {
-	id: "regulations",
-	title: "Regulations",
-	icon: Medal,
-	links: [
-		{
-			title: "FAR/DFARS",
-			path: "/far",
 		},
 	],
 };
@@ -132,9 +132,10 @@ export const menuLinks = [
 			},
 		],
 	},
-	marketIntelligenceLinks,
+
 	profileLinks,
-	administrationLinks,
+	marketIntelligenceLinks,
 	regulationLinks,
+	administrationLinks,
 	systemLinks,
 ];

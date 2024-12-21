@@ -20,7 +20,7 @@ export async function refreshSamData(company) {
 		throw new Error("No data found for the provided UEI");
 	}
 	const initializedData = initializeCompanyData(formattedData);
-	console.log("pull initialized", initializedData);
+	console.log("sam refresh data initialized", initializedData);
 	// Update company in database
 	const response = await client.models.Company.update({
 		id: company.id,

@@ -140,7 +140,6 @@ const schema = a.schema({
 			naicsCode: a.string().array(),
 			pscCode: a.string().array(),
 			sbaBusinessTypeDesc: a.string().array(),
-			entityURL: a.url(),
 			companyLogo: a.url(),
 			documentFolder: a.url(),
 			opportunities: a.hasMany("Opportunity", "companyId"),
