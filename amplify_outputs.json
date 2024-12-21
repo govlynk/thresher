@@ -985,16 +985,16 @@
               "attributes": [],
               "isArrayNullable": true
             },
-            "sbacertificationEntryDate": {
-              "name": "sbacertificationEntryDate",
+            "sbaCertificationEntryDate": {
+              "name": "sbaCertificationEntryDate",
               "isArray": true,
               "type": "AWSDateTime",
               "isRequired": false,
               "attributes": [],
               "isArrayNullable": true
             },
-            "sbacertificationExitDate": {
-              "name": "sbacertificationExitDate",
+            "sbaCertificationExitDate": {
+              "name": "sbaCertificationExitDate",
               "isArray": true,
               "type": "AWSDateTime",
               "isRequired": false,

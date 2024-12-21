@@ -54,12 +54,12 @@ export function initializeCompanyData(formattedData) {
 		stateOfIncorporationCode: formattedData.stateOfIncorporationCode || null,
 		businessTypeDesc: formattedData.businessTypeDesc || [],
 		sbaBusinessTypeDesc: formattedData.sbaBusinessTypeDesc || [],
-		// sbaCertificationEntryDate: formattedData.sbaCertificationEntryDate
-		// 	? new Date(formattedData.sbaCertificationEntryDate).toISOString()
-		// 	: null,
-		// sbaCertificationExitDate: formattedData.sbaCertificationExitDate
-		// 	? new Date(formattedData.sbaCertificationExitDate).toISOString()
-		// 	: null,
+		sbaCertificationEntryDate: formattedData.sbaCertificationEntryDate
+			? new Date(formattedData.sbaCertificationEntryDate).toISOString()
+			: null,
+		sbaCertificationExitDate: formattedData.sbaCertificationExitDate
+			? new Date(formattedData.sbaCertificationExitDate).toISOString()
+			: null,
 		submissionDate: formattedData.submissionDate ? new Date(formattedData.submissionDate).toISOString() : null,
 		SAMPullDate: new Date().toISOString(),
 
