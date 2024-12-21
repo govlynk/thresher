@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Alert } from "@mui/material";
+import { Box, Typography, Alert, Button, CircularProgress } from "@mui/material";
 import { generateClient } from "aws-amplify/data";
 import { useGlobalStore } from "../stores/globalStore";
 import CompanyHeader from "../components/company/CompanyHeader";
 import CompanyDetailsGrid from "../components/company/CompanyDetailsGrid";
+import { refreshSamData } from "../utils/sam/samDataRefresh";
+import { RefreshCw } from "lucide-react";
 
-const client = generateClient({
-	authMode: "userPool",
-});
+const client = generateClient();
 
 export default function SAMRegistrationScreen() {
 	const [company, setCompany] = useState(null);
@@ -25,7 +25,6 @@ export default function SAMRegistrationScreen() {
 			setLoading(true);
 			try {
 				const response = await client.models.Company.get({ id: activeCompanyId });
-				console.log("Company response:", response);
 				setCompany(response.data);
 				setError(null);
 			} catch (err) {
@@ -39,6 +38,24 @@ export default function SAMRegistrationScreen() {
 		fetchCompany();
 	}, [activeCompanyId]);
 
+	const handleRefreshData = async () => {
+		if (!company) return;
+
+		setLoading(true);
+		setError(null);
+
+		try {
+			const updatedCompany = await refreshSamData(company);
+			console.log("Updated company:", updatedCompany);
+			setCompany(updatedCompany);
+		} catch (err) {
+			console.error("Error refreshing SAM data:", err);
+			setError(err.message || "Failed to refresh SAM data");
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	if (!activeCompanyId) {
 		return (
 			<Box sx={{ p: 3 }}>
@@ -47,7 +64,7 @@ export default function SAMRegistrationScreen() {
 		);
 	}
 
-	if (loading) {
+	if (loading && !company) {
 		return (
 			<Box sx={{ p: 3 }}>
 				<Typography>Loading...</Typography>
@@ -65,9 +82,28 @@ export default function SAMRegistrationScreen() {
 
 	return (
 		<Box sx={{ p: 3 }}>
-			<Typography variant='h4' sx={{ mb: 4, fontWeight: "bold" }}>
-				Company Registration Details
-			</Typography>
+			<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+				<Typography variant='h4' sx={{ fontWeight: "bold" }}>
+					Company Registration Details
+				</Typography>
+				<Button
+					variant='contained'
+					color='primary'
+					onClick={handleRefreshData}
+					disabled={!company?.uei}
+					startIcon={loading ? <CircularProgress size={20} /> : <RefreshCw size={20} />}
+					sx={{ ml: 2 }}
+				>
+					{loading ? "Refreshing..." : "Refresh SAM Data"}
+				</Button>
+			</Box>
+
+			{error && (
+				<Alert severity='error' sx={{ mb: 3 }}>
+					{error}
+				</Alert>
+			)}
+
 			{company && (
 				<>
 					<CompanyHeader company={company} />

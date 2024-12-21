@@ -10,8 +10,6 @@ export default function CompanyInfoSection({ company }) {
 			<DataField label='DBA Name' value={company.dbaName} />
 			<DataField label='Entity Division' value={company.entityDivisionName} />
 			<DataField label='Congressional District' value={company.congressionalDistrict} />
-			<DataField label='Core Congressional District' value={company.coreCongressionalDistrict} />
-			<DataField label='Entity URL' value={company.entityURL} isUrl />
 		</InfoCard>
 	);
 }

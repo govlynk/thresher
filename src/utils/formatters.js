@@ -8,6 +8,19 @@ export const formatCurrency = (amount) => {
 	}).format(amount);
 };
 
+export const formatShortDate = (dateString) => {
+	if (!dateString) return "N/A";
+	try {
+		return new Date(dateString).toLocaleDateString(undefined, {
+			month: "2-digit",
+			day: "2-digit",
+		});
+	} catch (error) {
+		console.error("Error formatting short date:", error);
+		return "Invalid Date";
+	}
+};
+
 export const formatDate = (dateString) => {
 	if (!dateString) return "N/A";
 	try {

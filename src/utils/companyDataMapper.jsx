@@ -56,6 +56,7 @@ export const formatCompanyData = (entityData) => {
 	console.log("ED", entityData);
 	console.log("poc", pointsOfContact);
 
+	console.log("entity information", coreData.entityInformation);
 	const companyData = {
 		// Entity Registration Data
 		activationDate: entityRegistrationData.activationDate || null,
@@ -68,14 +69,13 @@ export const formatCompanyData = (entityData) => {
 		exclusionStatusFlag: entityRegistrationData.exclusionStatusFlag || null,
 
 		keyWords: entityRegistrationData.keyWords || null,
+		//
 		lastUpdateDate: entityRegistrationData.lastUpdateDate || null,
 		legalBusinessName: entityRegistrationData.legalBusinessName || null,
 		purposeOfRegistrationDesc: entityRegistrationData.purposeOfRegistrationDesc || null,
 		registrationStatus: entityRegistrationData.registrationStatus || null,
 		registrationDate: entityRegistrationData.registrationDate || null,
-		// Dups
 		registrationExpirationDate: entityRegistrationData.registrationExpirationDate || null,
-		expirationDate: entityRegistrationData.registrationExpirationDate || null,
 		//
 		SAMPullDate: new Date().toISOString(),
 		uei: entityRegistrationData.ueiSAM || null,
@@ -83,10 +83,8 @@ export const formatCompanyData = (entityData) => {
 		// Core Data - Entity Information
 		entityDivisionName: coreData.entityInformation?.entityDivisionName || null,
 		entityStartDate: coreData.entityInformation?.entityStartDate || null,
-		// Dups
-		entityURL: coreData.entityInformation?.entityURL || null,
+
 		companyWebsite: coreData.entityInformation?.entityURL || null,
-		//
 		fiscalYearEndCloseDate: coreData.entityInformation?.fiscalYearEndCloseDate || null,
 		submissionDate: coreData.entityInformation?.submissionDate || null,
 
@@ -98,9 +96,8 @@ export const formatCompanyData = (entityData) => {
 		stateOfIncorporationCode: coreData.generalInformation?.stateOfIncorporationCode || null,
 		countryOfIncorporationCode: coreData.generalInformation?.countryOfIncorporationCode || null,
 
-		// Congressional District from Core Data - Dups
-		coreCongressionalDistrict: entityRegistrationData.congressionalDistrict || null,
-		congressionalDistrict: entityRegistrationData.congressionalDistrict || null,
+		// Congressional District
+		congressionalDistrict: coreData.congressionalDistrict || null,
 	};
 
 	// Map Address Data

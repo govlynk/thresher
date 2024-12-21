@@ -1,19 +1,11 @@
 import React from "react";
 import { Box, Paper, Typography, Chip, Divider, Grid } from "@mui/material";
 import { Building2, Calendar, FileText } from "lucide-react";
+import { formatDate } from "../../utils/formatters";
 
 export default function CompanyHeader({ company }) {
-	const registrationStatus = company.registrationStatus || "ACTIVE";
+	const registrationStatus = company.registrationStatus.toUpperCase() || "ACTIVE";
 	const isActive = registrationStatus === "ACTIVE";
-
-	const formatDate = (dateString) => {
-		if (!dateString) return null;
-		return new Date(dateString).toLocaleDateString("en-US", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-	};
 
 	return (
 		<Paper sx={{ p: 3, mb: 3 }}>

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
 import { useGlobalStore } from "../globalStore";
-import { getRepsAndCerts } from "../../utils/samApi";
+import { getRepsAndCerts } from "../../utils/sam/samApi";
 import { processRegulationResponses } from "../../utils/regulationUtils";
 
 const client = generateClient();

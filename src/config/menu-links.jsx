@@ -12,6 +12,7 @@ import {
 	Search,
 	Briefcase,
 	DollarSign,
+	Settings2,
 	PieChart,
 	BarChart,
 } from "lucide-react";
@@ -56,7 +57,7 @@ const profileLinks = {
 const administrationLinks = {
 	id: "administration",
 	title: "Administration",
-	icon: Users,
+	icon: Settings2,
 	links: [
 		{
 			title: "Manage Contacts",

@@ -40,11 +40,7 @@ export function initializeCompanyData(companyData) {
 
 		companyEmail: companyData.companyEmail || null,
 		companyPhoneNumber: companyData.companyPhoneNumber || null,
-		companyWebsite: companyData.entityURL
-			? companyData.entityURL.startsWith("http")
-				? companyData.entityURL
-				: `https://${companyData.entityURL}`
-			: null,
+		companyWebsite: companyData.companyWebsite || null,
 		organizationStructureDesc: companyData.organizationStructureDesc || null,
 		profitStructureDesc: companyData.profitStructureDesc || null,
 		//

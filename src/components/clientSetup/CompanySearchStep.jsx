@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, Paper, useTheme, CircularProgress, Alert } from "@mui/material";
 import { Search, ArrowRight, Building2 } from "lucide-react";
-import { getEntity } from "../../utils/samApi";
+import { getEntity } from "../../utils/sam/samApi";
 import { useSetupWorkflowStore } from "../../stores/setupWorkflowStore";
 import { formatCompanyData } from "../../utils/companyDataMapper";
 
