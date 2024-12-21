@@ -962,13 +962,6 @@
               "attributes": [],
               "isArrayNullable": true
             },
-            "entityURL": {
-              "name": "entityURL",
-              "isArray": false,
-              "type": "AWSURL",
-              "isRequired": false,
-              "attributes": []
-            },
             "companyLogo": {
               "name": "companyLogo",
               "isArray": false,
