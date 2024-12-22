@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { questions } from "../config/questions";
+import { questions } from "../components/assessment/questions";
 
 export const useAssessmentStore = create((set) => ({
 	currentStep: 0,
