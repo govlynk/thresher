@@ -23,7 +23,6 @@ export function AboutSection({ value, onChange }) {
 					required: true,
 					placeholder: "Describe your company's background, expertise, and core business areas...",
 					minHeight: 300,
-					minLength: 100,
 					maxLength: 2000,
 				}}
 				value={value}

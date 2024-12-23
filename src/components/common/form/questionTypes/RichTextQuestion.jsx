@@ -2,7 +2,7 @@ import React from "react";
 import { Box } from "@mui/material";
 import { RichTextEditor } from "../RichTextEditor/RichTextEditor";
 import { FormField } from "../FormField";
-import { createEditorState, convertEditorStateToRaw, isEmptyEditorState } from "../../../../utils/richTextUtils";
+import { getPlainText, createEditorState, convertEditorStateToRaw } from "../../../../utils/richTextUtils";
 
 export function RichTextQuestion({ question, value, onChange }) {
 	const handleEditorChange = React.useCallback(
@@ -36,9 +36,6 @@ export function RichTextQuestion({ question, value, onChange }) {
 	};
 
 	const error = validateContent();
-	console.log("RichTextQuestion -> error", error);
-	console.log("RichTextQuestion -> value", value);
-	console.log("RichTextQuestion -> question", question);
 
 	return (
 		<Box sx={{ width: "100%" }}>
