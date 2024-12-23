@@ -11,8 +11,7 @@ export function CertificationsStep({ formData, onChange, errors, onInfoClick }) 
       name: '',
       issuer: '',
       dateObtained: '',
-      expirationDate: '',
-      description: ''
+      expirationDate: ''
     }];
     onChange('certifications', newCertifications);
   };
@@ -33,8 +32,8 @@ export function CertificationsStep({ formData, onChange, errors, onInfoClick }) 
 
   return (
     <FormStep
-      title="Certifications & Qualifications"
-      description="List your company's relevant certifications and qualifications"
+      title="Certifications"
+      description="List your company's relevant certifications"
       onInfoClick={onInfoClick}
     >
       {formData.certifications?.map((cert, index) => (
@@ -57,7 +56,6 @@ export function CertificationsStep({ formData, onChange, errors, onInfoClick }) 
                   fullWidth
                   value={cert.name}
                   onChange={(e) => handleCertificationChange(index, 'name', e.target.value)}
-                  error={!!errors?.certifications?.[index]?.name}
                 />
               </FormField>
             </Grid>
@@ -67,7 +65,6 @@ export function CertificationsStep({ formData, onChange, errors, onInfoClick }) 
                   fullWidth
                   value={cert.issuer}
                   onChange={(e) => handleCertificationChange(index, 'issuer', e.target.value)}
-                  error={!!errors?.certifications?.[index]?.issuer}
                 />
               </FormField>
             </Grid>
@@ -90,18 +87,6 @@ export function CertificationsStep({ formData, onChange, errors, onInfoClick }) 
                   value={cert.expirationDate}
                   onChange={(e) => handleCertificationChange(index, 'expirationDate', e.target.value)}
                   InputLabelProps={{ shrink: true }}
-                />
-              </FormField>
-            </Grid>
-            <Grid item xs={12}>
-              <FormField label="Description">
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  value={cert.description}
-                  onChange={(e) => handleCertificationChange(index, 'description', e.target.value)}
-                  placeholder="Describe the scope and relevance of this certification..."
                 />
               </FormField>
             </Grid>

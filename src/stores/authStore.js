@@ -50,26 +50,15 @@ export const useAuthStore = create()(
 					const isGovLynkAdmin = groups.some(
 						(group) => typeof group === "string" && group.toLowerCase() === "govlynk_admin"
 					);
-					console.log("authInfo", authInfo);
 					// Fetch user data from database using email
 					const { data: users } = await client.models.User.list({
 						filter: { email: { eq: authInfo.email } },
 						limit: 1,
 					});
-					console.log("users", users?.[0]);
 					let userData = users?.[0];
 
 					if (!userData) {
 						//throw new Error("User is not defined");
-						// Create new user if doesn't exist
-						// const { data: newUser } = await client.models.User.create({
-						// 	cognitoId: cognitoUser.userId,
-						// 	email: authInfo.email,
-						// 	name: cognitoUser.username,
-						// 	status: "ACTIVE",
-						// 	lastLogin: new Date().toISOString(),
-						// });
-						// userData = newUser;
 					} else {
 						// Update last login
 						const { data: updatedUser } = await client.models.User.update({

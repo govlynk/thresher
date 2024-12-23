@@ -1,146 +1,80 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
-  TextField, 
-  Button, 
-  Typography,
-  Chip,
-  Paper
-} from '@mui/material';
-import { useCapabilityStatementStore } from '../../../stores/capabilityStatementStore';
+import React from "react";
+import { Grid } from "@mui/material";
+import { FormStep } from "../../common/form/FormStep";
+import { FormSection } from "../../common/form/FormSection";
+// import { RichTextQuestion } from '../../common/form/questionTypes/RichTextQuestion';
+import { TextQuestion } from "../../common/form/questionTypes/TextQuestion";
 
-export default function BasicInfoStep() {
-  const { formData, setFormData, nextStep } = useCapabilityStatementStore();
-  const [keywordInput, setKeywordInput] = useState('');
-  const [capabilityInput, setCapabilityInput] = useState('');
+export function BasicInfoStep({ formData, onChange, errors, onInfoClick }) {
+	return (
+		<FormStep
+			title='Basic Information'
+			description="Tell us about your company's mission, vision, and values"
+			onInfoClick={onInfoClick}
+		>
+			<FormSection>
+				<Grid container spacing={3}>
+					<Grid item xs={12}>
+						<TextQuestion
+							question={{
+								id: "aboutUs",
+								title: "About Us",
+								required: false,
+								error: errors?.aboutUs,
+								placeholder: "Describe your company...",
+								minHeight: 200,
+							}}
+							value={formData.aboutUs}
+							onChange={onChange}
+						/>
+					</Grid>
 
-  const handleKeywordAdd = (e) => {
-    if (e.key === 'Enter' && keywordInput.trim()) {
-      setFormData({
-        keywords: [...formData.keywords, keywordInput.trim()]
-      });
-      setKeywordInput('');
-    }
-  };
+					<Grid item xs={12}>
+						<TextQuestion
+							question={{
+								id: "mission",
+								title: "Mission Statement",
+								required: false,
+								error: errors?.mission,
+								placeholder: "Your company mission...",
+								minHeight: 150,
+							}}
+							value={formData.mission}
+							onChange={onChange}
+						/>
+					</Grid>
 
-  const handleCapabilityAdd = (e) => {
-    if (e.key === 'Enter' && capabilityInput.trim()) {
-      setFormData({
-        keyCapabilities: [...formData.keyCapabilities, capabilityInput.trim()]
-      });
-      setCapabilityInput('');
-    }
-  };
+					<Grid item xs={12}>
+						<TextQuestion
+							question={{
+								id: "vision",
+								title: "Vision Statement",
+								required: false,
+								error: errors?.vision,
+								placeholder: "Your company vision...",
+								minHeight: 150,
+							}}
+							value={formData.vision}
+							onChange={onChange}
+						/>
+					</Grid>
 
-  const handleRemoveKeyword = (keyword) => {
-    setFormData({
-      keywords: formData.keywords.filter(k => k !== keyword)
-    });
-  };
-
-  const handleRemoveCapability = (capability) => {
-    setFormData({
-      keyCapabilities: formData.keyCapabilities.filter(c => c !== capability)
-    });
-  };
-
-  const handleSubmit = () => {
-    nextStep();
-  };
-
-  return (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Basic Information
-      </Typography>
-
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <TextField
-          fullWidth
-          label="About Us"
-          multiline
-          rows={4}
-          value={formData.aboutUs}
-          onChange={(e) => setFormData({ aboutUs: e.target.value })}
-        />
-
-        <TextField
-          fullWidth
-          label="Mission"
-          multiline
-          rows={2}
-          value={formData.mission}
-          onChange={(e) => setFormData({ mission: e.target.value })}
-        />
-
-        <TextField
-          fullWidth
-          label="Vision"
-          multiline
-          rows={2}
-          value={formData.vision}
-          onChange={(e) => setFormData({ vision: e.target.value })}
-        />
-
-        <TextField
-          fullWidth
-          label="Competitive Advantage"
-          multiline
-          rows={3}
-          value={formData.competitiveAdvantage}
-          onChange={(e) => setFormData({ competitiveAdvantage: e.target.value })}
-        />
-
-        <Box>
-          <TextField
-            fullWidth
-            label="Key Capabilities"
-            value={capabilityInput}
-            onChange={(e) => setCapabilityInput(e.target.value)}
-            onKeyPress={handleCapabilityAdd}
-            helperText="Press Enter to add capability"
-          />
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-            {formData.keyCapabilities.map((capability, index) => (
-              <Chip
-                key={index}
-                label={capability}
-                onDelete={() => handleRemoveCapability(capability)}
-              />
-            ))}
-          </Box>
-        </Box>
-
-        <Box>
-          <TextField
-            fullWidth
-            label="Keywords"
-            value={keywordInput}
-            onChange={(e) => setKeywordInput(e.target.value)}
-            onKeyPress={handleKeywordAdd}
-            helperText="Press Enter to add keyword"
-          />
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-            {formData.keywords.map((keyword, index) => (
-              <Chip
-                key={index}
-                label={keyword}
-                onDelete={() => handleRemoveKeyword(keyword)}
-              />
-            ))}
-          </Box>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            disabled={!formData.aboutUs.trim()}
-          >
-            Next
-          </Button>
-        </Box>
-      </Box>
-    </Paper>
-  );
+					<Grid item xs={12}>
+						<TextQuestion
+							question={{
+								id: "competitiveAdvantage",
+								title: "Competitive Advantage",
+								required: false,
+								error: errors?.competitiveAdvantage,
+								placeholder: "What sets you apart...",
+								minHeight: 150,
+							}}
+							value={formData.competitiveAdvantage}
+							onChange={onChange}
+						/>
+					</Grid>
+				</Grid>
+			</FormSection>
+		</FormStep>
+	);
 }

@@ -50,7 +50,7 @@ export const questions = [
 		id: "capabilities",
 		title: "Core Capabilities",
 		question: "Describe your company's core capabilities and differentiators",
-		type: QUESTION_TYPES.RICH_TEXT,
+		type: QUESTION_TYPES.TEXT,
 		required: true,
 		minLength: 50,
 		maxLength: 500,

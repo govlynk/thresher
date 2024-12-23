@@ -1,6 +1,7 @@
 export const QUESTION_TYPES = {
 	TEXT: "text",
 	LONG_TEXT: "longText",
+	RICH_TEXT: "richText",
 	YES_NO: "yesNo",
 	MULTIPLE_CHOICE: "multipleChoice",
 	SINGLE_CHOICE: "singleChoice",

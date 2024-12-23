@@ -1,64 +1,91 @@
-import React, { useEffect, useCallback } from "react";
-import { Box, Stepper, Step, StepLabel, Paper, Alert } from "@mui/material";
+import React from "react";
+import { Box, Container } from "@mui/material";
+import { FormController } from "../common/form/FormController";
+import { BasicInfoStep } from "./steps/BasicInfoStep";
+import { CoreCapabilitiesStep } from "./steps/CoreCapabilitiesStep";
+import { PastPerformanceStep } from "./steps/PastPerformanceStep";
+import { CertificationsStep } from "./steps/CertificationsStep";
+import { ReviewStep } from "./steps/ReviewStep";
 import { useCapabilityStatementStore } from "../../stores/capabilityStatementStore";
-import { useGlobalStore } from "../../stores/globalStore";
-import BasicInfoStep from "./steps/BasicInfoStep";
-import PastPerformanceStep from "./steps/PastPerformanceStep";
-import CertificationsStep from "./steps/CertificationsStep";
-import ReviewStep from "./steps/ReviewStep";
+import { questionInfo } from "./questionInfo";
+import { useFormAutosave } from "../common/form/useFormAutosave";
 
-const steps = ["Basic Information", "Past Performance", "Certifications", "Review"];
+const steps = [
+	{
+		id: "basicInfo",
+		label: "Basic Information",
+		component: BasicInfoStep,
+		validate: (data) => {
+			const errors = {};
+			console.log("rtf text", data);
+
+			if (!data.aboutUs?.trim()) errors.aboutUs = "About Us is required";
+			if (!data.mission?.trim()) errors.mission = "Mission is required";
+			if (!data.vision?.trim()) errors.vision = "Vision is required";
+			return Object.keys(errors).length ? errors : null;
+		},
+	},
+	{
+		id: "coreCapabilities",
+		label: "Core Capabilities",
+		component: CoreCapabilitiesStep,
+		validate: (data) => {
+			const errors = {};
+			if (!data.keyCapabilities?.length) {
+				errors.keyCapabilities = "At least one capability is required";
+			}
+			return Object.keys(errors).length ? errors : null;
+		},
+	},
+	{
+		id: "pastPerformance",
+		label: "Past Performance",
+		component: PastPerformanceStep,
+		validate: (data) => {
+			const errors = {};
+			if (!data.pastPerformances?.length) {
+				errors.pastPerformances = "At least one past performance is required";
+			}
+			return Object.keys(errors).length ? errors : null;
+		},
+	},
+	{
+		id: "certifications",
+		label: "Certifications",
+		component: CertificationsStep,
+	},
+	{
+		id: "review",
+		label: "Review",
+		component: ReviewStep,
+	},
+];
 
 export default function CapabilityStatementForm() {
-	const { activeStep, initializeForm, initialized } = useCapabilityStatementStore();
-	const { activeCompanyId } = useGlobalStore.getState();
+	const { formData, setFormData, submitForm, setAnswer, loading, error } = useCapabilityStatementStore();
 
-	const initForm = useCallback(async () => {
-		if (activeCompanyId && !initialized) {
-			await initializeForm(activeCompanyId);
-		}
-	}, [activeCompanyId, initializeForm, initialized]);
+	useFormAutosave({
+		formData,
+		onSave: setFormData,
+	});
 
-	useEffect(() => {
-		initForm();
-	}, [initForm]);
-
-	const renderStep = () => {
-		switch (activeStep) {
-			case 0:
-				return <BasicInfoStep />;
-			case 1:
-				return <PastPerformanceStep />;
-			case 2:
-				return <CertificationsStep />;
-			case 3:
-				return <ReviewStep />;
-			default:
-				return null;
-		}
+	const handleSubmit = async (data) => {
+		await submitForm(data);
 	};
 
-	if (!activeCompanyId) {
-		return (
-			<Box sx={{ p: 3 }}>
-				<Alert severity='warning'>Please select a company to create a capability statement</Alert>
-			</Box>
-		);
-	}
-
 	return (
-		<Box sx={{ p: 3 }}>
-			<Paper sx={{ p: 3, mb: 3 }}>
-				<Stepper activeStep={activeStep}>
-					{steps.map((label) => (
-						<Step key={label}>
-							<StepLabel>{label}</StepLabel>
-						</Step>
-					))}
-				</Stepper>
-			</Paper>
-
-			{renderStep()}
-		</Box>
+		<Container maxWidth='lg'>
+			<Box sx={{ py: 4 }}>
+				<FormController
+					steps={steps}
+					initialData={formData}
+					onSubmit={handleSubmit}
+					onSave={setFormData}
+					loading={loading}
+					error={error}
+					questionInfo={questionInfo}
+				/>
+			</Box>
+		</Container>
 	);
 }

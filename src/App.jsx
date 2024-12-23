@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Authenticator } from "@aws-amplify/ui-react";
 import { useAuthStore } from "./stores/authStore";
 import { useGlobalStore } from "./stores/globalStore";
@@ -23,14 +23,11 @@ const AuthenticatedApp = ({ signOut, user }) => {
 	const { setActiveUser, setActiveCompany, setActiveTeam } = useGlobalStore();
 	const [initError, setInitError] = React.useState(null);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (user) {
-			console.log("[AuthenticatedApp] Starting initialization for user:", user);
-
 			const initializeApp = async () => {
 				try {
 					// Initialize auth and get user data
-					console.log("[AuthenticatedApp] Initializing auth store...");
 					const userData = await initializeAuth(user);
 
 					if (!userData) {
@@ -57,10 +54,8 @@ const AuthenticatedApp = ({ signOut, user }) => {
 						}
 					}
 
-					console.log("[AuthenticatedApp] Initialization complete");
 					setInitError(null);
 				} catch (err) {
-					console.error("[AuthenticatedApp] Error during initialization:", err);
 					setInitError(err.message || "Failed to initialize application");
 				}
 			};
