@@ -1,9 +1,13 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
-// import { RichTextEditor } from "../../common/form/RichTextEditor/RichTextEditor";
 import { RichTextQuestion } from "../../common/form/questionTypes/RichTextQuestion";
 
 export function AboutSection({ value, onChange }) {
+	const handleChange = (fieldId, content) => {
+		// Since we're using RichTextQuestion, content will already be in the correct format
+		onChange(content);
+	};
+
 	return (
 		<Box>
 			<Typography variant='h6' gutterBottom>
@@ -16,13 +20,14 @@ export function AboutSection({ value, onChange }) {
 				question={{
 					id: "aboutUs",
 					title: "About Us",
-					required: false,
-					// error: errors?.aboutUs,
+					required: true,
 					placeholder: "Describe your company's background, expertise, and core business areas...",
 					minHeight: 300,
+					minLength: 100,
+					maxLength: 2000,
 				}}
 				value={value}
-				onChange={onChange}
+				onChange={handleChange}
 			/>
 		</Box>
 	);

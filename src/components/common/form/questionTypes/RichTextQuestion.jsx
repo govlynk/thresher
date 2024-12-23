@@ -2,28 +2,53 @@ import React from "react";
 import { Box } from "@mui/material";
 import { RichTextEditor } from "../RichTextEditor/RichTextEditor";
 import { FormField } from "../FormField";
+import { createEditorState, convertEditorStateToRaw, isEmptyEditorState } from "../../../../utils/richTextUtils";
 
 export function RichTextQuestion({ question, value, onChange }) {
 	const handleEditorChange = React.useCallback(
-		(content) => {
-			onChange(question.id, content);
+		(editorContent) => {
+			// Only update if content actually changed
+			if (editorContent !== value) {
+				onChange(question.id, editorContent);
+			}
 		},
-		[question.id, onChange]
+		[question.id, onChange, value]
 	);
+
+	const validateContent = () => {
+		if (question.required && (!value || value === "{}")) {
+			return "This field is required";
+		}
+
+		if (question.minLength || question.maxLength) {
+			const plainText = getPlainText(value);
+
+			if (question.minLength && plainText.length < question.minLength) {
+				return `Minimum ${question.minLength} characters required`;
+			}
+
+			if (question.maxLength && plainText.length > question.maxLength) {
+				return `Maximum ${question.maxLength} characters allowed`;
+			}
+		}
+
+		return null;
+	};
+
+	const error = validateContent();
+	console.log("RichTextQuestion -> error", error);
+	console.log("RichTextQuestion -> value", value);
+	console.log("RichTextQuestion -> question", question);
 
 	return (
 		<Box sx={{ width: "100%" }}>
-			<FormField
-				label={question.title}
-				required={question.required}
-				error={question.error}
-				helperText={question.helpText}
-			>
+			<FormField label={question.title} required={question.required} error={error} helperText={question.helpText}>
 				<RichTextEditor
 					value={value}
 					onChange={handleEditorChange}
 					placeholder={question.placeholder}
 					minHeight={question.minHeight || 300}
+					error={Boolean(error)}
 				/>
 			</FormField>
 		</Box>

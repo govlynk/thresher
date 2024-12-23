@@ -85,6 +85,7 @@ export default function CapabilityStatementForm() {
 		switch (activeStep) {
 			case 0:
 				return <AboutSection value={formData.aboutUs} onChange={(value) => updateFormData("aboutUs", value)} />;
+
 			case 1:
 				return (
 					<CapabilitiesSection
