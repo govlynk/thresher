@@ -27,7 +27,7 @@ const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
 const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
 const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
 const AssessmentScreen = lazy(() => import("../../screens/AssessmentScreen"));
-const CapabilityStatementScreen = lazy(() => import("../../screens/CapabilityStatementScreen - Copy"));
+const CapabilityStatementScreen = lazy(() => import("../../screens/CapabilityStatementScreen"));
 const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
 const TestScreen = lazy(() => import("../../screens/TestScreen"));
 

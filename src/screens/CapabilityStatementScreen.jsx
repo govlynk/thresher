@@ -1,32 +1,47 @@
-import React from 'react';
-import { Box, Container, Alert } from '@mui/material';
-import { useGlobalStore } from '../stores/globalStore';
-import CapabilityStatementForm from '../components/capability/CapabilityStatementForm';
+import React from "react";
+import { Box, Container, Typography, Alert, CircularProgress } from "@mui/material";
+import { useGlobalStore } from "../stores/globalStore";
+import { useCapabilityStatementStore } from "../stores/capabilityStatementStore";
+import CapabilityStatementForm from "../components/capability/CapabilityStatementForm";
 
-// Make sure to use default export
-const CapabilityStatementScreen = () => {
-  const { activeCompanyId } = useGlobalStore();
+function CapabilityStatementScreen() {
+	const { activeCompanyId } = useGlobalStore.getState();
+	const { loading, error } = useCapabilityStatementStore();
 
-  if (!activeCompanyId) {
-    return (
-      <Container maxWidth={false}>
-        <Box sx={{ p: 4 }}>
-          <Alert severity="warning">
-            Please select a company to manage capability statement
-          </Alert>
-        </Box>
-      </Container>
-    );
-  }
+	if (!activeCompanyId) {
+		return (
+			<Container maxWidth={false}>
+				<Box sx={{ p: 4 }}>
+					<Alert severity='warning'>Please select a company to manage capability statement</Alert>
+				</Box>
+			</Container>
+		);
+	}
 
-  return (
-    <Container maxWidth={false} disableGutters>
-      <Box sx={{ p: 4, width: '100%' }}>
-        <CapabilityStatementForm />
-      </Box>
-    </Container>
-  );
-};
+	if (loading) {
+		return (
+			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+				<CircularProgress />
+			</Box>
+		);
+	}
 
-// Export as default
+	return (
+		<Container maxWidth={false} disableGutters>
+			<Box sx={{ p: 2, width: "100%" }}>
+				<Typography variant='h4' gutterBottom>
+					Capability Statement
+				</Typography>
+				{error && (
+					<Alert severity='error' sx={{ mb: 3 }}>
+						{error}
+					</Alert>
+				)}
+
+				<CapabilityStatementForm />
+			</Box>
+		</Container>
+	);
+}
+
 export default CapabilityStatementScreen;
