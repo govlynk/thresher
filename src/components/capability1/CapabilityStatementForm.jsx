@@ -27,9 +27,9 @@ import { ReviewSection } from "./sections/ReviewSection";
 
 const steps = [
 	"About Us",
-	"Key Capabilities",
-	"Competitive Advantage",
 	"Mission & Vision",
+	"Competitive Advantage",
+	"Key Capabilities",
 	"Past Performance",
 	"Certifications",
 	"Review",
@@ -41,10 +41,10 @@ export default function CapabilityStatementForm() {
 	const [activeStep, setActiveStep] = useState(0);
 	const [formData, setFormData] = useState({
 		aboutUs: "",
-		keyCapabilities: [],
-		competitiveAdvantage: "",
 		mission: "",
 		vision: "",
+		competitiveAdvantage: "",
+		keyCapabilities: [],
 		pastPerformance: [],
 		certifications: [],
 	});
@@ -63,10 +63,10 @@ export default function CapabilityStatementForm() {
 		if (capabilityStatement) {
 			setFormData({
 				aboutUs: capabilityStatement.aboutUs || "",
-				keyCapabilities: capabilityStatement.keyCapabilities || [],
 				competitiveAdvantage: capabilityStatement.competitiveAdvantage || "",
 				mission: capabilityStatement.mission || "",
 				vision: capabilityStatement.vision || "",
+				keyCapabilities: capabilityStatement.keyCapabilities || [],
 				pastPerformance: capabilityStatement.pastPerformance || [],
 				certifications: capabilityStatement.certifications || [],
 			});
@@ -85,12 +85,13 @@ export default function CapabilityStatementForm() {
 		switch (activeStep) {
 			case 0:
 				return <AboutSection value={formData.aboutUs} onChange={(value) => updateFormData("aboutUs", value)} />;
-
 			case 1:
 				return (
-					<CapabilitiesSection
-						value={formData.keyCapabilities}
-						onChange={(value) => updateFormData("keyCapabilities", value)}
+					<MissionVisionSection
+						mission={formData.mission}
+						vision={formData.vision}
+						onMissionChange={(value) => updateFormData("mission", value)}
+						onVisionChange={(value) => updateFormData("vision", value)}
 					/>
 				);
 			case 2:
@@ -102,13 +103,12 @@ export default function CapabilityStatementForm() {
 				);
 			case 3:
 				return (
-					<MissionVisionSection
-						mission={formData.mission}
-						vision={formData.vision}
-						onMissionChange={(value) => updateFormData("mission", value)}
-						onVisionChange={(value) => updateFormData("vision", value)}
+					<CapabilitiesSection
+						value={formData.keyCapabilities}
+						onChange={(value) => updateFormData("keyCapabilities", value)}
 					/>
 				);
+
 			case 4:
 				return (
 					<PastPerformanceSection

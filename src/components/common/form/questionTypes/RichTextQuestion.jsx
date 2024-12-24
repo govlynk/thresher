@@ -39,7 +39,7 @@ export function RichTextQuestion({ question, value, onChange }) {
 
 	return (
 		<Box sx={{ width: "100%" }}>
-			<FormField label={question.title} required={question.required} error={error} helperText={question.helpText}>
+			<FormField question={question} error={error} helperText={question.helpText}>
 				<RichTextEditor
 					value={value}
 					onChange={handleEditorChange}

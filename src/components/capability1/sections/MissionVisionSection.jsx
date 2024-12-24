@@ -1,50 +1,50 @@
-import React from 'react';
-import { Box, TextField, Typography } from '@mui/material';
+import React from "react";
+import { Box, TextField, Typography } from "@mui/material";
+import { RichTextQuestion } from "../../common/form/questionTypes/RichTextQuestion";
 
 export function MissionVisionSection({ mission, vision, onMissionChange, onVisionChange }) {
-  return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Mission & Vision
-      </Typography>
-      
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Mission Statement
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Define your company's purpose and primary objectives.
-        </Typography>
-        <TextField
-          fullWidth
-          multiline
-          rows={3}
-          value={mission}
-          onChange={(e) => onMissionChange(e.target.value)}
-          placeholder="Enter your mission statement..."
-          helperText={`${mission.length}/500 characters`}
-          inputProps={{ maxLength: 500 }}
-        />
-      </Box>
+	const handleMissionChange = (fieldId, content) => {
+		// Since we're using RichTextQuestion, content will already be in the correct format
+		onMissionChange(content);
+	};
+	const handleVisionChange = (fieldId, content) => {
+		// Since we're using RichTextQuestion, content will already be in the correct format
+		onVisionChange(content);
+	};
 
-      <Box>
-        <Typography variant="subtitle1" gutterBottom>
-          Vision Statement
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Describe your company's aspirations and future goals.
-        </Typography>
-        <TextField
-          fullWidth
-          multiline
-          rows={3}
-          value={vision}
-          onChange={(e) => onVisionChange(e.target.value)}
-          placeholder="Enter your vision statement..."
-          helperText={`${vision.length}/500 characters`}
-          inputProps={{ maxLength: 500 }}
-        />
-      </Box>
-    </Box>
-  );
+	return (
+		<Box>
+			<Box sx={{ mb: 4 }}>
+				<RichTextQuestion
+					question={{
+						id: "mission",
+						title: "Mission Statement",
+						instructions: "Define your company's purpose and primary objectives.",
+						required: false,
+						placeholder: "Describe your company's mission...",
+						minHeight: 300,
+						maxLength: 2000,
+					}}
+					value={mission}
+					onChange={handleMissionChange}
+				/>
+			</Box>
+
+			<Box>
+				<RichTextQuestion
+					question={{
+						id: "vision",
+						title: "Vision Statement",
+						instructions: "Describe your company's aspirations and future goals.",
+						required: false,
+						placeholder: "Describe your company's vision...",
+						minHeight: 300,
+						maxLength: 2000,
+					}}
+					value={vision}
+					onChange={handleVisionChange}
+				/>
+			</Box>
+		</Box>
+	);
 }
