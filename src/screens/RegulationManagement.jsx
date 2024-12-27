@@ -14,12 +14,14 @@ export default function RegulationManagement() {
 	const { documents, fetchDocuments } = useDocumentStore();
 
 	useEffect(() => {
+		console.log("activeCompanyId:", activeCompanyId);
+		console.log("activeCompanyData:", activeCompanyData);
 		if (activeCompanyData?.uei) {
 			console.log("Fetching regulations for company:", activeCompanyData.uei);
 			fetchRegulations();
 			fetchDocuments();
 		}
-	}, [activeCompanyData?.uei, fetchRegulations, fetchDocuments]);
+	}, [activeCompanyData, fetchRegulations, fetchDocuments]);
 
 	if (!activeCompanyId) {
 		return (
