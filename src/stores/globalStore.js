@@ -24,20 +24,25 @@ export const useGlobalStore = create(
 
 			// Company methods
 			setActiveCompany: async (companyId) => {
+				console.log("setActiveCompany called with:", companyId);
 				try {
-					// Fetch full company data
 					const response = await client.models.Company.get({ id: companyId });
+					console.log("Company data response:", response);
 					const companyData = response?.data;
 
 					if (!companyData) {
+						console.error("No company data found for ID:", companyId);
 						throw new Error("Company data not found");
 					}
+
+					console.log("Setting active company:", {
+						companyId,
+						companyData,
+					});
 
 					set({
 						activeCompanyId: companyId,
 						activeCompanyData: companyData,
-						// Reset team when company changes
-						activeTeamId: null,
 					});
 
 					return companyData;
@@ -49,6 +54,10 @@ export const useGlobalStore = create(
 
 			getActiveCompany: () => {
 				const state = get();
+				console.log("getActiveCompany called, current state:", {
+					activeCompanyId: state.activeCompanyId,
+					activeCompanyData: state.activeCompanyData,
+				});
 				return state.activeCompanyData || null;
 			},
 

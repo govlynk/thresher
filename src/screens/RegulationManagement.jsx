@@ -8,18 +8,38 @@ import { RegulationDetails } from "../components/regulation/RegulationDetails";
 import { DocumentDownload } from "../components/regulation/DocumentDownload";
 
 export default function RegulationManagement() {
-	const { activeCompanyId, activeCompanyData } = useGlobalStore.getState();
+	const { activeCompanyId, activeCompanyData, getActiveCompany } = useGlobalStore();
 	const [selectedRegulation, setSelectedRegulation] = useState(null);
 	const { regulations, loading, error, fetchRegulations } = useRegulationStore();
 	const { documents, fetchDocuments } = useDocumentStore();
 
+	// Debug logging
 	useEffect(() => {
+		console.log("RegulationManagement - Mount");
+		console.log("Initial activeCompanyId:", activeCompanyId);
+		console.log("Initial activeCompanyData:", activeCompanyData);
+		console.log("getActiveCompany():", getActiveCompany());
+	}, []);
+
+	// Debug company changes
+	useEffect(() => {
+		console.log("Company Changed:");
 		console.log("activeCompanyId:", activeCompanyId);
 		console.log("activeCompanyData:", activeCompanyData);
+		console.log("getActiveCompany():", getActiveCompany());
+	}, [activeCompanyId, activeCompanyData]);
+
+	useEffect(() => {
 		if (activeCompanyData?.uei) {
-			console.log("Fetching regulations for company:", activeCompanyData.uei);
+			console.log("Fetching regulations for UEI:", activeCompanyData.uei);
 			fetchRegulations();
 			fetchDocuments();
+		} else {
+			console.log("No UEI available:", {
+				activeCompanyData,
+				activeCompanyId,
+				getActiveCompany: getActiveCompany(),
+			});
 		}
 	}, [activeCompanyData, fetchRegulations, fetchDocuments]);
 

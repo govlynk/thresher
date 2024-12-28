@@ -7,7 +7,7 @@ import { useAuthStore } from "../../stores/authStore";
 
 export function CompanySelector() {
 	const { userCompanies, fetchUserCompanies, loading } = useUserCompanyStore();
-	const { activeCompanyId, setActiveCompany } = useGlobalStore();
+	const { activeCompanyId, setActiveCompany, activeCompanyData } = useGlobalStore();
 	const { user } = useAuthStore();
 	const [error, setError] = React.useState(null);
 
@@ -19,7 +19,7 @@ export function CompanySelector() {
 
 	useEffect(() => {
 		const initializeActiveCompany = async () => {
-			if (userCompanies.length > 0 && !activeCompanyId) {
+			if (userCompanies.length > 0 && activeCompanyId) {
 				try {
 					await setActiveCompany(userCompanies[0].id);
 					setError(null);
