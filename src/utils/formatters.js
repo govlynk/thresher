@@ -57,3 +57,16 @@ export const formatUrl = (url) => {
 		return null;
 	}
 };
+
+export const parseAgencyHierarchy = (hierarchyString) => {
+	if (!hierarchyString) return null;
+
+	const segments = hierarchyString.split(".");
+
+	return {
+		department: segments[0] || "",
+		agency: segments[1] || "",
+		office: segments.slice(2, -1).join(".") || "",
+		subOffice: segments[segments.length - 1] || "",
+	};
+};

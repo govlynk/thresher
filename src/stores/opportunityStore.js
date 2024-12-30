@@ -202,6 +202,13 @@ export const useOpportunityStore = create((set, get) => ({
 				noticeId: opportunity.noticeId,
 				title: opportunity.title || "",
 				description: opportunity.description || "",
+
+				// Agency hierarchy
+				department: opportunity?.department || "N/A",
+				agency: opportunity?.agency || "N/A",
+				office: opportunity?.office || "N/A",
+				subOffice: opportunity?.subOffice || "N/A",
+
 				solicitationNumber: opportunity.solicitationNumber || "",
 				fullParentPathName: opportunity.fullParentPathName || "",
 				postedDate: opportunity.postedDate ? new Date(opportunity.postedDate).toISOString() : null,

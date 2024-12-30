@@ -1,27 +1,34 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardActions, Typography, Button, Chip, Box, Tooltip, IconButton } from "@mui/material";
 import {
-	ThumbsUp,
-	ThumbsDown,
-	Calendar,
-	Building2,
-	MapPin,
-	ExternalLink,
-	DollarSign,
-	Eye,
-	Building,
-} from "lucide-react";
+	Card,
+	CardContent,
+	CardActions,
+	Typography,
+	Button,
+	Chip,
+	Box,
+	Tooltip,
+	IconButton,
+	Select,
+	MenuItem,
+	FormControl,
+	InputLabel,
+} from "@mui/material";
+import { ThumbsUp, ThumbsDown, Calendar, Building2, MapPin, ExternalLink, DollarSign, Eye, Users } from "lucide-react";
 import { useOpportunityStore } from "../../stores/opportunityStore";
 import { OpportunityDetailsSidebar } from "./OpportunityDetailsSidebar";
 import { formatDate, formatCurrency } from "../../utils/formatters";
 import { useGlobalStore } from "../../stores/globalStore";
+import { useTeamStore } from "../../stores/teamStore";
 
 export function OpportunityCard({ opportunity, type = "new" }) {
 	const { saveOpportunity, rejectOpportunity, moveToSaved, loading, error } = useOpportunityStore();
 	const [detailsOpen, setDetailsOpen] = useState(false);
 	const [localLoading, setLocalLoading] = useState(false);
 	const [localError, setLocalError] = useState(null);
-	const { activeCompanyId, activeTeamId, activeUserId } = useGlobalStore();
+	const { activeCompanyId, activeTeamId } = useGlobalStore();
+	const { teams } = useTeamStore();
+	const [selectedTeamId, setSelectedTeamId] = useState(activeTeamId);
 
 	const handleSave = async () => {
 		setLocalLoading(true);
@@ -31,42 +38,8 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 				await moveToSaved(opportunity);
 			} else {
 				await saveOpportunity({
-					noticeId: opportunity.noticeId,
-					title: opportunity.title,
-					description: opportunity.description || "",
-					agency: opportunity.department,
-					dueDate: opportunity.responseDeadLine,
-					status: "BACKLOG",
-					notes: "",
-					solicitationNumber: opportunity.solicitationNumber || "",
-					fullParentPathName: opportunity.fullParentPathName || "",
-					fullParentPathCode: opportunity.fullParentPathCode || "",
-					postedDate: opportunity.postedDate,
-					type: opportunity.type || "",
-					typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
-					typeOfSetAside: opportunity.typeOfSetAside || "",
-					responseDeadLine: opportunity.responseDeadLine,
-					naicsCode: opportunity.naicsCode || "",
-					naicsCodes: opportunity.naicsCodes,
-					classificationCode: opportunity.classificationCode || "",
-					active: opportunity.active || "Yes",
-					organizationType: opportunity.organizationType || "",
-					resourceLinks: opportunity.resourceLinks,
-					uiLink: opportunity.uiLink,
-					// Office Address as embedded fields
-					officeZipcode: opportunity.officeAddress.officeZipcode || "",
-					officeCity: opportunity.officeAddress.officeCity || "",
-					officeCountryCode: opportunity.officeAddress.officeCountryCode || "",
-					officeState: opportunity.officeAddress.officeState || "",
-					// Point of Contact as embedded fields
-					pocName: opportunity.pointOfContact.pocName || "",
-					pocEmail: opportunity.pointOfContact.pocEmail || "",
-					pocPhone: opportunity.pointOfContact.pocPhone || "",
-					pocType: opportunity.pointOfContact.pocType || "",
-					// Foreign key relationships
-					userId: activeUserId,
-					companyId: activeCompanyId,
-					teamId: activeTeamId,
+					...opportunity,
+					teamId: selectedTeamId,
 				});
 			}
 		} catch (err) {
@@ -90,6 +63,8 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 		}
 	};
 
+	console.log("OpportunityCard render", opportunity);
+
 	return (
 		<>
 			<Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -112,11 +87,6 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 						</Box>
 
 						<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-							<Building size={16} />
-							<Typography variant='body2'>{opportunity.subtier}</Typography>
-						</Box>
-
-						<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 							<Calendar size={16} />
 							<Typography variant='body2'>Posted: {formatDate(opportunity.postedDate)}</Typography>
 						</Box>
@@ -135,7 +105,7 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 								<MapPin size={16} />
 								<Typography variant='body2'>
 									{`${opportunity.placeOfPerformance.state?.name || ""}, 
-                    ${opportunity.placeOfPerformance.country?.name || ""}`}
+                  ${opportunity.placeOfPerformance.country?.name || ""}`}
 								</Typography>
 							</Box>
 						)}
@@ -149,6 +119,26 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 							</Box>
 						)}
 					</Box>
+
+					{type === "new" && (
+						<FormControl fullWidth size='small' sx={{ mb: 2 }}>
+							<InputLabel>Assign Team</InputLabel>
+							<Select
+								value={selectedTeamId}
+								onChange={(e) => setSelectedTeamId(e.target.value)}
+								label='Assign Team'
+							>
+								{teams.map((team) => (
+									<MenuItem key={team.id} value={team.id}>
+										<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+											<Users size={16} />
+											{team.name}
+										</Box>
+									</MenuItem>
+								))}
+							</Select>
+						</FormControl>
+					)}
 
 					{localError && (
 						<Typography color='error' variant='body2' sx={{ mt: 1 }}>
@@ -194,7 +184,7 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 						target='_blank'
 						rel='noopener noreferrer'
 					>
-						View Details
+						View on SAM.gov
 					</Button>
 				</CardActions>
 			</Card>

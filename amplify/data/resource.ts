@@ -27,6 +27,12 @@ const schema = a.schema({
 			status: a.enum(["BACKLOG", "BID", "REVIEW", "SUBMITTED", "WON", "LOST", "REJECTED"]),
 			solicitationNumber: a.string(),
 			fullParentPathName: a.string(),
+
+			department: a.string(),
+			agency: a.string(),
+			office: a.string(),
+			subOffice: a.string(),
+
 			postedDate: a.datetime(),
 			type: a.string(),
 			typeOfSetAsideDescription: a.string(),

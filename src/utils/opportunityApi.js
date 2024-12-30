@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { parseAgencyHierarchy } from "./formatters";
 
 const formatQueryParams = (params) => {
 	const queryParams = [];
@@ -25,6 +26,16 @@ const formatQueryParams = (params) => {
 
 const processOpportunityData = (opportunity) => {
 	if (!opportunity) return null;
+
+	const parsedAgency = parseAgencyHierarchy(opportunity.fullParentPathName);
+	const flattenedAgency = opportunity.fullParentPathName
+		? {
+				department: parsedAgency?.department || "N/A",
+				agency: parsedAgency?.agency || "N/A",
+				office: parsedAgency?.office || "N/A",
+				subOffice: parsedAgency?.subOffice || "N/A",
+		  }
+		: {};
 
 	const flattenedOfficeAddress = opportunity.officeAddress
 		? {
