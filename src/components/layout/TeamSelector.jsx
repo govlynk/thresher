@@ -1,21 +1,22 @@
-import React from "react";
-import { FormControl, Select, MenuItem, Box, CircularProgress } from "@mui/material";
+import React, { useEffect } from "react";
+import { FormControl, Select, MenuItem, Box, CircularProgress, Alert } from "@mui/material";
 import { Users } from "lucide-react";
 import { useTeamStore } from "../../stores/teamStore";
 import { useGlobalStore } from "../../stores/globalStore";
 
 export function TeamSelector() {
-	const { teams, loading, fetchTeams } = useTeamStore();
+	const { teams, loading, error, fetchTeams } = useTeamStore();
 	const { activeCompanyId, activeTeamId, setActiveTeam } = useGlobalStore();
 
-	React.useEffect(() => {
+	// Fetch teams when company changes
+	useEffect(() => {
 		if (activeCompanyId) {
 			fetchTeams(activeCompanyId);
 		}
 	}, [activeCompanyId, fetchTeams]);
 
 	// Set first team as default when teams load and no team is selected
-	React.useEffect(() => {
+	useEffect(() => {
 		if (teams.length > 0 && !activeTeamId) {
 			setActiveTeam(teams[0].id);
 		}
@@ -29,9 +30,22 @@ export function TeamSelector() {
 		);
 	}
 
+	if (error) {
+		return (
+			<Alert severity='error' sx={{ maxWidth: 300 }}>
+				{error}
+			</Alert>
+		);
+	}
+
 	if (!teams?.length) {
 		return null;
 	}
+
+	const handleTeamChange = (event) => {
+		const newTeamId = event.target.value;
+		setActiveTeam(newTeamId);
+	};
 
 	return (
 		<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -39,7 +53,7 @@ export function TeamSelector() {
 			<FormControl size='small' sx={{ minWidth: 200 }}>
 				<Select
 					value={activeTeamId || ""}
-					onChange={(e) => setActiveTeam(e.target.value)}
+					onChange={handleTeamChange}
 					displayEmpty
 					sx={{
 						bgcolor: "background.paper",

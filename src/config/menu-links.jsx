@@ -23,12 +23,16 @@ const profileLinks = {
 	icon: Users,
 	links: [
 		{
-			title: "Capability Statement",
+			title: "Company Background",
 			path: "/capability",
 		},
 		{
 			title: "SAM Registration",
 			path: "/sam",
+		},
+		{
+			title: "File Browser",
+			path: "/company-files",
 		},
 	],
 };

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
+import { useGlobalStore } from "./globalStore";
 
 const client = generateClient({
 	authMode: "userPool",
@@ -47,9 +48,15 @@ export const useOpportunityStore = create((set, get) => ({
 	boardConfig: BOARD_CONFIG,
 	subscription: null,
 
-	fetchOpportunities: async (companyId) => {
-		if (!companyId) {
-			set({ error: "Company ID is required", loading: false });
+	fetchOpportunities: async () => {
+		const { activeCompanyId, activeTeamId } = useGlobalStore.getState();
+
+		if (!activeCompanyId) {
+			set({
+				error: "No active company selected",
+				loading: false,
+				opportunities: [],
+			});
 			return;
 		}
 
@@ -61,10 +68,23 @@ export const useOpportunityStore = create((set, get) => ({
 
 		set({ loading: true });
 		try {
+			// Build filter based on company and team selection
+			const filter = {
+				companyId: { eq: activeCompanyId },
+				...(activeTeamId && { teamId: { eq: activeTeamId } }),
+			};
+
+			console.log("Fetching opportunities with filter:", filter);
+
 			const subscription = client.models.Opportunity.observeQuery({
-				filter: { companyId: { eq: companyId } },
+				filter,
+				sort: {
+					field: "position",
+					direction: "ASC",
+				},
 			}).subscribe({
 				next: ({ items }) => {
+					console.log("Received opportunities:", items.length);
 					set({
 						opportunities: items,
 						loading: false,
@@ -72,9 +92,9 @@ export const useOpportunityStore = create((set, get) => ({
 					});
 				},
 				error: (err) => {
-					console.error("Error in opportunity subscription:", err);
+					console.error("Fetch opportunities error:", err);
 					set({
-						error: err.message || "Failed to fetch opportunities",
+						error: "Failed to fetch opportunities",
 						loading: false,
 					});
 				},
@@ -82,22 +102,25 @@ export const useOpportunityStore = create((set, get) => ({
 
 			set({ subscription });
 		} catch (err) {
-			console.error("Error setting up opportunity subscription:", err);
+			console.error("Fetch opportunities error:", err);
 			set({
-				error: err.message || "Failed to load opportunities",
+				error: "Failed to fetch opportunities",
 				loading: false,
 			});
 		}
 	},
 
 	moveOpportunity: async (opportunityId, newStatus) => {
+		const { activeTeamId } = useGlobalStore.getState();
 		const opportunity = get().opportunities.find((opp) => opp.id === opportunityId);
+
 		if (!opportunity) return;
 
 		try {
 			const updatedOpportunity = await client.models.Opportunity.update({
 				id: opportunityId,
 				status: newStatus,
+				teamId: activeTeamId, // Ensure team ID is updated when moving
 			});
 
 			return updatedOpportunity;
@@ -108,6 +131,7 @@ export const useOpportunityStore = create((set, get) => ({
 	},
 
 	updateOpportunity: async (id, updates) => {
+		const { activeTeamId } = useGlobalStore.getState();
 		const opportunity = get().opportunities.find((opp) => opp.id === id);
 		if (!opportunity) return;
 
@@ -115,6 +139,7 @@ export const useOpportunityStore = create((set, get) => ({
 			const updatedOpportunity = await client.models.Opportunity.update({
 				id,
 				...updates,
+				teamId: activeTeamId, // Ensure team ID is updated
 			});
 
 			return updatedOpportunity;

@@ -154,6 +154,15 @@ export function KanbanBoard({ onEditTodo }) {
 		};
 	}, [fetchTodos, selectedTeamId]);
 
+	useEffect(() => {
+		const handleTeamChange = () => {
+			fetchTodos();
+		};
+
+		window.addEventListener("teamChanged", handleTeamChange);
+		return () => window.removeEventListener("teamChanged", handleTeamChange);
+	}, [selectedTeamId]);
+
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: { distance: 5 },

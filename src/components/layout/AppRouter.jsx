@@ -29,6 +29,7 @@ const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysis
 const AssessmentScreen = lazy(() => import("../../screens/AssessmentScreen"));
 const CapabilityStatementScreen = lazy(() => import("../../screens/CapabilityStatementScreen"));
 const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
+const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));
 const TestScreen = lazy(() => import("../../screens/TestScreen"));
 
 const AppRouter = ({ signOut, user }) => {
@@ -108,6 +109,14 @@ const AppRouter = ({ signOut, user }) => {
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<TeamScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='company-files'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<FileBrowserScreen />
 						</Suspense>
 					}
 				/>

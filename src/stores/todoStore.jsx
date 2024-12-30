@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
 import { useTeamTodoStore } from "./teamTodoStore";
-import { useUserCompanyStore } from "./userCompanyStore";
+import { useGlobalStore } from "./globalStore";
 
 const client = generateClient({
 	authMode: "userPool",
@@ -14,8 +14,8 @@ export const useTodoStore = create((set, get) => ({
 	subscription: null,
 
 	fetchTodos: async () => {
-		const activeCompany = useUserCompanyStore.getState().getActiveCompany();
-		if (!activeCompany?.id) {
+		const { activeCompanyId, activeTeamId } = useGlobalStore.getState();
+		if (!activeCompanyId) {
 			set({
 				todos: [],
 				loading: false,
@@ -32,10 +32,8 @@ export const useTodoStore = create((set, get) => ({
 
 		set({ loading: true });
 		try {
-			const selectedTeamId = useTeamTodoStore.getState().selectedTeamId;
-
 			const subscription = client.models.Todo.observeQuery({
-				filter: selectedTeamId === "all" ? undefined : { teamId: { eq: selectedTeamId } },
+				filter: activeTeamId === "all" ? undefined : { teamId: { eq: activeTeamId } },
 			}).subscribe({
 				next: ({ items }) => {
 					set({

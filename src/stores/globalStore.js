@@ -11,7 +11,7 @@ export const useGlobalStore = create(
 			activeUserId: null,
 			activeCompanyId: null,
 			activeTeamId: null,
-			activeCompanyData: null, // Add this to store full company data
+			activeCompanyData: null,
 
 			// User methods
 			setActiveUser: (userId) => {
@@ -35,14 +35,11 @@ export const useGlobalStore = create(
 						throw new Error("Company data not found");
 					}
 
-					console.log("Setting active company:", {
-						companyId,
-						companyData,
-					});
-
+					// Reset team selection when company changes
 					set({
 						activeCompanyId: companyId,
 						activeCompanyData: companyData,
+						activeTeamId: null, // Reset team selection
 					});
 
 					return companyData;
@@ -54,16 +51,16 @@ export const useGlobalStore = create(
 
 			getActiveCompany: () => {
 				const state = get();
-				console.log("getActiveCompany called, current state:", {
-					activeCompanyId: state.activeCompanyId,
-					activeCompanyData: state.activeCompanyData,
-				});
 				return state.activeCompanyData || null;
 			},
 
 			// Team methods
 			setActiveTeam: (teamId) => {
+				console.log("Setting active team:", teamId);
 				set({ activeTeamId: teamId });
+
+				// Trigger a custom event to notify dependent components
+				window.dispatchEvent(new CustomEvent("teamChanged", { detail: { teamId } }));
 			},
 
 			getActiveTeam: () => {
@@ -82,7 +79,6 @@ export const useGlobalStore = create(
 		}),
 		{
 			name: "global-store",
-			// Only persist these fields
 			partialize: (state) => ({
 				activeUserId: state.activeUserId,
 				activeCompanyId: state.activeCompanyId,
