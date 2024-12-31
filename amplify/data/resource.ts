@@ -302,6 +302,30 @@ const schema = a.schema({
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 
+	MaturityAssessment: a
+		.model({
+			companyId: a.string().required(),
+			answers: a.json(),
+			status: a.enum(["IN_PROGRESS", "COMPLETED"]),
+			completedAt: a.datetime(),
+			lastModified: a.datetime(),
+			company: a.belongsTo("Company", "companyId"),
+		})
+		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+
+	MaturityAssessmentHistory: a
+		.model({
+			assessmentId: a.string().required(),
+			companyId: a.string().required(),
+			answers: a.json(),
+			status: a.enum(["IN_PROGRESS", "COMPLETED"]),
+			completedAt: a.datetime(),
+			modifiedAt: a.datetime().required(),
+			assessment: a.belongsTo("MaturityAssessment", "assessmentId"),
+			company: a.belongsTo("Company", "companyId"),
+		})
+		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+
 	Todo: a
 		.model({
 			title: a.string().required(),

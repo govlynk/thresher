@@ -27,6 +27,7 @@ const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
 const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
 const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
 const AssessmentScreen = lazy(() => import("../../screens/AssessmentScreen"));
+const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
 const CapabilityStatementScreen = lazy(() => import("../../screens/CapabilityStatementScreen"));
 const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
 const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));
@@ -172,6 +173,15 @@ const AppRouter = ({ signOut, user }) => {
 						</Suspense>
 					}
 				/>
+				<Route
+					path='maturity'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<MaturityAssessmentScreen />
+						</Suspense>
+					}
+				/>
+
 				<Route
 					path='capability'
 					element={

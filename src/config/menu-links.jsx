@@ -27,6 +27,10 @@ const profileLinks = {
 			path: "/capability",
 		},
 		{
+			title: "Maturity Assessment",
+			path: "/maturity",
+		},
+		{
 			title: "SAM Registration",
 			path: "/sam",
 		},
