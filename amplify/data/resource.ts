@@ -312,6 +312,7 @@ const schema = a.schema({
 			completedAt: a.datetime(),
 			lastModified: a.datetime(),
 			company: a.belongsTo("Company", "companyId"),
+			history: a.belongsTo("MaturityAssessmentHistory", "assessmentId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 
