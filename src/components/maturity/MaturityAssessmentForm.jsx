@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Box, Container } from "@mui/material";
 import { FormController } from "../common/form/FormController";
 import { questions } from "./questions";
 import { questionInfo } from "./questionInfo";
 import { useMaturityStore } from "../../stores/maturityStore";
 import { useGlobalStore } from "../../stores/globalStore";
-import { useFormAutosave } from "../common/form/useFormAutosave";
+import { useFormAutosave } from "../../utils/form/useFormAutosave";
 import { SectionQuestion } from "../common/form/questionTypes/SectionQuestion";
 import { RatingQuestion } from "../common/form/questionTypes/RatingQuestion";
 import { MultipleChoiceQuestion } from "../common/form/questionTypes/MultipleChoiceQuestion";
@@ -29,6 +29,28 @@ const QUESTION_COMPONENTS = {
 export function MaturityAssessmentForm() {
 	const { assessment, saveAssessment, loading, error } = useMaturityStore();
 	const { activeCompanyId } = useGlobalStore();
+
+	// Memoize the save handler
+	const handleSave = useCallback(
+		async (data) => {
+			if (!activeCompanyId) {
+				throw new Error("Company ID is required");
+			}
+			await saveAssessment({
+				companyId: activeCompanyId,
+				answers: data,
+				status: "IN_PROGRESS",
+			});
+		},
+		[activeCompanyId, saveAssessment]
+	);
+
+	// Enable autosave with 2 second delay
+	useFormAutosave({
+		formData: assessment?.answers || {},
+		onSave: handleSave,
+		delay: 2000,
+	});
 
 	// Transform questions array into steps format expected by FormController
 	const formSteps = questions.map((question) => ({
@@ -63,21 +85,6 @@ export function MaturityAssessmentForm() {
 		},
 	}));
 
-	// Enable autosave
-	useFormAutosave({
-		formData: assessment?.answers || {},
-		onSave: async (data) => {
-			if (!activeCompanyId) {
-				throw new Error("Company ID is required");
-			}
-			await saveAssessment({
-				companyId: activeCompanyId,
-				answers: data,
-				status: "IN_PROGRESS",
-			});
-		},
-	});
-
 	const handleSubmit = async (formData) => {
 		if (!activeCompanyId) {
 			throw new Error("No active company selected");
@@ -92,13 +99,12 @@ export function MaturityAssessmentForm() {
 	};
 
 	return (
-		<Container maxWidth='md'>
+		<Container>
 			<Box sx={{ py: 4 }}>
 				<FormController
 					steps={formSteps}
 					initialData={assessment?.answers || {}}
 					onSubmit={handleSubmit}
-					onSave={saveAssessment}
 					loading={loading}
 					error={error}
 					questionInfo={questionInfo}

@@ -5,6 +5,7 @@ import NotFoundPage from "../../screens/NotFoundPage";
 // Lazy load screens for better performance
 import React, { lazy, Suspense } from "react";
 import { Box, CircularProgress } from "@mui/material";
+import StrategicPositioiningForm from "../marketPositioning/StrategicPositioningForm";
 
 // Loading component for suspense fallback
 const LoadingScreen = () => (
@@ -14,6 +15,22 @@ const LoadingScreen = () => (
 );
 
 // Lazy loaded components
+const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
+
+const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
+const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen"));
+const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
+
+const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
+const AssessmentScreen = lazy(() => import("../../screens/AssessmentScreen"));
+const StrategicPositioiningScreen = lazy(() => import("../../screens/StrategicPositioiningScreen"));
+
+const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
+const CapabilityStatementScreen = lazy(() => import("../../screens/CapabilityStatementScreen"));
+
+const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
+const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));
+
 const ClientSetupScreen = lazy(() => import("../../screens/ClientSetupScreen"));
 const UserScreen = lazy(() => import("../../screens/UserScreen"));
 const CompanyScreen = lazy(() => import("../../screens/CompanyScreen"));
@@ -21,16 +38,6 @@ const TeamScreen = lazy(() => import("../../screens/TeamScreen"));
 const UserCompanyAccessScreen = lazy(() => import("../../screens/UserCompanyAccessScreen"));
 const ContactsScreen = lazy(() => import("../../screens/ContactsScreen"));
 const ContactAdminScreen = lazy(() => import("../../screens/ContactAdminScreen"));
-const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
-const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen"));
-const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
-const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
-const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
-const AssessmentScreen = lazy(() => import("../../screens/AssessmentScreen"));
-const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
-const CapabilityStatementScreen = lazy(() => import("../../screens/CapabilityStatementScreen"));
-const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
-const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));
 const TestScreen = lazy(() => import("../../screens/TestScreen"));
 
 const AppRouter = ({ signOut, user }) => {
@@ -45,21 +52,32 @@ const AppRouter = ({ signOut, user }) => {
 						</Suspense>
 					}
 				/>
-
-				{/* Market Intelligence Routes */}
+				{/* Market Positioning Routes */}
 				<Route
-					path='opportunities'
+					path='strategy'
 					element={
 						<Suspense fallback={<LoadingScreen />}>
-							<OpportunitiesScreen />
+							<StrategicPositioiningScreen />
 						</Suspense>
 					}
 				/>
+
+				{/* Market Intelligence Routes */}
 				<Route
 					path='spending-analysis'
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<SpendingAnalysisScreen />
+						</Suspense>
+					}
+				/>
+
+				{/* Sales Routes */}
+				<Route
+					path='opportunities'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<OpportunitiesScreen />
 						</Suspense>
 					}
 				/>

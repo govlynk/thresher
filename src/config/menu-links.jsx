@@ -14,6 +14,7 @@ import {
 	DollarSign,
 	Settings2,
 	PieChart,
+	ChartLine,
 	BarChart,
 } from "lucide-react";
 
@@ -22,10 +23,6 @@ const profileLinks = {
 	title: "Profile",
 	icon: Users,
 	links: [
-		{
-			title: "Company Background",
-			path: "/capability",
-		},
 		{
 			title: "Maturity Assessment",
 			path: "/maturity",
@@ -45,15 +42,37 @@ const profileLinks = {
 const marketIntelligenceLinks = {
 	id: "market",
 	title: "Market Intelligence",
+	icon: Briefcase,
+	links: [
+		{
+			title: "Spending Analysis",
+			path: "/spending-analysis",
+		},
+	],
+};
+
+// Group related menu items
+const marketPositioningLinks = {
+	id: "positioning",
+	title: "Market Positioning",
 	icon: PieChart,
+	links: [
+		{
+			title: "Strategic Positioning",
+			path: "/strategy",
+		},
+	],
+};
+
+// Group related menu items
+const salesLinks = {
+	id: "sales",
+	title: "Sales",
+	icon: ChartLine,
 	links: [
 		{
 			title: "Contract Opportunities",
 			path: "/opportunities",
-		},
-		{
-			title: "Spending Analysis",
-			path: "/spending-analysis",
 		},
 		{
 			title: "Pipeline",
@@ -142,7 +161,9 @@ export const menuLinks = [
 	},
 
 	profileLinks,
+	marketPositioningLinks,
 	marketIntelligenceLinks,
+	salesLinks,
 	regulationLinks,
 	administrationLinks,
 	systemLinks,
