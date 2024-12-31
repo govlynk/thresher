@@ -252,6 +252,7 @@ const schema = a.schema({
 			company: a.belongsTo("Company", "companyId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+
 	Opportunity: a
 		.model({
 			noticeId: a.string().required(),

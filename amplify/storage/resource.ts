@@ -6,10 +6,15 @@ export const storage = defineStorage({
 		"company/{company_id}/*": [
 			allow.entity("identity").to(["read", "write", "delete"]),
 			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
+
+			allow.guest.to(["read", "write"]),
+			allow.authenticated.to(["read", "write", "delete"]),
 		],
 		"contacts/{contact_id}/*": [
 			allow.entity("identity").to(["read", "write", "delete"]),
 			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
+			allow.guest.to(["read", "write"]),
+			allow.authenticated.to(["read", "write", "delete"]),
 		],
 	}),
 });
