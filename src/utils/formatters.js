@@ -58,6 +58,20 @@ export const formatUrl = (url) => {
 	}
 };
 
+export const formatToBillions = (amount) => {
+	const billions = amount / 1000000000;
+	return {
+		value: Number(billions.toFixed(2)),
+		formatted:
+			new Intl.NumberFormat("en-US", {
+				style: "currency",
+				currency: "USD",
+				notation: "compact",
+				maximumFractionDigits: 2,
+			}).format(billions) + "B",
+	};
+};
+
 export const parseAgencyHierarchy = (hierarchyString) => {
 	if (!hierarchyString) return null;
 
