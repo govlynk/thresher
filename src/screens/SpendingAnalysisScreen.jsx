@@ -7,6 +7,7 @@ import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
 import { ResponsiveChoropleth } from "@nivo/geo";
 import { features } from "../utils/spending/usStatesGeo";
+import { formatToBillions } from "../utils/formatters";
 const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
 // Pie chart theme
@@ -83,14 +84,14 @@ export default function SpendingAnalysisScreen() {
 		data?.agencySpending?.results?.map((agency) => ({
 			id: agency.name,
 			label: agency.name,
-			value: agency.amount,
+			value: formatToBillions(agency.amount),
 		})) || [];
 
 	// Process NAICS spending data for bar chart
 	const naicsData =
 		data?.naicsSpending?.results?.map((item) => ({
 			naics: item.code,
-			amount: item.amount,
+			amount: formatToBillions(item.amount),
 			description: item.name,
 		})) || [];
 
@@ -110,7 +111,7 @@ export default function SpendingAnalysisScreen() {
 	const geoData =
 		data?.geographicSpending?.results?.map((state) => ({
 			id: state.shape_code,
-			value: state.amount,
+			value: formatToBillions(state.amount),
 		})) || [];
 
 	return (
