@@ -19,67 +19,6 @@ const COMPANY_ROLES = [
 ] as const;
 
 const schema = a.schema({
-	Opportunity: a
-		.model({
-			noticeId: a.string().required(),
-			title: a.string().required(),
-			description: a.string(),
-			status: a.enum(["BACKLOG", "BID", "REVIEW", "SUBMITTED", "WON", "LOST", "REJECTED"]),
-			solicitationNumber: a.string(),
-			fullParentPathName: a.string(),
-
-			department: a.string(),
-			agency: a.string(),
-			office: a.string(),
-			subOffice: a.string(),
-
-			postedDate: a.datetime(),
-			type: a.string(),
-			typeOfSetAsideDescription: a.string(),
-			typeOfSetAside: a.string(),
-			responseDeadLine: a.datetime(),
-			naicsCode: a.string(),
-			naicsCodes: a.string().array(),
-			classificationCode: a.string(),
-			active: a.string(),
-			organizationType: a.string(),
-			resourceLinks: a.string().array(),
-			uiLink: a.string(),
-
-			// Office Address as embedded fields
-			officeZipcode: a.string(),
-			officeCity: a.string(),
-			officeCountryCode: a.string(),
-			officeState: a.string(),
-
-			// Point of Contact as embedded fields
-			pocName: a.string(),
-			pocEmail: a.string(),
-			pocPhone: a.string(),
-			pocType: a.string(),
-
-			// Pipeline fields
-			position: a.integer(),
-			priority: a.enum(["HIGH", "MEDIUM", "LOW"]),
-			estimatedEffort: a.integer(),
-			actualEffort: a.integer(),
-			tags: a.string().array(),
-			notes: a.string(),
-			assigneeId: a.string(),
-			dueDate: a.datetime(),
-
-			// Foreign key relationships
-			userId: a.string(),
-			companyId: a.string().required(),
-			teamId: a.string().required(),
-
-			// Relationships
-			user: a.belongsTo("User", "userId"),
-			company: a.belongsTo("Company", "companyId"),
-			team: a.belongsTo("Team", "teamId"),
-		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
-
 	User: a
 		.model({
 			cognitoId: a.string(),
@@ -158,7 +97,6 @@ const schema = a.schema({
 			performances: a.hasMany("PastPerformance", "companyId"),
 			certifications: a.hasMany("Certification", "companyId"),
 			maturity: a.hasMany("MaturityAssessment", "companyId"),
-			maturityHistory: a.hasMany("MaturityAssessmentHistory", "companyId"),
 			federalRegulations: a.hasMany("FederalRegulation", "companyId"),
 			RegulationDocuments: a.hasMany("RegulationDocument", "companyId"),
 			users: a.hasMany("UserCompanyAccess", "companyId"),
@@ -312,20 +250,66 @@ const schema = a.schema({
 			completedAt: a.datetime(),
 			lastModified: a.datetime(),
 			company: a.belongsTo("Company", "companyId"),
-			histories: a.hasMany("MaturityAssessmentHistory", "assessmentId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
-
-	MaturityAssessmentHistory: a
+	Opportunity: a
 		.model({
-			assessmentId: a.string().required(),
+			noticeId: a.string().required(),
+			title: a.string().required(),
+			description: a.string(),
+			status: a.enum(["BACKLOG", "BID", "REVIEW", "SUBMITTED", "WON", "LOST", "REJECTED"]),
+			solicitationNumber: a.string(),
+			fullParentPathName: a.string(),
+
+			department: a.string(),
+			agency: a.string(),
+			office: a.string(),
+			subOffice: a.string(),
+
+			postedDate: a.datetime(),
+			type: a.string(),
+			typeOfSetAsideDescription: a.string(),
+			typeOfSetAside: a.string(),
+			responseDeadLine: a.datetime(),
+			naicsCode: a.string(),
+			naicsCodes: a.string().array(),
+			classificationCode: a.string(),
+			active: a.string(),
+			organizationType: a.string(),
+			resourceLinks: a.string().array(),
+			uiLink: a.string(),
+
+			// Office Address as embedded fields
+			officeZipcode: a.string(),
+			officeCity: a.string(),
+			officeCountryCode: a.string(),
+			officeState: a.string(),
+
+			// Point of Contact as embedded fields
+			pocName: a.string(),
+			pocEmail: a.string(),
+			pocPhone: a.string(),
+			pocType: a.string(),
+
+			// Pipeline fields
+			position: a.integer(),
+			priority: a.enum(["HIGH", "MEDIUM", "LOW"]),
+			estimatedEffort: a.integer(),
+			actualEffort: a.integer(),
+			tags: a.string().array(),
+			notes: a.string(),
+			assigneeId: a.string(),
+			dueDate: a.datetime(),
+
+			// Foreign key relationships
+			userId: a.string(),
 			companyId: a.string().required(),
-			answers: a.json(),
-			status: a.enum(["IN_PROGRESS", "COMPLETED"]),
-			completedAt: a.datetime(),
-			modifiedAt: a.datetime().required(),
-			assessment: a.belongsTo("MaturityAssessment", "assessmentId"),
+			teamId: a.string().required(),
+
+			// Relationships
+			user: a.belongsTo("User", "userId"),
 			company: a.belongsTo("Company", "companyId"),
+			team: a.belongsTo("Team", "teamId"),
 		})
 		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
 
