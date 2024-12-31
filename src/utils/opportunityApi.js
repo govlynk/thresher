@@ -36,6 +36,7 @@ const processOpportunityData = (opportunity) => {
 				subOffice: parsedAgency?.subOffice || "N/A",
 		  }
 		: {};
+	console.log("parsedAgency", parsedAgency);
 
 	const flattenedOfficeAddress = opportunity.officeAddress
 		? {
@@ -57,9 +58,7 @@ const processOpportunityData = (opportunity) => {
 
 	return {
 		...opportunity,
-		department: opportunity.department?.name || opportunity.departmentName || "N/A",
-		subtier: opportunity.subtierAgency?.name || opportunity.subtierAgencyName || "N/A",
-		office: opportunity.office?.name || opportunity.officeName || "N/A",
+		...flattenedAgency,
 		...flattenedOfficeAddress,
 		pointOfContact: flattenedPointOfContact,
 	};

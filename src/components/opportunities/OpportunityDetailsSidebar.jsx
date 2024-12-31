@@ -42,12 +42,14 @@ export function OpportunityDetailsSidebar({ open, onClose, opportunity }) {
 			open={open}
 			onClose={onClose}
 			PaperProps={{
-				sx: { width: "600px" },
+				sx: { width: "400px" },
 			}}
 		>
 			<Box sx={{ p: 3 }}>
 				<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-					<Typography variant='h6'>Opportunity Details</Typography>
+					<Typography variant='h6' component='h2'>
+						Opportunity Details
+					</Typography>
 					<IconButton onClick={onClose}>
 						<CircleX />
 					</IconButton>
@@ -55,133 +57,145 @@ export function OpportunityDetailsSidebar({ open, onClose, opportunity }) {
 
 				<Divider sx={{ mb: 3 }} />
 
-				<Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-					{/* Title and Notice ID */}
+				<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
 					<Box>
-						<Typography variant='h5' gutterBottom>
+						<Typography variant='subtitle2' color='text.secondary' component='div'>
+							Title
+						</Typography>
+						<Typography variant='body1' component='div'>
 							{opportunity.title}
 						</Typography>
-						<Typography variant='body2' color='text.secondary'>
-							Notice ID: {opportunity.noticeId}
-						</Typography>
 					</Box>
 
-					{/* Type and Set-Aside */}
-					<Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-						<Chip label={opportunity.type} color='primary' />
-						{opportunity.typeOfSetAside && <Chip label={opportunity.typeOfSetAside} color='secondary' />}
-					</Box>
-
-					{/* Department Info */}
-					{renderSection(
-						"Department Information",
-						<Box>
-							<Typography variant='body1'>{opportunity.department}</Typography>
-							<Typography variant='body2' color='text.secondary'>
-								{opportunity.subtier}
-							</Typography>
-							<Typography variant='body2' color='text.secondary'>
-								{opportunity.office}
-							</Typography>
-						</Box>,
-						<Building2 size={20} />
-					)}
-
-					{/* Dates */}
-					{renderSection(
-						"Important Dates",
-						<Box>
-							<Typography variant='body2'>
-								<strong>Posted:</strong> {formatDate(opportunity.postedDate)}
-							</Typography>
-							<Typography variant='body2'>
-								<strong>Response Deadline:</strong>{" "}
-								<Box component='span' color='error.main'>
-									{formatDate(opportunity.responseDeadLine)}
-								</Box>
-							</Typography>
-						</Box>,
-						<Calendar size={20} />
-					)}
-
-					{/* Location */}
-					{opportunity.placeOfPerformance &&
-						renderSection(
-							"Place of Performance",
-							`${opportunity.placeOfPerformance.state?.name || ""}, 
-             ${opportunity.placeOfPerformance.country?.name || ""}`,
-							<MapPin size={20} />
-						)}
-
-					{/* Award Amount */}
-					{opportunity.award?.amount &&
-						renderSection("Award Amount", formatCurrency(opportunity.award.amount), <DollarSign size={20} />)}
-
-					{/* NAICS Codes */}
-					{opportunity.naicsCode &&
-						renderSection(
-							"NAICS Codes",
-							<Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-								{opportunity.naicsCodes?.map((code, index) => (
-									<Chip key={index} icon={<Tag size={14} />} label={code} variant='outlined' size='small' />
-								))}
-							</Box>,
-							<Tag size={20} />
-						)}
-
-					{/* Points of Contact */}
 					<Box>
-						<Typography variant='subtitle2' color='text.secondary' sx={{ mb: 2 }}>
-							Points of Contact
+						<Typography variant='subtitle2' color='text.secondary' component='div'>
+							Solicitation Number
 						</Typography>
-						{opportunity.pointOfContact?.map((contact, index) => (
-							<Box key={index}>
-								{renderContactInfo(contact)}
-								{index < opportunity.pointOfContact.length - 1 && <Divider sx={{ my: 1 }} />}
-							</Box>
-						))}
+						<Typography variant='body1' component='div'>
+							{opportunity.solicitationNumber || "N/A"}
+						</Typography>
 					</Box>
 
-					{/* Description */}
+					<Box>
+						<Typography variant='subtitle2' color='text.secondary' component='div'>
+							Department
+						</Typography>
+						<Typography variant='body1' component='div'>
+							{opportunity.department}
+						</Typography>
+					</Box>
+
+					<Box>
+						<Typography variant='subtitle2' color='text.secondary' component='div'>
+							Sub-tier
+						</Typography>
+						<Typography variant='body1' component='div'>
+							{opportunity.subtier || "N/A"}
+						</Typography>
+					</Box>
+
+					<Box>
+						<Typography variant='subtitle2' color='text.secondary' component='div'>
+							Office
+						</Typography>
+						<Typography variant='body1' component='div'>
+							{opportunity.office || "N/A"}
+						</Typography>
+					</Box>
+
+					<Box>
+						<Typography variant='subtitle2' color='text.secondary' component='div'>
+							Posted Date
+						</Typography>
+						<Typography variant='body1' component='div'>
+							{formatDate(opportunity.postedDate)}
+						</Typography>
+					</Box>
+
+					<Box>
+						<Typography variant='subtitle2' color='text.secondary' component='div'>
+							Response Deadline
+						</Typography>
+						<Typography variant='body1' component='div'>
+							{formatDate(opportunity.responseDeadLine)}
+						</Typography>
+					</Box>
+
+					{opportunity.placeOfPerformance && (
+						<Box>
+							<Typography variant='subtitle2' color='text.secondary' component='div'>
+								Place of Performance
+							</Typography>
+							<Typography variant='body1' component='div'>
+								{`${opportunity.placeOfPerformance.state?.name || ""}, 
+						${opportunity.placeOfPerformance.country?.name || ""}`}
+							</Typography>
+						</Box>
+					)}
+
+					{opportunity.award?.amount && (
+						<Box>
+							<Typography variant='subtitle2' color='text.secondary' component='div'>
+								Award Amount
+							</Typography>
+							<Typography variant='body1' component='div'>
+								{formatCurrency(opportunity.award.amount)}
+							</Typography>
+						</Box>
+					)}
+
+					<Box>
+						<Typography variant='subtitle2' color='text.secondary' component='div'>
+							Set Aside
+						</Typography>
+						<Typography variant='body1' component='div'>
+							{opportunity.setAside || "None"}
+						</Typography>
+					</Box>
+
+					<Box>
+						<Typography variant='subtitle2' color='text.secondary' component='div'>
+							NAICS Code
+						</Typography>
+						<Typography variant='body1' component='div'>
+							{opportunity.naicsCode || "N/A"}
+						</Typography>
+					</Box>
+
 					{opportunity.description && (
 						<Box>
-							<Typography variant='subtitle2' color='text.secondary' gutterBottom>
+							<Typography variant='subtitle2' color='text.secondary' component='div'>
 								Description
 							</Typography>
-							<Typography
-								variant='body2'
-								sx={{
-									whiteSpace: "pre-wrap",
-									bgcolor: "background.default",
-									p: 2,
-									borderRadius: 1,
-								}}
-							>
+							<Typography variant='body2' component='div' sx={{ mt: 1, whiteSpace: "pre-wrap" }}>
 								{opportunity.description}
 							</Typography>
 						</Box>
 					)}
 
-					{/* Links */}
-					<Box>
-						<Typography variant='subtitle2' color='text.secondary' gutterBottom>
-							Resource Links
-						</Typography>
-						<Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-							{opportunity.resourceLinks?.map((link, index) => (
-								<Link
-									key={index}
-									href={link}
-									target='_blank'
-									rel='noopener noreferrer'
-									sx={{ display: "flex", alignItems: "center", gap: 1 }}
-								>
-									<ExternalLink size={16} />
-									Resource {index + 1}
-								</Link>
-							))}
+					{opportunity.resourceLinks?.length > 0 && (
+						<Box>
+							<Typography variant='subtitle2' color='text.secondary' component='div'>
+								Resources
+							</Typography>
+							<Box sx={{ mt: 1 }}>
+								{opportunity.resourceLinks.map((link, index) => (
+									<Link
+										key={index}
+										href={link}
+										target='_blank'
+										rel='noopener noreferrer'
+										sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}
+									>
+										<ExternalLink size={16} />
+										<Typography variant='body2' component='span'>
+											Resource {index + 1}
+										</Typography>
+									</Link>
+								))}
+							</Box>
 						</Box>
-					</Box>
+					)}
 				</Box>
 			</Box>
 		</Drawer>
