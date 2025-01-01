@@ -55,6 +55,12 @@ export function AgencyChart({ data = [] }) {
 				enableArcLabels={false}
 				animate={false}
 				isInteractive={true}
+				colors={{ scheme: "nivo" }}
+				borderWidth={1}
+				borderColor={{
+					from: "color",
+					modifiers: [["darker", 0.2]],
+				}}
 				legends={[
 					{
 						anchor: "bottom",
@@ -65,6 +71,16 @@ export function AgencyChart({ data = [] }) {
 						symbolSize: 18,
 						symbolShape: "circle",
 						itemTextColor: theme.palette.text.secondary,
+						itemDirection: "left-to-right",
+						itemsSpacing: 2,
+						effects: [
+							{
+								on: "hover",
+								style: {
+									itemTextColor: theme.palette.text.primary,
+								},
+							},
+						],
 					},
 				]}
 			/>

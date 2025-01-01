@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useCapabilityStatementStore } from "../../stores/capabilityStatementStore";
+import { strategicPositioningStore } from "../../stores/strategicPositioningStore";
 import { useGlobalStore } from "../../stores/globalStore";
 import {
 	Box,
@@ -19,6 +19,8 @@ import { MissionVisionSection } from "./sections/MissionVisionSection";
 import { CompetitiveSection } from "./sections/CompetitiveSection";
 import { CapabilitiesSection } from "./sections/CapabilitiesSection";
 import { ReviewSection } from "./sections/ReviewSection";
+import { convertFromRaw } from "draft-js";
+import { getPlainText } from "../../utils/richTextUtils";
 
 const steps = ["About Us", "Mission & Vision", "Competitive Advantage", "Key Capabilities", "Review"];
 
@@ -37,7 +39,7 @@ export default function StrategicPositioningForm() {
 	const [saveError, setSaveError] = useState(null);
 
 	const { capabilityStatement, loading, error, fetchCapabilityStatement, saveCapabilityStatement, reset } =
-		useCapabilityStatementStore();
+		strategicPositioningStore();
 
 	// Fetch data only on mount and company change
 	useEffect(() => {
@@ -50,7 +52,7 @@ export default function StrategicPositioningForm() {
 		};
 
 		fetchData();
-
+		console.log("Capability statement:", capabilityStatement);
 		return () => {
 			mounted = false;
 			reset();

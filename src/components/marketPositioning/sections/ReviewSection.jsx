@@ -1,18 +1,21 @@
 import React from "react";
 import { Box, Typography, Paper, Divider } from "@mui/material";
+import { RichTextEditor } from "../../common/form/RichTextEditor/RichTextEditor";
 
 export function ReviewSection({ formData }) {
 	return (
 		<Box>
 			<Typography variant='h6' gutterBottom>
-				Review Strategic Positioining
+				Review Strategic Positioning
 			</Typography>
 
 			<Paper sx={{ p: 3, mb: 3 }}>
 				<Typography variant='h6' gutterBottom>
 					About Us
 				</Typography>
-				<Typography paragraph>{formData.aboutUs}</Typography>
+				<Box sx={{ mb: 3 }}>
+					<RichTextEditor value={formData.aboutUs} readOnly minHeight={200} />
+				</Box>
 				<Divider sx={{ my: 2 }} />
 
 				<Typography variant='h6' gutterBottom>
@@ -30,18 +33,24 @@ export function ReviewSection({ formData }) {
 				<Typography variant='h6' gutterBottom>
 					Competitive Advantage
 				</Typography>
-				<Typography paragraph>{formData.competitiveAdvantage}</Typography>
+				<Box sx={{ mb: 3 }}>
+					<RichTextEditor value={formData.competitiveAdvantage} readOnly minHeight={200} />
+				</Box>
 				<Divider sx={{ my: 2 }} />
 
 				<Typography variant='h6' gutterBottom>
 					Mission
 				</Typography>
-				<Typography paragraph>{formData.mission}</Typography>
+				<Box sx={{ mb: 3 }}>
+					<RichTextEditor value={formData.mission} readOnly minHeight={200} />
+				</Box>
+
 				<Typography variant='h6' gutterBottom>
 					Vision
 				</Typography>
-				<Typography paragraph>{formData.vision}</Typography>
-				<Divider sx={{ my: 2 }} />
+				<Box sx={{ mb: 3 }}>
+					<RichTextEditor value={formData.vision} readOnly minHeight={200} />
+				</Box>
 			</Paper>
 		</Box>
 	);

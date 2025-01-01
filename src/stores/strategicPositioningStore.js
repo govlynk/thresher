@@ -75,4 +75,12 @@ export const strategicPositioningStore = create((set, get) => ({
 			throw err;
 		}
 	},
+
+	reset: () => {
+		set({
+			capabilityStatement: null,
+			loading: false,
+			error: null,
+		});
+	},
 }));
