@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useCapabilityStatementStore } from "../../stores/capabilityStatementStore";
 import { useGlobalStore } from "../../stores/globalStore";
-
 import {
 	Box,
 	Button,
@@ -23,45 +22,86 @@ import { ReviewSection } from "./sections/ReviewSection";
 
 const steps = ["About Us", "Mission & Vision", "Competitive Advantage", "Key Capabilities", "Review"];
 
-export default function StrategicPositioiningForm() {
+const INITIAL_FORM_STATE = {
+	aboutUs: "",
+	mission: "",
+	vision: "",
+	competitiveAdvantage: "",
+	keyCapabilities: [],
+};
+
+export default function StrategicPositioningForm() {
 	const activeCompanyId = useGlobalStore((state) => state.activeCompanyId);
 	const [activeStep, setActiveStep] = useState(0);
-	const [formData, setFormData] = useState({
-		aboutUs: "",
-		mission: "",
-		vision: "",
-		competitiveAdvantage: "",
-		keyCapabilities: [],
-	});
+	const [formData, setFormData] = useState(INITIAL_FORM_STATE);
+	const [saveError, setSaveError] = useState(null);
 
-	const { capabilityStatement, loading, error, fetchCapabilityStatement, saveCapabilityStatement } =
+	const { capabilityStatement, loading, error, fetchCapabilityStatement, saveCapabilityStatement, reset } =
 		useCapabilityStatementStore();
 
-	//Only fetch when activeCompanyId changes
+	// Fetch data only on mount and company change
 	useEffect(() => {
-		if (activeCompanyId) {
-			fetchCapabilityStatement(activeCompanyId);
-		}
+		let mounted = true;
+
+		const fetchData = async () => {
+			if (activeCompanyId && mounted) {
+				await fetchCapabilityStatement(activeCompanyId);
+			}
+		};
+
+		fetchData();
+
+		return () => {
+			mounted = false;
+			reset();
+		};
+	}, [activeCompanyId, fetchCapabilityStatement, reset]);
+
+	// Update form when capability statement changes
+	useEffect(() => {
 		if (capabilityStatement) {
 			setFormData({
 				aboutUs: capabilityStatement.aboutUs || "",
-				competitiveAdvantage: capabilityStatement.competitiveAdvantage || "",
 				mission: capabilityStatement.mission || "",
 				vision: capabilityStatement.vision || "",
+				competitiveAdvantage: capabilityStatement.competitiveAdvantage || "",
 				keyCapabilities: capabilityStatement.keyCapabilities || [],
 			});
 		}
-	}, [activeCompanyId]);
+	}, [capabilityStatement]);
 
-	if (!activeCompanyId) {
-		return (
-			<Box sx={{ p: 3 }}>
-				<Alert severity='warning'>Please select a company to create a capability statement</Alert>
-			</Box>
-		);
-	}
+	const updateFormData = useCallback((field, value) => {
+		setFormData((prev) => ({
+			...prev,
+			[field]: value,
+		}));
+		setSaveError(null);
+	}, []);
 
-	const renderStepContent = () => {
+	const handleNext = () => {
+		setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
+	};
+
+	const handleBack = () => {
+		setActiveStep((prev) => Math.max(prev - 1, 0));
+	};
+
+	const handleSave = async () => {
+		if (!activeCompanyId) return;
+
+		setSaveError(null);
+		try {
+			await saveCapabilityStatement({
+				...formData,
+				companyId: activeCompanyId,
+			});
+		} catch (err) {
+			console.error("Error saving capability statement:", err);
+			setSaveError(err.message || "Failed to save capability statement");
+		}
+	};
+
+	const renderStepContent = useCallback(() => {
 		switch (activeStep) {
 			case 0:
 				return <AboutSection value={formData.aboutUs} onChange={(value) => updateFormData("aboutUs", value)} />;
@@ -88,51 +128,26 @@ export default function StrategicPositioiningForm() {
 						onChange={(value) => updateFormData("keyCapabilities", value)}
 					/>
 				);
-
 			case 4:
 				return <ReviewSection formData={formData} />;
 			default:
 				return null;
 		}
-	};
+	}, [activeStep, formData, updateFormData]);
 
-	const handleNext = () => {
-		setActiveStep((prev) => prev + 1);
-	};
-
-	const handleBack = () => {
-		setActiveStep((prev) => prev - 1);
-	};
-
-	const handleSave = async () => {
-		try {
-			await saveCapabilityStatement(formData);
-			// Show success message or handle completion
-		} catch (err) {
-			// Handle error
-		}
-	};
-
-	const updateFormData = (field, value) => {
-		setFormData((prev) => ({
-			...prev,
-			[field]: value,
-		}));
-	};
+	if (!activeCompanyId) {
+		return (
+			<Box sx={{ p: 3 }}>
+				<Alert severity='warning'>Please select a company to create a capability statement</Alert>
+			</Box>
+		);
+	}
 
 	if (loading) {
 		return (
 			<Box sx={{ width: "100%", mt: 4 }}>
 				<LinearProgress />
 			</Box>
-		);
-	}
-
-	if (error) {
-		return (
-			<Alert severity='error' sx={{ mt: 4 }}>
-				{error}
-			</Alert>
 		);
 	}
 
@@ -147,7 +162,19 @@ export default function StrategicPositioiningForm() {
 			</Stepper>
 
 			<Card>
-				<CardContent>{renderStepContent()}</CardContent>
+				<CardContent>
+					{error && (
+						<Alert severity='error' sx={{ mb: 3 }}>
+							{error}
+						</Alert>
+					)}
+					{saveError && (
+						<Alert severity='error' sx={{ mb: 3 }}>
+							{saveError}
+						</Alert>
+					)}
+					{renderStepContent()}
+				</CardContent>
 			</Card>
 
 			<Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
