@@ -1,26 +1,26 @@
 import { EditorState, convertToRaw, convertFromRaw, ContentState } from "draft-js";
 
-export const createEmptyEditorState = () => {
-	return EditorState.createEmpty();
-};
-
-export const createEditorStateFromRaw = (rawContent) => {
-	if (!rawContent) return createEmptyEditorState();
+export const createEditorStateFromRaw = (rawContent, previousEditorState = null) => {
+	if (!rawContent) return EditorState.createEmpty();
 
 	try {
+		// Try parsing as JSON (rich text)
 		const contentState = convertFromRaw(JSON.parse(rawContent));
-		return EditorState.createWithContent(contentState);
-	} catch (err) {
-		console.warn("Invalid raw content, creating empty editor state:", err);
-		return createEmptyEditorState();
+		const newEditorState = EditorState.createWithContent(contentState);
+
+		// If we have a previous editor state, try to preserve selection
+		if (previousEditorState) {
+			const selection = previousEditorState.getSelection();
+			if (selection.getHasFocus()) {
+				return EditorState.forceSelection(newEditorState, selection);
+			}
+		}
+
+		return newEditorState;
+	} catch (e) {
+		console.warn("Invalid raw content, creating empty editor state:", e);
+		return EditorState.createEmpty();
 	}
-};
-
-export const createEditorStateFromText = (text) => {
-	if (!text) return createEmptyEditorState();
-
-	const contentState = ContentState.createFromText(String(text));
-	return EditorState.createWithContent(contentState);
 };
 
 export const convertEditorStateToRaw = (editorState) => {
@@ -30,12 +30,18 @@ export const convertEditorStateToRaw = (editorState) => {
 	return JSON.stringify(convertToRaw(contentState));
 };
 
-export const getPlainTextFromEditorState = (editorState) => {
-	if (!editorState) return "";
-	return editorState.getCurrentContent().getPlainText();
+export const getPlainText = (value) => {
+	if (!value) return "";
+
+	try {
+		const contentState = convertFromRaw(JSON.parse(value));
+		return contentState.getPlainText();
+	} catch (e) {
+		return String(value || "");
+	}
 };
 
-export const isEditorStateEmpty = (editorState) => {
+export const isEmptyEditorState = (editorState) => {
 	if (!editorState) return true;
 
 	const contentState = editorState.getCurrentContent();

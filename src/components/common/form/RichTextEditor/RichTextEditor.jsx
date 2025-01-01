@@ -1,5 +1,5 @@
-import React from "react";
-import { Editor, RichUtils } from "draft-js";
+import React, { useCallback } from "react";
+import { Editor, RichUtils, EditorState } from "draft-js";
 import { Box, Paper } from "@mui/material";
 import { EditorToolbar } from "./EditorToolbar";
 import { useEditorState } from "./useEditorState";
@@ -12,18 +12,32 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 200, 
 		readOnly,
 	});
 
-	const handleKeyCommand = (command, editorState) => {
-		const newState = RichUtils.handleKeyCommand(editorState, command);
-		if (newState) {
-			setEditorState(newState);
-			return "handled";
-		}
-		return "not-handled";
-	};
+	const handleKeyCommand = useCallback(
+		(command, editorState) => {
+			const newState = RichUtils.handleKeyCommand(editorState, command);
+			if (newState) {
+				setEditorState(newState);
+				return "handled";
+			}
+			return "not-handled";
+		},
+		[setEditorState]
+	);
 
-	const handleToolbarToggle = (type, newState) => {
-		setEditorState(newState);
-	};
+	const handleToolbarToggle = useCallback(
+		(type, newState) => {
+			// Ensure we maintain focus after toolbar actions
+			const withFocus = EditorState.moveFocusToEnd(newState);
+			setEditorState(withFocus);
+		},
+		[setEditorState]
+	);
+
+	const handleFocus = useCallback(() => {
+		if (!readOnly) {
+			setEditorState(EditorState.moveFocusToEnd(editorState));
+		}
+	}, [editorState, readOnly, setEditorState]);
 
 	return (
 		<Paper
@@ -53,6 +67,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 200, 
 						minHeight: minHeight - 32,
 					},
 				}}
+				onClick={handleFocus}
 			>
 				<Editor
 					editorState={editorState}
@@ -61,6 +76,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 200, 
 					readOnly={readOnly}
 					handleKeyCommand={handleKeyCommand}
 					spellCheck={true}
+					preserveSelectionOnBlur={true}
 				/>
 			</Box>
 		</Paper>
