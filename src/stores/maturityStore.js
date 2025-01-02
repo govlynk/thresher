@@ -42,46 +42,41 @@ export const useMaturityStore = create((set, get) => ({
 			const currentAssessment = get().assessment;
 			const timestamp = new Date().toISOString();
 
-			// Save current version to history if it exists
-			if (currentAssessment) {
-				await client.models.MaturityAssessmentHistory.create({
-					assessmentId: currentAssessment.id,
-					companyId: data.companyId,
-					answers: currentAssessment.answers,
-					status: currentAssessment.status,
-					completedAt: currentAssessment.completedAt,
-					modifiedAt: timestamp,
-				});
-
+			let response;
+			if (currentAssessment?.id) {
 				// Update existing assessment
-				const response = await client.models.MaturityAssessment.update({
+				response = await client.models.MaturityAssessment.update({
 					id: currentAssessment.id,
 					...data,
 					lastModified: timestamp,
 				});
-
-				set({
-					assessment: response.data,
-					loading: false,
-					error: null,
-				});
 			} else {
 				// Create new assessment
-				const response = await client.models.MaturityAssessment.create({
+				response = await client.models.MaturityAssessment.create({
 					...data,
 					lastModified: timestamp,
 				});
-
-				set({
-					assessment: response.data,
-					loading: false,
-					error: null,
-				});
 			}
+
+			set({
+				assessment: response.data,
+				loading: false,
+				error: null,
+			});
+
+			return response.data;
 		} catch (err) {
 			console.error("Error saving assessment:", err);
 			set({ error: err.message, loading: false });
 			throw err;
 		}
+	},
+
+	reset: () => {
+		set({
+			assessment: null,
+			loading: false,
+			error: null,
+		});
 	},
 }));

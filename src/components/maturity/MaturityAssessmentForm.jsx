@@ -5,7 +5,9 @@ import { questions } from "./questions";
 import { questionInfo } from "./questionInfo";
 import { useMaturityStore } from "../../stores/maturityStore";
 import { useGlobalStore } from "../../stores/globalStore";
-import { useFormAutosave } from "../../utils/form/useFormAutosave";
+import { useFormAutosave } from "../common/form/useFormAutosave";
+
+// Import question components
 import { SectionQuestion } from "../common/form/questionTypes/SectionQuestion";
 import { RatingQuestion } from "../common/form/questionTypes/RatingQuestion";
 import { MultipleChoiceQuestion } from "../common/form/questionTypes/MultipleChoiceQuestion";
@@ -15,14 +17,15 @@ import { LikertQuestion } from "../common/form/questionTypes/LikertQuestion";
 import { CodeListQuestion } from "../common/form/questionTypes/CodeListQuestion";
 import { DemographicQuestion } from "../common/form/questionTypes/DemographicQuestion";
 
+// Map of question types to components
 const QUESTION_COMPONENTS = {
 	section: SectionQuestion,
 	rating: RatingQuestion,
-	multipleChoice: MultipleChoiceQuestion,
-	richText: RichTextQuestion,
+	multiplechoice: MultipleChoiceQuestion,
+	richtext: RichTextQuestion,
 	authorization: AuthorizationQuestion,
 	likert: LikertQuestion,
-	codeList: CodeListQuestion,
+	codelist: CodeListQuestion,
 	demographic: DemographicQuestion,
 };
 
@@ -30,7 +33,6 @@ export function MaturityAssessmentForm() {
 	const { assessment, saveAssessment, loading, error } = useMaturityStore();
 	const { activeCompanyId } = useGlobalStore();
 
-	// Memoize the save handler
 	const handleSave = useCallback(
 		async (data) => {
 			if (!activeCompanyId) {
@@ -45,14 +47,25 @@ export function MaturityAssessmentForm() {
 		[activeCompanyId, saveAssessment]
 	);
 
-	// Enable autosave with 2 second delay
+	const handleSubmit = async (formData) => {
+		if (!activeCompanyId) {
+			throw new Error("No active company selected");
+		}
+
+		await saveAssessment({
+			companyId: activeCompanyId,
+			answers: formData,
+			status: "COMPLETED",
+			completedAt: new Date().toISOString(),
+		});
+	};
+
 	useFormAutosave({
 		formData: assessment?.answers || {},
 		onSave: handleSave,
 		delay: 2000,
 	});
 
-	// Transform questions array into steps format expected by FormController
 	const formSteps = questions.map((question) => ({
 		id: question.id,
 		label: question.title,
@@ -68,7 +81,7 @@ export function MaturityAssessmentForm() {
 				<QuestionComponent
 					question={question}
 					value={formData[question.id]}
-					onChange={(id, value) => onChange(id, value)}
+					onChange={(value) => onChange(question.id, value)}
 					error={errors?.[question.id]}
 					onInfoClick={onInfoClick}
 				/>
@@ -85,24 +98,12 @@ export function MaturityAssessmentForm() {
 		},
 	}));
 
-	const handleSubmit = async (formData) => {
-		if (!activeCompanyId) {
-			throw new Error("No active company selected");
-		}
-
-		await saveAssessment({
-			companyId: activeCompanyId,
-			answers: formData,
-			status: "COMPLETED",
-			completedAt: new Date().toISOString(),
-		});
-	};
-
 	return (
 		<FormController
 			steps={formSteps}
 			initialData={assessment?.answers || {}}
 			onSubmit={handleSubmit}
+			onSave={handleSave}
 			loading={loading}
 			error={error}
 			questionInfo={questionInfo}
