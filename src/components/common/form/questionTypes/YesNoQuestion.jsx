@@ -18,9 +18,11 @@ export function YesNoQuestion({ question, value, onChange, onInfoClick }) {
 					<Typography variant='h6' gutterBottom>
 						{question.title}
 					</Typography>
-					<IconButton size='small' onClick={() => onInfoClick?.(question)} sx={{ mb: 1 }}>
-						<Info size={20} />
-					</IconButton>
+					{question?.info && (
+						<IconButton size='small' onClick={() => onInfoClick?.(question)} sx={{ mb: 1 }}>
+							<Info size={20} />
+						</IconButton>
+					)}
 				</Box>
 			</FormLabel>
 

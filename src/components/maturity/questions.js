@@ -12,6 +12,7 @@ export const questions = [
 				title: "FAR Compliance",
 				type: QUESTION_TYPES.RATING,
 				required: true,
+				info: false,
 				maxRating: 5,
 				categories: ["FAR/DFARS Knowledge", "Compliance Program", "Internal Controls", "Documentation"],
 				labels: {
@@ -27,6 +28,7 @@ export const questions = [
 				title: "Supply Chain Security",
 				type: QUESTION_TYPES.LIKERT,
 				required: true,
+				info: false,
 				scale: ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"],
 				statements: [
 					"We have a documented supply chain security program",
@@ -40,6 +42,7 @@ export const questions = [
 				title: "Trade Agreement Act Compliance",
 				type: QUESTION_TYPES.MULTIPLE_CHOICE,
 				required: true,
+				info: false,
 				multiple: true,
 				options: [
 					"Documented country of origin tracking",
@@ -63,6 +66,7 @@ export const questions = [
 				title: "Federal Marketplace Presence",
 				type: QUESTION_TYPES.RATING,
 				required: true,
+				info: false,
 				maxRating: 5,
 				categories: [
 					"Contract Vehicle Coverage",
@@ -83,6 +87,7 @@ export const questions = [
 				title: "Target Agency Identification",
 				type: QUESTION_TYPES.CODE_LIST,
 				required: true,
+				info: false,
 				maxItems: 5,
 				pattern: "^[A-Z]{2,4}$",
 				helpText: "Enter agency codes (e.g., DOD, DHS, etc.)",
@@ -105,6 +110,7 @@ export const questions = [
 				title: "Revenue Metrics",
 				type: QUESTION_TYPES.DEMOGRAPHIC,
 				required: true,
+				info: false,
 				fields: [
 					{
 						name: "annualRevenue",
@@ -136,6 +142,7 @@ export const questions = [
 				title: "Contract Management Capacity",
 				type: QUESTION_TYPES.RATING,
 				required: true,
+				info: false,
 				maxRating: 5,
 				categories: ["Financial Systems", "Contract Administration", "Resource Allocation", "Risk Management"],
 				labels: {
@@ -160,6 +167,7 @@ export const questions = [
 				title: "Quality Management Systems",
 				type: QUESTION_TYPES.MULTIPLE_CHOICE,
 				required: true,
+				info: false,
 				multiple: true,
 				options: [
 					"ISO 9001 Certification",
@@ -175,6 +183,7 @@ export const questions = [
 				title: "Delivery Capabilities Assessment",
 				type: QUESTION_TYPES.LIKERT,
 				required: true,
+				info: false,
 				scale: ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"],
 				statements: [
 					"We consistently meet delivery deadlines",
@@ -197,6 +206,7 @@ export const questions = [
 				title: "Federal Marketing Strategy",
 				type: QUESTION_TYPES.RICH_TEXT,
 				required: true,
+				info: false,
 				minLength: 100,
 				maxLength: 2000,
 				placeholder: "Describe your federal marketing strategy...",
@@ -207,6 +217,7 @@ export const questions = [
 				title: "Pipeline Management",
 				type: QUESTION_TYPES.RATING,
 				required: true,
+				info: false,
 				maxRating: 5,
 				categories: ["Opportunity Tracking", "Win Rate", "Bid/No-Bid Process", "Capture Planning"],
 				labels: {
@@ -231,6 +242,7 @@ export const questions = [
 				title: "Cybersecurity Posture",
 				type: QUESTION_TYPES.MULTIPLE_CHOICE,
 				required: true,
+				info: false,
 				multiple: true,
 				options: [
 					"NIST 800-171 Compliant",
@@ -246,6 +258,7 @@ export const questions = [
 				title: "Systems Compliance",
 				type: QUESTION_TYPES.RATING,
 				required: true,
+				info: false,
 				maxRating: 5,
 				categories: ["Access Controls", "Data Protection", "System Documentation", "Change Management"],
 				labels: {
@@ -265,6 +278,7 @@ export const questions = [
 		title: "Assessment Authorization",
 		type: QUESTION_TYPES.AUTHORIZATION,
 		required: true,
+		info: false,
 		agreementText: `By submitting this assessment, I certify that:
 1. All information provided is accurate and complete to the best of my knowledge
 2. I am authorized to complete this assessment on behalf of my organization

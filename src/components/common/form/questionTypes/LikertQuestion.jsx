@@ -30,9 +30,11 @@ export function LikertQuestion({ question, value = {}, onChange, error, onInfoCl
 					{question.title}
 					{question.required && <span style={{ color: "error.main" }}> *</span>}
 				</Typography>
-				<IconButton size='small' onClick={() => onInfoClick?.(question)} sx={{ mb: 1 }}>
-					<Info size={20} />
-				</IconButton>
+				{question.info && (
+					<IconButton size='small' onClick={() => onInfoClick?.(question)} sx={{ mb: 1 }}>
+						<Info size={20} />
+					</IconButton>
+				)}
 			</Box>
 
 			{question.description && (

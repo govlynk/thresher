@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Typography, Paper, Divider } from "@mui/material";
+import { Box, Typography, Paper, Divider, IconButton } from "@mui/material";
+import { Info } from "lucide-react";
 import { TextQuestion } from "./TextQuestion";
 import { ChoiceQuestion } from "./ChoiceQuestion";
 import { RatingQuestion } from "./RatingQuestion";
@@ -23,7 +24,7 @@ const questionComponents = {
 	[QUESTION_TYPES.AUTHORIZATION]: AuthorizationQuestion,
 };
 
-export function SectionQuestion({ question, value = {}, onChange, error = {} }) {
+export function SectionQuestion({ question, value = {}, onChange, error = {}, onInfoClick = {} }) {
 	const handleQuestionChange = (questionId, questionValue) => {
 		onChange({
 			...value,
@@ -33,10 +34,16 @@ export function SectionQuestion({ question, value = {}, onChange, error = {} }) 
 
 	return (
 		<Box sx={{ mb: 4 }}>
-			<Typography variant='h5' gutterBottom>
-				{question.title}
-			</Typography>
-
+			<Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+				<Typography variant='h5' gutterBottom>
+					{question.title}
+				</Typography>
+				{onInfoClick && (
+					<IconButton size='small' onClick={() => onInfoClick(question)}>
+						<Info size={20} />
+					</IconButton>
+				)}
+			</Box>
 			{question.description && (
 				<Typography variant='body1' color='text.secondary' sx={{ mb: 3 }}>
 					{question.description}

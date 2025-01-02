@@ -16,23 +16,6 @@ export const questionInfo = {
 		],
 	},
 
-	farCompliance: {
-		title: "Compliance & Governance",
-		backgroundInfo: `A strong compliance and governance framework is essential for successful government contracting. 
-    This section assesses your organization's adherence to federal regulations and internal control mechanisms.`,
-		videoUrl: "https://youtu.be/example",
-		resources: [
-			{
-				title: "FAR Compliance Guide",
-				url: "https://www.acquisition.gov/browse/index/far",
-			},
-			{
-				title: "Supply Chain Security Best Practices",
-				url: "https://www.cisa.gov/supply-chain",
-			},
-		],
-	},
-
 	marketReadiness: {
 		title: "Market Readiness",
 		backgroundInfo: `Market readiness evaluates your organization's preparedness to compete and succeed in the federal marketplace.

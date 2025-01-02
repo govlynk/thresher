@@ -32,9 +32,11 @@ export function TextQuestion({ question, value, onChange, onInfoClick }) {
 					{question.title}
 					{question.required && <span style={{ color: "error.main" }}> *</span>}
 				</Typography>
-				<IconButton size='small' onClick={() => onInfoClick?.(question)} sx={{ mb: 1 }}>
-					<Info size={20} />
-				</IconButton>
+				{question?.info && (
+					<IconButton size='small' onClick={() => onInfoClick?.(question)} sx={{ mb: 1 }}>
+						<Info size={20} />
+					</IconButton>
+				)}
 			</Box>
 
 			<Typography variant='body1' sx={{ mb: 2, color: "text.secondary" }}>

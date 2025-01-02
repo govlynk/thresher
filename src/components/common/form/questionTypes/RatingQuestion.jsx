@@ -17,9 +17,11 @@ export function RatingQuestion({ question, value = {}, onChange }) {
 					{question.title}
 					{question.required && <span style={{ color: "error.main" }}> *</span>}
 				</Typography>
-				<IconButton size='small' onClick={() => onInfoClick?.(question)}>
-					<Info size={20} />
-				</IconButton>
+				{question?.info && (
+					<IconButton size='small' onClick={() => onInfoClick?.(question)}>
+						<Info size={20} />
+					</IconButton>
+				)}
 			</Box>
 
 			<Typography variant='body1' sx={{ mb: 3, color: "text.secondary" }}>

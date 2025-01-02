@@ -82,6 +82,7 @@ export function FormController({
 
 	const currentStep = steps[activeStep];
 	const StepComponent = currentStep?.component;
+	console.log("questionInfo", questionInfo?.[currentStep?.id]);
 
 	return (
 		// <Box sx={{ width: '100%' }}>
