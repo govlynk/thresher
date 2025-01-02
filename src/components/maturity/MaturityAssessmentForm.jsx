@@ -5,7 +5,6 @@ import { questions } from "./questions";
 import { questionInfo } from "./questionInfo";
 import { useMaturityStore } from "../../stores/maturityStore";
 import { useGlobalStore } from "../../stores/globalStore";
-import { useFormAutosave } from "../common/form/useFormAutosave";
 
 // Import question components
 import { SectionQuestion } from "../common/form/questionTypes/SectionQuestion";
@@ -59,12 +58,6 @@ export function MaturityAssessmentForm() {
 			completedAt: new Date().toISOString(),
 		});
 	};
-
-	useFormAutosave({
-		formData: assessment?.answers || {},
-		onSave: handleSave,
-		delay: 2000,
-	});
 
 	const formSteps = questions.map((question) => ({
 		id: question.id,

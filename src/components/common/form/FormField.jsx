@@ -1,11 +1,12 @@
 import React from "react";
-import { Box, Typography, FormHelperText } from "@mui/material";
+import { Box, Typography, IconButton } from "@mui/material";
+import { Info } from "lucide-react";
 
 export function FormField({ question, error, children }) {
 	return (
-		<Box sx={{ mb: 2 }}>
-			{question.title && (
-				<Typography variant='h6' gutterBottom sx={{ display: "flex", alignItems: "center" }}>
+		<Box sx={{ mb: 3 }}>
+			<Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+				<Typography variant='h6'>
 					{question.title}
 					{question.required && (
 						<Typography component='span' color='error' sx={{ ml: 0.5 }}>
@@ -13,19 +14,25 @@ export function FormField({ question, error, children }) {
 						</Typography>
 					)}
 				</Typography>
-			)}
+				{question.info && (
+					<IconButton size='small' onClick={() => onInfoClick?.(question)}>
+						<Info size={20} />
+					</IconButton>
+				)}
+			</Box>
 
 			{question.instructions && (
 				<Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
 					{question.instructions}
-					{question.required && <span style={{ color: "error.main" }}> *</span>}
 				</Typography>
 			)}
 
 			{children}
 
-			{(error || question.helperText) && (
-				<FormHelperText error={!!error}>{error || question.helperText}</FormHelperText>
+			{error && (
+				<Typography color='error' variant='caption' sx={{ mt: 1 }}>
+					{error}
+				</Typography>
 			)}
 		</Box>
 	);

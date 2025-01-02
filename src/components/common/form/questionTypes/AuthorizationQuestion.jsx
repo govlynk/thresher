@@ -1,43 +1,18 @@
 import React from "react";
-import {
-	Box,
-	Typography,
-	TextField,
-	FormControlLabel,
-	Checkbox,
-	FormHelperText,
-	Paper,
-	Alert,
-	IconButton,
-} from "@mui/material";
-import { Info } from "lucide-react";
+import { Box, Typography, TextField, FormControlLabel, Checkbox, FormHelperText, Paper, Alert } from "@mui/material";
+import { FormField } from "../FormField";
 
-export function AuthorizationQuestion({ question, value = {}, onChange, onInfoClick }) {
+export function AuthorizationQuestion({ question, value = {}, onChange, error }) {
 	const handleChange = (field, newValue) => {
-		const updatedValue = {
+		onChange(question.id, {
 			...value,
 			[field]: newValue,
 			timestamp: new Date().toISOString(),
-		};
-		onChange(question.id, updatedValue);
+		});
 	};
 
-	const error = question.validation?.(value);
-
 	return (
-		<Box sx={{ width: "100%" }}>
-			<Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-				<Typography variant='h6'>
-					{question.title}
-					{question.required && <span style={{ color: "error.main" }}> *</span>}
-				</Typography>
-				{question?.info && (
-					<IconButton size='small' onClick={() => onInfoClick?.(question)}>
-						<Info size={20} />
-					</IconButton>
-				)}
-			</Box>
-
+		<FormField question={question} error={error}>
 			<Paper
 				variant='outlined'
 				sx={{
@@ -100,8 +75,6 @@ export function AuthorizationQuestion({ question, value = {}, onChange, onInfoCl
 					</Alert>
 				)}
 			</Box>
-
-			{question.helpText && <FormHelperText sx={{ mt: 2 }}>{question.helpText}</FormHelperText>}
-		</Box>
+		</FormField>
 	);
 }

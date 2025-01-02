@@ -1,19 +1,8 @@
 import React from "react";
-import {
-	Box,
-	Typography,
-	TextField,
-	FormControl,
-	InputLabel,
-	Select,
-	MenuItem,
-	Grid,
-	FormHelperText,
-	IconButton,
-} from "@mui/material";
-import { Info } from "lucide-react";
+import { Box, TextField, FormControl, InputLabel, Select, MenuItem, Grid, FormHelperText } from "@mui/material";
+import { FormField } from "../FormField";
 
-export function DemographicQuestion({ question, value = {}, onChange, onInfoClick }) {
+export function DemographicQuestion({ question, value = {}, onChange, error }) {
 	const handleFieldChange = (fieldName, fieldValue) => {
 		onChange(question.id, {
 			...value,
@@ -21,53 +10,34 @@ export function DemographicQuestion({ question, value = {}, onChange, onInfoClic
 		});
 	};
 
-	const validateField = (field, fieldValue) => {
-		if (field.required && !fieldValue) {
-			return `${field.label} is required`;
-		}
+	const getFieldError = (field) => {
+		if (!field.required) return null;
+		if (!value[field.name]) return `${field.label} is required`;
+
 		if (field.type === "number") {
-			const num = Number(fieldValue);
+			const num = Number(value[field.name]);
 			if (field.min && num < field.min) {
-				return `${field.label} must be at least ${field.min}`;
+				return `Must be at least ${field.min}`;
 			}
 			if (field.max && num > field.max) {
-				return `${field.label} must be no more than ${field.max}`;
+				return `Must be no more than ${field.max}`;
 			}
 		}
-		return "";
+		return null;
 	};
 
 	return (
-		<Box sx={{ width: "100%" }}>
-			<Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-				<Typography variant='h6'>
-					{question.title}
-					{question.required && <span style={{ color: "error.main" }}> *</span>}
-				</Typography>
-				{question?.info && (
-					<IconButton size='small' onClick={() => onInfoClick?.(question)}>
-						<Info size={20} />
-					</IconButton>
-				)}
-			</Box>
-
-			{question.question && (
-				<Typography variant='body1' sx={{ mb: 3, color: "text.secondary" }}>
-					{question.question}
-				</Typography>
-			)}
-
+		<FormField question={question} error={error}>
 			<Grid container spacing={3}>
 				{question.fields.map((field) => (
 					<Grid item xs={12} sm={6} key={field.name}>
 						{field.type === "select" ? (
-							<FormControl fullWidth>
+							<FormControl fullWidth error={Boolean(getFieldError(field))}>
 								<InputLabel required={field.required}>{field.label}</InputLabel>
 								<Select
 									value={value[field.name] || ""}
 									onChange={(e) => handleFieldChange(field.name, e.target.value)}
 									label={field.label}
-									error={Boolean(validateField(field, value[field.name]))}
 								>
 									{field.options.map((option) => (
 										<MenuItem key={option.value} value={option.value}>
@@ -75,9 +45,7 @@ export function DemographicQuestion({ question, value = {}, onChange, onInfoClic
 										</MenuItem>
 									))}
 								</Select>
-								{validateField(field, value[field.name]) && (
-									<FormHelperText error>{validateField(field, value[field.name])}</FormHelperText>
-								)}
+								{getFieldError(field) && <FormHelperText>{getFieldError(field)}</FormHelperText>}
 							</FormControl>
 						) : (
 							<TextField
@@ -87,8 +55,8 @@ export function DemographicQuestion({ question, value = {}, onChange, onInfoClic
 								value={value[field.name] || ""}
 								onChange={(e) => handleFieldChange(field.name, e.target.value)}
 								required={field.required}
-								error={Boolean(validateField(field, value[field.name]))}
-								helperText={validateField(field, value[field.name])}
+								error={Boolean(getFieldError(field))}
+								helperText={getFieldError(field)}
 								inputProps={{
 									min: field.min,
 									max: field.max,
@@ -98,8 +66,6 @@ export function DemographicQuestion({ question, value = {}, onChange, onInfoClic
 					</Grid>
 				))}
 			</Grid>
-
-			{question.helpText && <FormHelperText sx={{ mt: 2 }}>{question.helpText}</FormHelperText>}
-		</Box>
+		</FormField>
 	);
 }

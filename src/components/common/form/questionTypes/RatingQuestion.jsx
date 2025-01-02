@@ -1,33 +1,22 @@
 import React from "react";
-import { Box, Typography, Rating, FormHelperText, IconButton } from "@mui/material";
-import { Star, Info } from "lucide-react";
+import { Box, Typography, Rating, FormHelperText } from "@mui/material";
+import { Star } from "lucide-react";
+import { FormField } from "../FormField";
 
-export function RatingQuestion({ question, value = {}, onChange }) {
+export function RatingQuestion({ question, value, onChange }) {
+	// Ensure value is an object
+	const ratings = value || {};
+
 	const handleRatingChange = (category, newValue) => {
-		onChange(question.id, {
-			...value,
+		const updatedRatings = {
+			...ratings,
 			[category]: newValue,
-		});
+		};
+		onChange(updatedRatings);
 	};
 
 	return (
-		<Box sx={{ width: "100%" }}>
-			<Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-				<Typography variant='h6'>
-					{question.title}
-					{question.required && <span style={{ color: "error.main" }}> *</span>}
-				</Typography>
-				{question?.info && (
-					<IconButton size='small' onClick={() => onInfoClick?.(question)}>
-						<Info size={20} />
-					</IconButton>
-				)}
-			</Box>
-
-			<Typography variant='body1' sx={{ mb: 3, color: "text.secondary" }}>
-				{question.question}
-			</Typography>
-
+		<FormField question={question} error={null}>
 			{question.categories.map((category) => (
 				<Box key={category} sx={{ mb: 2 }}>
 					<Typography variant='subtitle1' gutterBottom>
@@ -35,7 +24,7 @@ export function RatingQuestion({ question, value = {}, onChange }) {
 					</Typography>
 					<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
 						<Rating
-							value={value[category] || 0}
+							value={ratings[category] || 0}
 							onChange={(_, newValue) => handleRatingChange(category, newValue)}
 							max={question.maxRating || 5}
 							icon={<Star fill='currentColor' />}
@@ -46,16 +35,14 @@ export function RatingQuestion({ question, value = {}, onChange }) {
 								},
 							}}
 						/>
-						{value[category] && question.labels && (
+						{ratings[category] && question.labels && (
 							<Typography variant='body2' color='text.secondary'>
-								{question.labels[value[category]]}
+								{question.labels[ratings[category]]}
 							</Typography>
 						)}
 					</Box>
 				</Box>
 			))}
-
-			{question.helpText && <FormHelperText>{question.helpText}</FormHelperText>}
-		</Box>
+		</FormField>
 	);
 }

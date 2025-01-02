@@ -1,30 +1,32 @@
 import React from "react";
-import { Box, Typography, Paper, Divider, IconButton } from "@mui/material";
-import { Info } from "lucide-react";
-import { TextQuestion } from "./TextQuestion";
-import { ChoiceQuestion } from "./ChoiceQuestion";
-import { RatingQuestion } from "./RatingQuestion";
-import { SliderQuestion } from "./SliderQuestion";
-import { FileUploadQuestion } from "./FileUploadQuestion";
-import { LikertQuestion } from "./LikertQuestion";
-import { DemographicQuestion } from "./DemographicQuestion";
-import { AuthorizationQuestion } from "./AuthorizationQuestion";
-import { QUESTION_TYPES } from "../questionTypes";
+import { Box, Typography, Paper, Divider } from "@mui/material";
+import { getNormalizedQuestionType } from "../questionTypes";
 
+// Import all question components
+import { TextQuestion } from "./TextQuestion";
+import { RatingQuestion } from "./RatingQuestion";
+import { MultipleChoiceQuestion } from "./MultipleChoiceQuestion";
+import { RichTextQuestion } from "./RichTextQuestion";
+import { AuthorizationQuestion } from "./AuthorizationQuestion";
+import { LikertQuestion } from "./LikertQuestion";
+import { CodeListQuestion } from "./CodeListQuestion";
+import { DemographicQuestion } from "./DemographicQuestion";
+
+// Map question types to components
 const questionComponents = {
-	[QUESTION_TYPES.TEXT]: TextQuestion,
-	[QUESTION_TYPES.LONG_TEXT]: TextQuestion,
-	[QUESTION_TYPES.MULTIPLE_CHOICE]: ChoiceQuestion,
-	[QUESTION_TYPES.SINGLE_CHOICE]: ChoiceQuestion,
-	[QUESTION_TYPES.RATING]: RatingQuestion,
-	[QUESTION_TYPES.SLIDER]: SliderQuestion,
-	[QUESTION_TYPES.FILE_UPLOAD]: FileUploadQuestion,
-	[QUESTION_TYPES.LIKERT]: LikertQuestion,
-	[QUESTION_TYPES.DEMOGRAPHIC]: DemographicQuestion,
-	[QUESTION_TYPES.AUTHORIZATION]: AuthorizationQuestion,
+	text: TextQuestion,
+	longText: TextQuestion,
+	richText: RichTextQuestion,
+	rating: RatingQuestion,
+	multipleChoice: MultipleChoiceQuestion,
+	singleChoice: MultipleChoiceQuestion,
+	likert: LikertQuestion,
+	codeList: CodeListQuestion,
+	demographic: DemographicQuestion,
+	authorization: AuthorizationQuestion,
 };
 
-export function SectionQuestion({ question, value = {}, onChange, error = {}, onInfoClick = {} }) {
+export function SectionQuestion({ question, value = {}, onChange, error = {}, onInfoClick }) {
 	const handleQuestionChange = (questionId, questionValue) => {
 		onChange({
 			...value,
@@ -38,11 +40,6 @@ export function SectionQuestion({ question, value = {}, onChange, error = {}, on
 				<Typography variant='h5' gutterBottom>
 					{question.title}
 				</Typography>
-				{onInfoClick && (
-					<IconButton size='small' onClick={() => onInfoClick(question)}>
-						<Info size={20} />
-					</IconButton>
-				)}
 			</Box>
 			{question.description && (
 				<Typography variant='body1' color='text.secondary' sx={{ mb: 3 }}>
@@ -52,10 +49,11 @@ export function SectionQuestion({ question, value = {}, onChange, error = {}, on
 
 			<Paper variant='outlined' sx={{ p: 3 }}>
 				{question.questions.map((subQuestion, index) => {
-					const QuestionComponent = questionComponents[subQuestion.type];
+					const type = getNormalizedQuestionType(subQuestion.type);
+					const QuestionComponent = questionComponents[type];
 
 					if (!QuestionComponent) {
-						console.warn(`Unknown question type: ${subQuestion.type}`);
+						console.error(`Unknown question type: ${subQuestion.type} (normalized: ${type})`);
 						return null;
 					}
 
@@ -66,6 +64,7 @@ export function SectionQuestion({ question, value = {}, onChange, error = {}, on
 								value={value[subQuestion.id]}
 								onChange={(newValue) => handleQuestionChange(subQuestion.id, newValue)}
 								error={error[subQuestion.id]}
+								onInfoClick={onInfoClick}
 							/>
 							{index < question.questions.length - 1 && <Divider sx={{ my: 3 }} />}
 						</Box>
