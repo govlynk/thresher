@@ -24,11 +24,13 @@ const AuthenticatedApp = ({ signOut, user }) => {
 	const [initError, setInitError] = React.useState(null);
 
 	useEffect(() => {
+		console.log("[AuthenticatedApp] Initializing app", user);
 		if (user) {
 			const initializeApp = async () => {
 				try {
 					// Initialize auth and get user data
 					const userData = await initializeAuth(user);
+					console.log("[AuthenticatedApp] User data initialized", userData);
 
 					if (!userData) {
 						console.error("[AuthenticatedApp] No user data returned from auth initialization");
