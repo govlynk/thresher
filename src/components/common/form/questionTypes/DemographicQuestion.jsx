@@ -8,10 +8,12 @@ import {
   Select,
   MenuItem,
   Grid,
-  FormHelperText
+  FormHelperText,
+  IconButton
 } from '@mui/material';
+import { Info } from 'lucide-react';
 
-export function DemographicQuestion({ question, value = {}, onChange }) {
+export function DemographicQuestion({ question, value = {}, onChange, onInfoClick }) {
   const handleFieldChange = (fieldName, fieldValue) => {
     onChange(question.id, {
       ...value,
@@ -37,10 +39,15 @@ export function DemographicQuestion({ question, value = {}, onChange }) {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Typography variant="h6" gutterBottom>
-        {question.title}
-        {question.required && <span style={{ color: 'error.main' }}> *</span>}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <Typography variant="h6">
+          {question.title}
+          {question.required && <span style={{ color: 'error.main' }}> *</span>}
+        </Typography>
+        <IconButton size="small" onClick={() => onInfoClick?.(question)}>
+          <Info size={20} />
+        </IconButton>
+      </Box>
 
       {question.question && (
         <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>

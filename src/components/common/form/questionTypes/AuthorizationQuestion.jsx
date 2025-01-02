@@ -7,20 +7,18 @@ import {
   Checkbox,
   FormHelperText,
   Paper,
-  Alert
+  Alert,
+  IconButton
 } from '@mui/material';
+import { Info } from 'lucide-react';
 
-export function AuthorizationQuestion({ question, value = {}, onChange }) {
+export function AuthorizationQuestion({ question, value = {}, onChange, onInfoClick }) {
   const handleChange = (field, newValue) => {
     const updatedValue = {
       ...value,
       [field]: newValue,
       timestamp: new Date().toISOString()
     };
-
-    // Run validation
-    const validationError = question.validation?.(updatedValue);
-    
     onChange(question.id, updatedValue);
   };
 
@@ -28,10 +26,15 @@ export function AuthorizationQuestion({ question, value = {}, onChange }) {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Typography variant="h6" gutterBottom>
-        {question.title}
-        {question.required && <span style={{ color: 'error.main' }}> *</span>}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <Typography variant="h6">
+          {question.title}
+          {question.required && <span style={{ color: 'error.main' }}> *</span>}
+        </Typography>
+        <IconButton size="small" onClick={() => onInfoClick?.(question)}>
+          <Info size={20} />
+        </IconButton>
+      </Box>
 
       <Paper 
         variant="outlined" 
