@@ -19,8 +19,6 @@ import { MissionVisionSection } from "./sections/MissionVisionSection";
 import { CompetitiveSection } from "./sections/CompetitiveSection";
 import { CapabilitiesSection } from "./sections/CapabilitiesSection";
 import { ReviewSection } from "./sections/ReviewSection";
-import { convertFromRaw } from "draft-js";
-import { getPlainText } from "../../utils/richTextUtils";
 
 const steps = ["About Us", "Mission & Vision", "Competitive Advantage", "Key Capabilities", "Review"];
 

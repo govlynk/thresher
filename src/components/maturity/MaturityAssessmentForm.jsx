@@ -99,17 +99,13 @@ export function MaturityAssessmentForm() {
 	};
 
 	return (
-		<Container>
-			<Box sx={{ py: 4 }}>
-				<FormController
-					steps={formSteps}
-					initialData={assessment?.answers || {}}
-					onSubmit={handleSubmit}
-					loading={loading}
-					error={error}
-					questionInfo={questionInfo}
-				/>
-			</Box>
-		</Container>
+		<FormController
+			steps={formSteps}
+			initialData={assessment?.answers || {}}
+			onSubmit={handleSubmit}
+			loading={loading}
+			error={error}
+			questionInfo={questionInfo}
+		/>
 	);
 }

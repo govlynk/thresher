@@ -1,8 +1,9 @@
 import React from "react";
-import { TextField, Box, Typography, FormHelperText } from "@mui/material";
+import { TextField, Box, Typography, FormHelperText, IconButton } from "@mui/material";
+import { Info } from "lucide-react";
 import { QUESTION_TYPES } from "../questionTypes";
 
-export function TextQuestion({ question, value, onChange }) {
+export function TextQuestion({ question, value, onChange, onInfoClick }) {
 	const handleChange = (e) => {
 		const newValue = e.target.value;
 		onChange(question.id, newValue);
@@ -26,10 +27,15 @@ export function TextQuestion({ question, value, onChange }) {
 
 	return (
 		<Box sx={{ width: "100%" }}>
-			<Typography variant='h6' gutterBottom>
-				{question.title}
-				{question.required && <span style={{ color: "error.main" }}> *</span>}
-			</Typography>
+			<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+				<Typography variant='h6' gutterBottom>
+					{question.title}
+					{question.required && <span style={{ color: "error.main" }}> *</span>}
+				</Typography>
+				<IconButton size='small' onClick={() => onInfoClick?.(question)} sx={{ mb: 1 }}>
+					<Info size={20} />
+				</IconButton>
+			</Box>
 
 			<Typography variant='body1' sx={{ mb: 2, color: "text.secondary" }}>
 				{question.question}
