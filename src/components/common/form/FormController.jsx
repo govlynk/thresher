@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Stepper, Step, StepLabel, Button, Alert } from "@mui/material";
-import { ArrowLeft, ArrowRight, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { InfoSidebar } from "./InfoSidebar";
 
 export function FormController({
@@ -117,12 +117,6 @@ export function FormController({
 				</Button>
 
 				<Box sx={{ display: "flex", gap: 2 }}>
-					{onSave && (
-						<Button onClick={handleSave} disabled={loading} startIcon={<Save />}>
-							Save Progress
-						</Button>
-					)}
-
 					<Button
 						variant='contained'
 						onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}

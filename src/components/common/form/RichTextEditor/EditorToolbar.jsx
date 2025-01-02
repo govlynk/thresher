@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, IconButton, Tooltip, Divider } from "@mui/material";
-import { RichUtils } from "draft-js";
+import { RichUtils, EditorState } from "draft-js";
 import {
 	Bold,
 	Italic,
@@ -34,11 +34,17 @@ const ALIGNMENT_STYLES = [
 ];
 
 export function EditorToolbar({ editorState, onToggle }) {
-	if (!editorState) return null;
+	// Guard against undefined editorState
+	if (!editorState || !(editorState instanceof EditorState)) {
+		return null;
+	}
+
+	const currentContent = editorState.getCurrentContent();
+	if (!currentContent) return null;
 
 	const currentInlineStyle = editorState.getCurrentInlineStyle();
 	const selection = editorState.getSelection();
-	const blockType = editorState.getCurrentContent().getBlockForKey(selection.getStartKey()).getType();
+	const blockType = currentContent.getBlockForKey(selection.getStartKey())?.getType() || "unstyled";
 
 	const toggleInlineStyle = (style) => {
 		onToggle("inline", RichUtils.toggleInlineStyle(editorState, style));
@@ -63,7 +69,6 @@ export function EditorToolbar({ editorState, onToggle }) {
 				flexWrap: "wrap",
 			}}
 		>
-			{/* Inline Styles */}
 			{INLINE_STYLES.map(({ label, style, icon: Icon }) => (
 				<Tooltip key={style} title={label}>
 					<IconButton
@@ -78,7 +83,6 @@ export function EditorToolbar({ editorState, onToggle }) {
 
 			<Divider orientation='vertical' flexItem />
 
-			{/* Block Types */}
 			{BLOCK_TYPES.map(({ label, style, icon: Icon }) => (
 				<Tooltip key={style} title={label}>
 					<IconButton
@@ -93,7 +97,6 @@ export function EditorToolbar({ editorState, onToggle }) {
 
 			<Divider orientation='vertical' flexItem />
 
-			{/* Alignment Styles */}
 			{ALIGNMENT_STYLES.map(({ label, style, icon: Icon }) => (
 				<Tooltip key={style} title={label}>
 					<IconButton

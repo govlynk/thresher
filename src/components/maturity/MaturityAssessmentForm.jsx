@@ -1,10 +1,12 @@
 import React, { useCallback } from "react";
-import { Box, Container } from "@mui/material";
+import { Box, Container, useTheme } from "@mui/material";
 import { FormController } from "../common/form/FormController";
 import { questions } from "./questions";
 import { questionInfo } from "./questionInfo";
 import { useMaturityStore } from "../../stores/maturityStore";
 import { useGlobalStore } from "../../stores/globalStore";
+import { StepperProgress } from "../common/form/StepperProgress";
+import { QuestionCard } from "../common/form/QuestionCard";
 
 // Import question components
 import { SectionQuestion } from "../common/form/questionTypes/SectionQuestion";
@@ -14,9 +16,8 @@ import { RichTextQuestion } from "../common/form/questionTypes/RichTextQuestion"
 import { AuthorizationQuestion } from "../common/form/questionTypes/AuthorizationQuestion";
 import { LikertQuestion } from "../common/form/questionTypes/LikertQuestion";
 import { CodeListQuestion } from "../common/form/questionTypes/CodeListQuestion";
-import { DemographicQuestion } from "../common/form/questionTypes/DemographicQuestion";
+import { FinancialQuestion } from "../common/form/questionTypes/FinancialQuestion";
 
-// Map of question types to components
 const QUESTION_COMPONENTS = {
 	section: SectionQuestion,
 	rating: RatingQuestion,
@@ -25,18 +26,17 @@ const QUESTION_COMPONENTS = {
 	authorization: AuthorizationQuestion,
 	likert: LikertQuestion,
 	codelist: CodeListQuestion,
-	demographic: DemographicQuestion,
+	financial: FinancialQuestion,
 };
 
 export function MaturityAssessmentForm() {
+	const theme = useTheme();
 	const { assessment, saveAssessment, loading, error } = useMaturityStore();
 	const { activeCompanyId } = useGlobalStore();
 
 	const handleSave = useCallback(
 		async (data) => {
-			if (!activeCompanyId) {
-				throw new Error("Company ID is required");
-			}
+			if (!activeCompanyId) throw new Error("Company ID is required");
 			await saveAssessment({
 				companyId: activeCompanyId,
 				answers: data,
@@ -47,10 +47,7 @@ export function MaturityAssessmentForm() {
 	);
 
 	const handleSubmit = async (formData) => {
-		if (!activeCompanyId) {
-			throw new Error("No active company selected");
-		}
-
+		if (!activeCompanyId) throw new Error("No active company selected");
 		await saveAssessment({
 			companyId: activeCompanyId,
 			answers: formData,
@@ -64,20 +61,21 @@ export function MaturityAssessmentForm() {
 		label: question.title,
 		component: ({ formData, onChange, errors, onInfoClick }) => {
 			const QuestionComponent = QUESTION_COMPONENTS[question.type.toLowerCase()];
-
 			if (!QuestionComponent) {
 				console.error(`No component found for question type: ${question.type}`);
 				return null;
 			}
 
 			return (
-				<QuestionComponent
-					question={question}
-					value={formData[question.id]}
-					onChange={(value) => onChange(question.id, value)}
-					error={errors?.[question.id]}
-					onInfoClick={onInfoClick}
-				/>
+				<QuestionCard title={question.title} subtitle={question.description}>
+					<QuestionComponent
+						question={question}
+						value={formData[question.id]}
+						onChange={(value) => onChange(question.id, value)}
+						error={errors?.[question.id]}
+						onInfoClick={onInfoClick}
+					/>
+				</QuestionCard>
 			);
 		},
 		validate: (data) => {
@@ -92,14 +90,25 @@ export function MaturityAssessmentForm() {
 	}));
 
 	return (
-		<FormController
-			steps={formSteps}
-			initialData={assessment?.answers || {}}
-			onSubmit={handleSubmit}
-			onSave={handleSave}
-			loading={loading}
-			error={error}
-			questionInfo={questionInfo}
-		/>
+		<Box
+			sx={{
+				minHeight: "100vh",
+				bgcolor: theme.palette.mode === "dark" ? "grey.900" : "grey.50",
+				transition: "background-color 0.3s ease",
+			}}
+		>
+			<Container maxWidth='lg' sx={{ py: 4 }}>
+				<FormController
+					steps={formSteps}
+					initialData={assessment?.answers || {}}
+					onSubmit={handleSubmit}
+					onSave={handleSave}
+					loading={loading}
+					error={error}
+					questionInfo={questionInfo}
+					StepperComponent={StepperProgress}
+				/>
+			</Container>
+		</Box>
 	);
 }

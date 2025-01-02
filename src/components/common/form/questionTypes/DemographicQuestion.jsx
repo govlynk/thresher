@@ -4,7 +4,7 @@ import { FormField } from "../FormField";
 
 export function DemographicQuestion({ question, value = {}, onChange, error }) {
 	const handleFieldChange = (fieldName, fieldValue) => {
-		onChange(question.id, {
+		onChange({
 			...value,
 			[fieldName]: fieldValue,
 		});

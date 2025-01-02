@@ -1,14 +1,21 @@
 import React from "react";
-import { Box, Typography, TextField, FormControlLabel, Checkbox, FormHelperText, Paper, Alert } from "@mui/material";
+import { Box, Typography, TextField, FormControlLabel, Checkbox, Paper, Alert } from "@mui/material";
 import { FormField } from "../FormField";
 
 export function AuthorizationQuestion({ question, value = {}, onChange, error }) {
 	const handleChange = (field, newValue) => {
-		onChange(question.id, {
+		const newState = {
 			...value,
 			[field]: newValue,
 			timestamp: new Date().toISOString(),
-		});
+		};
+
+		// Clear signature if agreement is unchecked
+		if (field === "agreed" && !newValue) {
+			newState.signature = "";
+		}
+
+		onChange(question.id, newState);
 	};
 
 	return (
@@ -60,6 +67,8 @@ export function AuthorizationQuestion({ question, value = {}, onChange, error })
 						required={question.required}
 						placeholder='Type your full name'
 						helperText='Please type your full name as your electronic signature'
+						disabled={!value?.agreed}
+						error={Boolean(error)}
 					/>
 				)}
 

@@ -26,6 +26,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 200, 
 
 	const handleToolbarToggle = useCallback(
 		(type, newState) => {
+			if (!newState) return;
 			// Ensure we maintain focus after toolbar actions
 			const withFocus = EditorState.moveFocusToEnd(newState);
 			setEditorState(withFocus);
@@ -34,10 +35,13 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 200, 
 	);
 
 	const handleFocus = useCallback(() => {
-		if (!readOnly) {
+		if (!readOnly && editorState) {
 			setEditorState(EditorState.moveFocusToEnd(editorState));
 		}
 	}, [editorState, readOnly, setEditorState]);
+
+	// Return null if no valid editorState
+	if (!editorState) return null;
 
 	return (
 		<Paper
