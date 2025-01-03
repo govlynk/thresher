@@ -7,29 +7,20 @@ import { useMaturityStore } from "../../stores/maturityStore";
 import { useGlobalStore } from "../../stores/globalStore";
 import { StepperProgress } from "../common/form/StepperProgress";
 import { QuestionCard } from "../common/form/QuestionCard";
-import { Plus } from "lucide-react";
-import { AssessmentTimeline } from "./visualization/AssessmentTimeline";
 import { MaturityDashboard } from "./visualization/MaturityDashboard";
+import { AssessmentSummary } from "./sections/AssessmentSummary";
+// import { useAssessmentValidation } from "./hooks/useAssessmentValidation";
+// import { useAssessmentNavigation } from "./hooks/useAssessmentNavigation";
 
 // Import question components
 import { SectionQuestion } from "../common/form/questionTypes/SectionQuestion";
-import { RatingQuestion } from "../common/form/questionTypes/RatingQuestion";
 import { MultipleChoiceQuestion } from "../common/form/questionTypes/MultipleChoiceQuestion";
-import { RichTextQuestion } from "../common/form/questionTypes/RichTextQuestion";
-import { AuthorizationQuestion } from "../common/form/questionTypes/AuthorizationQuestion";
 import { LikertQuestion } from "../common/form/questionTypes/LikertQuestion";
-import { CodeListQuestion } from "../common/form/questionTypes/CodeListQuestion";
-import { FinancialQuestion } from "../common/form/questionTypes/FinancialQuestion";
 
 const QUESTION_COMPONENTS = {
 	section: SectionQuestion,
-	rating: RatingQuestion,
 	multiplechoice: MultipleChoiceQuestion,
-	richtext: RichTextQuestion,
-	authorization: AuthorizationQuestion,
 	likert: LikertQuestion,
-	codelist: CodeListQuestion,
-	financial: FinancialQuestion,
 };
 
 export function MaturityAssessmentForm() {
@@ -43,6 +34,9 @@ export function MaturityAssessmentForm() {
 		// Set the most recent assessment as selected by default
 		if (assessments?.length && !selectedAssessmentId) {
 			setSelectedAssessmentId(assessments[0].id);
+			if (assessment?.answers) {
+				setFormData(JSON.parse(assessment.answers));
+			}
 		}
 	}, [assessments, selectedAssessmentId]);
 
@@ -51,7 +45,9 @@ export function MaturityAssessmentForm() {
 			if (!activeCompanyId) throw new Error("Company ID is required");
 			await saveAssessment({
 				companyId: activeCompanyId,
+				title: "Draft Assessment",
 				answers: data,
+				maturityScore: "",
 				status: "IN_PROGRESS",
 			});
 		},
@@ -59,13 +55,21 @@ export function MaturityAssessmentForm() {
 	);
 
 	const handleSubmit = async (formData) => {
-		if (!activeCompanyId) throw new Error("No active company selected");
-		await saveAssessment({
-			companyId: activeCompanyId,
-			answers: formData,
-			status: "COMPLETED",
-			completedAt: new Date().toISOString(),
-		});
+		if (!activeCompanyId) {
+			return;
+		}
+		try {
+			await saveAssessment({
+				companyId: activeCompanyId,
+				title,
+				answers: formData,
+				maturityScore,
+				status: "COMPLETED",
+				completedAt: new Date().toISOString(),
+			});
+		} catch (err) {
+			console.error("Error submitting assessment:", err);
+		}
 	};
 
 	const handleNewAssessment = () => {

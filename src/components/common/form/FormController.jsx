@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Stepper, Step, StepLabel, Button, Alert } from "@mui/material";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { InfoSidebar } from "./InfoSidebar";
+import { StepperProgress } from "./StepperProgress";
 
 export function FormController({
 	steps,
@@ -86,13 +87,21 @@ export function FormController({
 	return (
 		// <Box sx={{ width: '100%' }}>
 		<Box sx={{ mx: "auto", p: 3 }}>
-			<Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+			{/* <Stepper activeStep={activeStep} sx={{ mb: 4 }}> */}
+			<StepperProgress
+				steps={formSteps}
+				activeStep={activeStep}
+				onStepClick={handleStepChange}
+				isStepClickable={canNavigateToStep}
+				isStepComplete={isStepValid}
+			>
 				{steps.map((step, index) => (
 					<Step key={index}>
 						<StepLabel>{step.label}</StepLabel>
 					</Step>
 				))}
-			</Stepper>
+			</StepperProgress>
+			{/* </Stepper> */}
 
 			{error && (
 				<Alert severity='error' sx={{ mb: 3 }}>

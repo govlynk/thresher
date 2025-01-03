@@ -207,7 +207,7 @@ export const questions = [
 			{
 				id: "cybersecurity",
 				title: "Cybersecurity Posture",
-				type: QUESTION_TYPES.MULTIPLE_CHOICE,
+				type: QUESTION_TYPES.LIKERT,
 				required: true,
 				info: false,
 
