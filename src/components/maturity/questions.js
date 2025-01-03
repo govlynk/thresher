@@ -13,8 +13,6 @@ export const questions = [
 				type: QUESTION_TYPES.LIKERT,
 				required: true,
 				info: false,
-				categories: ["FAR/DFARS Knowledge", "Compliance Program", "Internal Controls", "Documentation"],
-
 				scale: ["Initial", "Developing", "Defined", "Managed", "Optimized"],
 				statements: [
 					"We understand FAR/DFARS requirements",
@@ -40,16 +38,16 @@ export const questions = [
 			{
 				id: "taaCompliance",
 				title: "Trade Agreement Act Compliance",
-				type: QUESTION_TYPES.MULTIPLE_CHOICE,
+				type: QUESTION_TYPES.LIKERT,
 				required: true,
 				info: false,
-				multiple: true,
-				options: [
-					"Documented country of origin tracking",
-					"TAA compliance training program",
-					"Regular supplier audits",
-					"Compliance verification procedures",
-					"None of the above",
+
+				scale: ["Never", "As Needed", "High Risk Items Only", "Best Endeavors", "Always"],
+				statements: [
+					"We document country of origin for all products",
+					"We enforce TAA compliance training for employees",
+					"We regularly audit suppliers for compliance",
+					"We have documented compliance verification procedures",
 				],
 			},
 		],
@@ -64,23 +62,18 @@ export const questions = [
 			{
 				id: "federalPresence",
 				title: "Federal Marketplace Presence",
-				type: QUESTION_TYPES.RATING,
+				type: QUESTION_TYPES.LIKERT,
 				required: true,
 				info: false,
-				maxRating: 5,
-				categories: [
-					"Contract Vehicle Coverage",
-					"Agency Relationships",
-					"Market Understanding",
-					"Competitive Position",
+
+				scale: ["Initial", "Developing", "Defined", "Managed", "Optimized"],
+				statements: [
+					"We have a documented federal market strategy",
+					"We have a dedicated federal sales team",
+					"We have a system for tracking federal opportunities",
+					"We monitor federal market trends",
+					"We monitor our competitors in the federal market",
 				],
-				labels: {
-					1: "Limited",
-					2: "Emerging",
-					3: "Established",
-					4: "Strong",
-					5: "Leading",
-				},
 			},
 		],
 	},
@@ -91,53 +84,53 @@ export const questions = [
 		title: "Financial Health",
 		type: QUESTION_TYPES.SECTION,
 		questions: [
-			{
-				id: "revenueMetrics",
-				title: "Revenue Metrics",
-				type: QUESTION_TYPES.DEMOGRAPHIC,
-				required: true,
-				info: false,
-				fields: [
-					{
-						name: "annualRevenue",
-						label: "Annual Revenue",
-						type: "number",
-						min: 0,
-						required: true,
-					},
-					{
-						name: "federalRevenue",
-						label: "Federal Revenue Percentage",
-						type: "number",
-						min: 0,
-						max: 100,
-						required: true,
-					},
-					{
-						name: "profitMargin",
-						label: "Average Profit Margin",
-						type: "number",
-						min: -100,
-						max: 100,
-						required: true,
-					},
-				],
-			},
+			// {
+			// 	id: "revenueMetrics",
+			// 	title: "Revenue Metrics",
+			// 	type: QUESTION_TYPES.DEMOGRAPHIC,
+			// 	required: true,
+			// 	info: false,
+			// 	fields: [
+			// 		{
+			// 			name: "annualRevenue",
+			// 			label: "Annual Revenue",
+			// 			type: "number",
+			// 			min: 0,
+			// 			required: true,
+			// 		},
+			// 		{
+			// 			name: "federalRevenue",
+			// 			label: "Federal Revenue Percentage",
+			// 			type: "number",
+			// 			min: 0,
+			// 			max: 100,
+			// 			required: true,
+			// 		},
+			// 		{
+			// 			name: "profitMargin",
+			// 			label: "Average Profit Margin",
+			// 			type: "number",
+			// 			min: -100,
+			// 			max: 100,
+			// 			required: true,
+			// 		},
+			// 	],
+			// },
 			{
 				id: "contractCapacity",
 				title: "Contract Management Capacity",
-				type: QUESTION_TYPES.RATING,
+				type: QUESTION_TYPES.LIKERT,
 				required: true,
 				info: false,
 				maxRating: 5,
-				categories: ["Financial Systems", "Contract Administration", "Resource Allocation", "Risk Management"],
-				labels: {
-					1: "Basic",
-					2: "Developing",
-					3: "Established",
-					4: "Advanced",
-					5: "Expert",
-				},
+
+				scale: ["Initial", "Developing", "Defined", "Managed", "Optimized"],
+				statements: [
+					"We have a financial system for tracking contracts",
+					"We have a system for tracking contract deliverables",
+					"We have a system for monitoring resource allocation",
+					"We monitor contract risks",
+				],
 			},
 		],
 	},
@@ -151,7 +144,7 @@ export const questions = [
 			{
 				id: "qualityManagement",
 				title: "Quality Management Systems",
-				type: QUESTION_TYPES.MULTIPLE_CHOICE,
+				type: QUESTION_TYPES.LIKERT,
 				required: true,
 				info: false,
 				multiple: true,
@@ -188,31 +181,20 @@ export const questions = [
 		type: QUESTION_TYPES.SECTION,
 		questions: [
 			{
-				id: "marketingStrategy",
-				title: "Federal Marketing Strategy",
-				type: QUESTION_TYPES.RICH_TEXT,
-				required: true,
-				info: false,
-				minLength: 100,
-				maxLength: 2000,
-				placeholder: "Describe your federal marketing strategy...",
-				helpText: "Include key initiatives, target agencies, and value proposition",
-			},
-			{
 				id: "pipelineManagement",
 				title: "Pipeline Management",
-				type: QUESTION_TYPES.RATING,
+				type: QUESTION_TYPES.LIKERT,
 				required: true,
 				info: false,
 				maxRating: 5,
-				categories: ["Opportunity Tracking", "Win Rate", "Bid/No-Bid Process", "Capture Planning"],
-				labels: {
-					1: "Ad-hoc",
-					2: "Basic",
-					3: "Structured",
-					4: "Advanced",
-					5: "Optimized",
-				},
+
+				scale: ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"],
+				statements: [
+					"We track opportunities in a CRM system",
+					"We monitor our win rate",
+					"We have a bid/no-bid process",
+					"We have a capture planning process",
+				],
 			},
 		],
 	},
@@ -242,34 +224,19 @@ export const questions = [
 			{
 				id: "systemsCompliance",
 				title: "Systems Compliance",
-				type: QUESTION_TYPES.RATING,
+				type: QUESTION_TYPES.LIKERT,
 				required: true,
 				info: false,
 				maxRating: 5,
-				categories: ["Access Controls", "Data Protection", "System Documentation", "Change Management"],
-				labels: {
-					1: "Non-compliant",
-					2: "Partially Compliant",
-					3: "Compliant",
-					4: "Advanced",
-					5: "Industry Leading",
-				},
+
+				scale: ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"],
+				statements: [
+					"We have a documented access control policy",
+					"We have a data protection policy",
+					"We maintain system documentation",
+					"We have effective change management practices",
+				],
 			},
 		],
 	},
-
-	// Final Authorization
-	// 	{
-	// 		id: "authorization",
-	// 		title: "Assessment Authorization",
-	// 		type: QUESTION_TYPES.AUTHORIZATION,
-	// 		required: true,
-	// 		info: false,
-	// 		agreementText: `By submitting this assessment, I certify that:
-	// 1. All information provided is accurate and complete to the best of my knowledge
-	// 2. I am authorized to complete this assessment on behalf of my organization
-	// 3. I understand that this assessment may be used to develop improvement recommendations
-	// 4. I agree to maintain supporting documentation for all responses`,
-	// 		signatureRequired: true,
-	// 	},
 ];
