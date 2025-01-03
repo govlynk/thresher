@@ -210,15 +210,15 @@ export const questions = [
 				type: QUESTION_TYPES.MULTIPLE_CHOICE,
 				required: true,
 				info: false,
-				multiple: true,
-				options: [
-					"NIST 800-171 Compliant",
-					"CMMC Certification",
-					"Regular Security Assessments",
-					"Incident Response Plan",
+
+				scale: [
 					"Security Training Program",
-					"None of the above",
+					"Incident Response Plan",
+					"Regular Security Assessments",
+					"CMMC Certification",
+					"NIST 800-171 Compliant",
 				],
+				statements: ["We have a cyber security policy"],
 			},
 			{
 				id: "systemsCompliance",

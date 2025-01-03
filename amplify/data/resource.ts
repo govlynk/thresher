@@ -245,7 +245,9 @@ const schema = a.schema({
 	MaturityAssessment: a
 		.model({
 			companyId: a.string().required(),
+			title: a.string(),
 			answers: a.json(),
+			maturityScore: a.json(),
 			status: a.enum(["IN_PROGRESS", "COMPLETED"]),
 			completedAt: a.datetime(),
 			lastModified: a.datetime(),

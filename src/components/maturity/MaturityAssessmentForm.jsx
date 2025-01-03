@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import { Box, Container, useTheme } from "@mui/material";
+import React, { useCallback, useEffect, useState } from "react";
+import { Box, Container, Button, useTheme, Alert } from "@mui/material";
 import { FormController } from "../common/form/FormController";
 import { questions } from "./questions";
 import { questionInfo } from "./questionInfo";
@@ -7,6 +7,9 @@ import { useMaturityStore } from "../../stores/maturityStore";
 import { useGlobalStore } from "../../stores/globalStore";
 import { StepperProgress } from "../common/form/StepperProgress";
 import { QuestionCard } from "../common/form/QuestionCard";
+import { Plus } from "lucide-react";
+import { AssessmentTimeline } from "./visualization/AssessmentTimeline";
+import { MaturityDashboard } from "./visualization/MaturityDashboard";
 
 // Import question components
 import { SectionQuestion } from "../common/form/questionTypes/SectionQuestion";
@@ -31,8 +34,17 @@ const QUESTION_COMPONENTS = {
 
 export function MaturityAssessmentForm() {
 	const theme = useTheme();
-	const { assessment, saveAssessment, loading, error } = useMaturityStore();
+	const { assessment, assessments, saveAssessment, loading, error } = useMaturityStore();
 	const { activeCompanyId } = useGlobalStore();
+	const [selectedAssessmentId, setSelectedAssessmentId] = useState(null);
+	const [isNewAssessment, setIsNewAssessment] = useState(false);
+
+	useEffect(() => {
+		// Set the most recent assessment as selected by default
+		if (assessments?.length && !selectedAssessmentId) {
+			setSelectedAssessmentId(assessments[0].id);
+		}
+	}, [assessments, selectedAssessmentId]);
 
 	const handleSave = useCallback(
 		async (data) => {
@@ -55,6 +67,16 @@ export function MaturityAssessmentForm() {
 			completedAt: new Date().toISOString(),
 		});
 	};
+
+	const handleNewAssessment = () => {
+		setSelectedAssessmentId(null);
+		setIsNewAssessment(true);
+	};
+
+	// Show dashboard if there's a completed assessment and we're not creating a new one
+	if (assessment?.status === "COMPLETED" && !isNewAssessment) {
+		return <MaturityDashboard assessment={assessment} onNewAssessment={handleNewAssessment} />;
+	}
 
 	const formSteps = questions.map((question) => ({
 		id: question.id,
