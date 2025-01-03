@@ -147,15 +147,14 @@ export const questions = [
 				type: QUESTION_TYPES.LIKERT,
 				required: true,
 				info: false,
-				multiple: true,
-				options: [
-					"ISO 9001 Certification",
-					"CMMI Certification",
-					"Quality Control Procedures",
-					"Performance Metrics Tracking",
+				scale: [
 					"Continuous Improvement Program",
-					"None of the above",
+					"Performance Metrics Tracking",
+					"Quality Control Procedures",
+					"CMMI Certification",
+					"ISO 9001 Certification",
 				],
+				statements: ["We maintain high quality"],
 			},
 			{
 				id: "deliveryCapabilities",
