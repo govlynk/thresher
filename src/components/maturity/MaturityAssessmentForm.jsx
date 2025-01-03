@@ -97,18 +97,16 @@ export function MaturityAssessmentForm() {
 				transition: "background-color 0.3s ease",
 			}}
 		>
-			<Container maxWidth='lg' sx={{ py: 4 }}>
-				<FormController
-					steps={formSteps}
-					initialData={assessment?.answers || {}}
-					onSubmit={handleSubmit}
-					onSave={handleSave}
-					loading={loading}
-					error={error}
-					questionInfo={questionInfo}
-					StepperComponent={StepperProgress}
-				/>
-			</Container>
+			<FormController
+				steps={formSteps}
+				initialData={assessment?.answers || {}}
+				onSubmit={handleSubmit}
+				onSave={handleSave}
+				loading={loading}
+				error={error}
+				questionInfo={questionInfo}
+				StepperComponent={StepperProgress}
+			/>
 		</Box>
 	);
 }

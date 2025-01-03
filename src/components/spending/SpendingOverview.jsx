@@ -3,7 +3,7 @@ import { Box, Grid, Paper, Typography } from "@mui/material";
 import { TrendingUp, Building2, Award, DollarSign } from "lucide-react";
 import { formatBillions } from "../../utils/formatters";
 
-export function SpendingOverview({ data, company }) {
+export function SpendingOverview({ data = [], company = {} }) {
 	const totalSpending = data?.results?.reduce((sum, award) => sum + (award.amount || 0), 0) || 0;
 	const averageAwardSize = totalSpending / (data?.results?.length || 1);
 	const uniqueAgencies = new Set(data?.results?.map((award) => award.name)).size || 0;

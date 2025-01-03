@@ -18,17 +18,6 @@ export function QuestionCard({ children, title, subtitle, expanded = true }) {
 					theme.palette.mode === "dark" ? "0 4px 20px rgba(0,0,0,0.25)" : "0 4px 20px rgba(0,0,0,0.05)",
 			}}
 		>
-			<Box sx={{ mb: subtitle ? 2 : 3 }}>
-				<Typography variant='h6' gutterBottom>
-					{title}
-				</Typography>
-				{subtitle && (
-					<Typography variant='body2' color='text.secondary'>
-						{subtitle}
-					</Typography>
-				)}
-			</Box>
-
 			<Collapse in={expanded}>
 				<Box>{children}</Box>
 			</Collapse>

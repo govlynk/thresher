@@ -1,6 +1,7 @@
 import React from "react";
-import { Box, Typography, Paper, Divider } from "@mui/material";
 import { getNormalizedQuestionType } from "../questionTypes";
+import { Box, Typography, Paper, Divider, IconButton } from "@mui/material";
+import { Info } from "lucide-react";
 
 // Import all question components
 import { TextQuestion } from "./TextQuestion";
@@ -40,6 +41,11 @@ export function SectionQuestion({ question, value = {}, onChange, error = {}, on
 				<Typography variant='h5' gutterBottom>
 					{question.title}
 				</Typography>
+				{onInfoClick && (
+					<IconButton size='small' onClick={() => onInfoClick(question)}>
+						<Info size={20} />
+					</IconButton>
+				)}
 			</Box>
 			{question.description && (
 				<Typography variant='body1' color='text.secondary' sx={{ mb: 3 }}>
