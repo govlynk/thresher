@@ -9,7 +9,7 @@ export function TextQuestion({ question, value, onChange, onInfoClick }) {
 		onChange(question.id, newValue);
 	};
 
-	const getErrorMessage = () => {
+	const validateContent = () => {
 		if (!value && question.required) {
 			return "This field is required";
 		}
@@ -22,7 +22,7 @@ export function TextQuestion({ question, value, onChange, onInfoClick }) {
 		return "";
 	};
 
-	const error = getErrorMessage();
+	const error = validateContent();
 	const isLongText = question.type === QUESTION_TYPES.LONG_TEXT;
 
 	return (

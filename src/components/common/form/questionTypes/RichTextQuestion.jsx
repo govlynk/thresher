@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, IconButton } from "@mui/material";
+import { Box, Typography, IconButton } from "@mui/material";
 import { Info } from "lucide-react";
 import { RichTextEditor } from "../RichTextEditor/RichTextEditor";
 import { FormField } from "../FormField";
@@ -39,24 +39,24 @@ export function RichTextQuestion({ question, value, onChange, onInfoClick }) {
 
 	return (
 		<Box sx={{ width: "100%" }}>
-			<Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-				<FormField question={question} error={error} helperText={question.helpText}>
-					<Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-						{question?.info && (
-							<IconButton size='small' onClick={() => onInfoClick?.(question)}>
-								<Info size={20} />
-							</IconButton>
-						)}
-					</Box>
-					<RichTextEditor
-						value={value}
-						onChange={handleEditorChange}
-						placeholder={question.placeholder}
-						minHeight={question.minHeight || 300}
-						error={Boolean(error)}
-					/>
-				</FormField>
+			<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+				<Typography variant='h6' gutterBottom>
+					{question.title}
+					{question.required && <span style={{ color: "error.main" }}> *</span>}
+				</Typography>
+				{question?.info && (
+					<IconButton size='small' onClick={() => onInfoClick?.(question)} sx={{ mb: 1 }}>
+						<Info size={20} />
+					</IconButton>
+				)}
 			</Box>
+			<RichTextEditor
+				value={value}
+				onChange={handleEditorChange}
+				placeholder={question.placeholder}
+				minHeight={question.minHeight || 300}
+				error={Boolean(error)}
+			/>
 		</Box>
 	);
 }

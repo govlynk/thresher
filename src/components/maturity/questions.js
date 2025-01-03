@@ -10,18 +10,18 @@ export const questions = [
 			{
 				id: "farCompliance",
 				title: "FAR Compliance",
-				type: QUESTION_TYPES.RATING,
+				type: QUESTION_TYPES.LIKERT,
 				required: true,
 				info: false,
-				maxRating: 5,
 				categories: ["FAR/DFARS Knowledge", "Compliance Program", "Internal Controls", "Documentation"],
-				labels: {
-					1: "Initial",
-					2: "Developing",
-					3: "Defined",
-					4: "Managed",
-					5: "Optimized",
-				},
+
+				scale: ["Initial", "Developing", "Defined", "Managed", "Optimized"],
+				statements: [
+					"We understand FAR/DFARS requirements",
+					"We have a documented compliance program",
+					"We maintain adequate internal controls",
+					"We have a system for tracking compliance documentation",
+				],
 			},
 			{
 				id: "supplyChainSecurity",
@@ -80,20 +80,6 @@ export const questions = [
 					3: "Established",
 					4: "Strong",
 					5: "Leading",
-				},
-			},
-			{
-				id: "targetAgencies",
-				title: "Target Agency Identification",
-				type: QUESTION_TYPES.CODE_LIST,
-				required: true,
-				info: false,
-				maxItems: 5,
-				pattern: "^[A-Z]{2,4}$",
-				helpText: "Enter agency codes (e.g., DOD, DHS, etc.)",
-				validation: (codes) => {
-					if (codes.length === 0) return "At least one agency code is required";
-					return null;
 				},
 			},
 		],
@@ -273,17 +259,17 @@ export const questions = [
 	},
 
 	// Final Authorization
-	{
-		id: "authorization",
-		title: "Assessment Authorization",
-		type: QUESTION_TYPES.AUTHORIZATION,
-		required: true,
-		info: false,
-		agreementText: `By submitting this assessment, I certify that:
-1. All information provided is accurate and complete to the best of my knowledge
-2. I am authorized to complete this assessment on behalf of my organization
-3. I understand that this assessment may be used to develop improvement recommendations
-4. I agree to maintain supporting documentation for all responses`,
-		signatureRequired: true,
-	},
+	// 	{
+	// 		id: "authorization",
+	// 		title: "Assessment Authorization",
+	// 		type: QUESTION_TYPES.AUTHORIZATION,
+	// 		required: true,
+	// 		info: false,
+	// 		agreementText: `By submitting this assessment, I certify that:
+	// 1. All information provided is accurate and complete to the best of my knowledge
+	// 2. I am authorized to complete this assessment on behalf of my organization
+	// 3. I understand that this assessment may be used to develop improvement recommendations
+	// 4. I agree to maintain supporting documentation for all responses`,
+	// 		signatureRequired: true,
+	// 	},
 ];
