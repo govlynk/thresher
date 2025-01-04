@@ -208,11 +208,30 @@ const schema = a.schema({
 	PastPerformance: a
 		.model({
 			projectName: a.string().required(),
+			contractNumber: a.string(),
 			client: a.string().required(),
-			contractValue: a.float(), // Changed to `a.float()` for numerical values
-			startDate: a.date(),
-			endDate: a.date(),
 			description: a.string(),
+			customerAgency: a.string(),
+			contractValue: a.float(), // Changed to `a.float()` for numerical values
+			periodStart: a.date().required(),
+			periodEnd: a.date().required(),
+			workScope: a.string(),
+			contractType: a.enum(["FIRM_FIXED_PRICE", "TIME_AND_MATERIALS", "COST_PLUS", "IDIQ", "BPA"]),
+			// Reference Information
+			pointOfContactName: a.string(),
+			pointOfContactTitle: a.string(),
+			pointOfContactEmail: a.string(),
+			pointOfContactPhone: a.string(),
+			pointOfContactAgency: a.string(),
+
+			// Performance Details
+			performanceRating: a.enum(["EXCEPTIONAL", "VERY_GOOD", "SATISFACTORY", "MARGINAL", "UNSATISFACTORY"]),
+			relevantSINs: a.string().array(),
+
+			// Compliance & Documentation
+			cparsReference: a.string(),
+			deliverables: a.string(),
+
 			companyId: a.id().required(), // Changed to `a.id()` for proper unique identifier type
 			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship
 		})

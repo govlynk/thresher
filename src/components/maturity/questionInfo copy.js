@@ -28,61 +28,30 @@ export const questionInfo = {
 			},
 		],
 	},
-
 	financialHealth: {
-		title: "Financial Health Assessment",
+		title: "Financial Health",
+		backgroundInfo: `Strong financial health is critical for government contractors. This section assesses your organization's
+    financial stability, pricing competitiveness, and contract management capabilities.`,
 		videoUrl: "https://youtu.be/example",
-		backgroundInfo: ` Strong financial health is critical for government contractors. This section assesses your organization's
-    financial stability, pricing competitiveness, and contract management capabilities.
-	  Federal contractors must demonstrate:
-	  - Minimum annual revenue of $25,000
-	  - Sustainable financial operations
-	  - Competitive pricing strategies
-	  - Contract management capabilities[1]
-	`,
 		resources: [
-			{
-				title: "GSA Financial Requirements",
-				description: "Official GSA financial thresholds and requirements",
-			},
-			{
-				title: "Contract Pricing Guide",
-				description: "GSA pricing strategies and guidelines",
-			},
 			{
 				title: "Financial Management Guide",
 				url: "https://www.dcaa.mil/Customers/Contractors/",
 			},
 		],
 	},
-
 	operationalExcellence: {
-		title: "Operational Excellence Framework",
+		title: "Operational Excellence",
+		backgroundInfo: `Operational excellence ensures consistent delivery of high-quality services/products to government customers.
+    This section evaluates your quality management systems, delivery capabilities, and process maturity.`,
 		videoUrl: "https://youtu.be/example",
-		backgroundInfo: ` Operational excellence ensures consistent delivery of high-quality services/products to government customers.
-    This section evaluates your quality management systems, delivery capabilities, and process maturity.
-		  Successful federal contractors maintain:
-		  - Quality management systems
-		  - Performance measurement processes
-		  - Documentation procedures
-		  - Industry certifications[2]
-		`,
 		resources: [
-			{
-				title: "Quality Management Standards",
-				description: "Federal quality requirements and certifications",
-			},
-			{
-				title: "Process Documentation Guidelines",
-				description: "Best practices for federal contractors",
-			},
 			{
 				title: "Quality Management Systems Guide",
 				url: "https://www.iso.org/iso-9001-quality-management.html",
 			},
 		],
 	},
-
 	businessDevelopment: {
 		title: "Business Development",
 		backgroundInfo: `Effective business development is essential for growth in the federal marketplace. This section assesses
