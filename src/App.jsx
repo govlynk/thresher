@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Authenticator } from "@aws-amplify/ui-react";
 import { useAuthStore } from "./stores/authStore";
 import { useGlobalStore } from "./stores/globalStore";
@@ -58,6 +58,7 @@ const AuthenticatedApp = ({ signOut, user }) => {
 
 					setInitError(null);
 				} catch (err) {
+					console.error("[AuthenticatedApp] Initialization error", err);
 					setInitError(err.message || "Failed to initialize application");
 				}
 			};

@@ -18,6 +18,7 @@ export const useAuthStore = create()(
 			authDetails: null,
 
 			initialize: async (cognitoUser) => {
+				console.log("[AuthStore] Initializing auth", cognitoUser);
 				if (!cognitoUser) {
 					set({
 						user: null,
@@ -43,19 +44,25 @@ export const useAuthStore = create()(
 
 					// Extract groups from Cognito token
 					const groups = cognitoUser.signInUserSession?.accessToken?.payload?.["cognito:groups"] || [];
-					const isAdmin = groups.some((group) => typeof group === "string" && group.toLowerCase() === "admin");
+					const isAdmin = groups.some(
+						(group) => typeof group === "string" && group.toLowerCase().includes === "admin"
+					);
 					const isGovLynk = groups.some(
 						(group) => typeof group === "string" && group.toLowerCase().includes === "govlynk"
 					);
 					const isGovLynkAdmin = groups.some(
 						(group) => typeof group === "string" && group.toLowerCase() === "govlynk_admin"
 					);
+
 					// Fetch user data from database using email
+					const normalizedEmail = authInfo.email?.toLowerCase();
 					const { data: users } = await client.models.User.list({
-						filter: { email: { eq: authInfo.email } },
+						filter: { email: { eq: normalizedEmail } },
 						limit: 1,
 					});
 					let userData = users?.[0];
+
+					console.log("[AuthStore] User data", userData, users);
 
 					if (!userData) {
 						//throw new Error("User is not defined");
@@ -103,6 +110,7 @@ export const useAuthStore = create()(
 
 					return normalizedUser;
 				} catch (err) {
+					console.error("[**AuthStore] Failed to initialize authentication", err);
 					set({
 						error: "Failed to initialize authentication",
 						isAuthenticated: false,
@@ -110,7 +118,7 @@ export const useAuthStore = create()(
 						groups: [],
 						authDetails: null,
 					});
-					throw err;
+					// throw err;
 				}
 			},
 

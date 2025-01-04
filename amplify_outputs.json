@@ -2348,8 +2348,22 @@
               "isRequired": true,
               "attributes": []
             },
+            "title": {
+              "name": "title",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "answers": {
               "name": "answers",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false,
+              "attributes": []
+            },
+            "maturityScore": {
+              "name": "maturityScore",
               "isArray": false,
               "type": "AWSJSON",
               "isRequired": false,

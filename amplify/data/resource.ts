@@ -34,7 +34,11 @@ const schema = a.schema({
 			contact: a.belongsTo("Contact", "contactId"), // Relationship to Contact
 			todos: a.hasMany("Todo", "assigneeId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	Company: a
 		.model({
@@ -102,7 +106,11 @@ const schema = a.schema({
 			users: a.hasMany("UserCompanyAccess", "companyId"),
 			teams: a.hasMany("Team", "companyId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	Team: a
 		.model({
@@ -114,7 +122,11 @@ const schema = a.schema({
 			opportunities: a.hasMany("Opportunity", "teamId"),
 			todos: a.hasMany("Todo", "teamId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	TeamMember: a
 		.model({
@@ -124,7 +136,11 @@ const schema = a.schema({
 			team: a.belongsTo("Team", "teamId"),
 			contact: a.belongsTo("Contact", "contactId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	Contact: a
 		.model({
@@ -150,7 +166,11 @@ const schema = a.schema({
 			users: a.hasMany("User", "contactId"), // Inverse relationship to User
 			teamMembers: a.hasMany("TeamMember", "contactId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	UserCompanyAccess: a
 		.model({
@@ -161,7 +181,11 @@ const schema = a.schema({
 			user: a.belongsTo("User", "userId"),
 			company: a.belongsTo("Company", "companyId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	CapabilityStatement: a
 		.model({
@@ -175,7 +199,11 @@ const schema = a.schema({
 			lastModified: a.datetime(), // Marked as optional for flexibility
 			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	PastPerformance: a
 		.model({
@@ -188,7 +216,11 @@ const schema = a.schema({
 			companyId: a.id().required(), // Changed to `a.id()` for proper unique identifier type
 			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	Certification: a
 		.model({
@@ -200,7 +232,11 @@ const schema = a.schema({
 			companyId: a.id().required(), // Changed to `a.id()` for proper unique identifier type
 			company: a.belongsTo("Company", "companyId"), // Marked as optional relationship
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	// Main regulation model
 	FederalRegulation: a
@@ -217,7 +253,11 @@ const schema = a.schema({
 			company: a.belongsTo("Company", "companyId"),
 			answers: a.hasMany("RegulationAnswer", "regulationId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	// Answers model
 	RegulationAnswer: a
@@ -229,7 +269,11 @@ const schema = a.schema({
 			answerId: a.string(),
 			regulation: a.belongsTo("FederalRegulation", "regulationId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	// PDF Links model
 	RegulationDocument: a
@@ -240,7 +284,11 @@ const schema = a.schema({
 			lastUpdated: a.datetime(),
 			company: a.belongsTo("Company", "companyId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	MaturityAssessment: a
 		.model({
@@ -253,7 +301,11 @@ const schema = a.schema({
 			lastModified: a.datetime(),
 			company: a.belongsTo("Company", "companyId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	Opportunity: a
 		.model({
@@ -314,7 +366,11 @@ const schema = a.schema({
 			company: a.belongsTo("Company", "companyId"),
 			team: a.belongsTo("Team", "teamId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	Todo: a
 		.model({
@@ -332,7 +388,11 @@ const schema = a.schema({
 			teamId: a.string().required(),
 			team: a.belongsTo("Team", "teamId"),
 		})
-		.authorization((allow) => [allow.owner(), allow.group("Admin").to(["create", "read", "update", "delete"])]),
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
