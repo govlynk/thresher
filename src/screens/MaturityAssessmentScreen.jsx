@@ -1,37 +1,19 @@
-import React, { useEffect } from "react";
-import { Box, Container, Typography, Alert } from "@mui/material";
-import { MaturityAssessmentForm } from "../components/maturity/MaturityAssessmentForm";
-import { useMaturityStore } from "../stores/maturityStore";
-import { useGlobalStore } from "../stores/globalStore";
+import React from "react";
+import { Container, Box, Typography } from "@mui/material";
+import { MaturityAssessmentContainer } from "../components/maturity/MaturityAssessmentContainer";
 
-export default function MaturityAssessmentScreen() {
-	const { activeCompanyId } = useGlobalStore();
-	const { fetchAssessment, loading, error } = useMaturityStore();
-
-	useEffect(() => {
-		if (activeCompanyId) {
-			fetchAssessment(activeCompanyId);
-		}
-	}, [activeCompanyId, fetchAssessment]);
-
-	if (!activeCompanyId) {
-		return (
-			<Container maxWidth={false}>
-				<Box sx={{ p: 4 }}>
-					<Alert severity='warning'>Please select a company to complete the maturity assessment</Alert>
-				</Box>
-			</Container>
-		);
-	}
-
+function MaturityAssessmentScreen() {
 	return (
 		<Container maxWidth={false} disableGutters>
 			<Box sx={{ p: 2, width: "100%" }}>
 				<Typography variant='h4' gutterBottom>
 					Government Contracting Maturity Assessment
 				</Typography>
-				<MaturityAssessmentForm />
+				<MaturityAssessmentContainer />
 			</Box>
 		</Container>
 	);
 }
+
+// Make sure to use a default export
+export default MaturityAssessmentScreen;

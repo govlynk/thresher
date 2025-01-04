@@ -1,10 +1,10 @@
 import React from "react";
-import { Box, Typography, Button, Paper, Grid, CircularProgress } from "@mui/material";
+import { Box, Typography, Paper, Grid } from "@mui/material";
 import { MaturityRadarChart } from "../visualization/MaturityRadarChart";
 import { SectionScoreCard } from "./SectionScoreCard";
 import { processAssessmentData } from "../../../utils/maturity/dataProcessing";
 
-export function AssessmentSummary({ formData, onSubmit, onBack, loading }) {
+export function AssessmentSummary({ formData }) {
   const processedData = processAssessmentData(formData);
 
   return (
@@ -48,20 +48,6 @@ export function AssessmentSummary({ formData, onSubmit, onBack, loading }) {
           </Grid>
         ))}
       </Grid>
-
-      <Box sx={{ mt: 4, display: "flex", justifyContent: "space-between" }}>
-        <Button onClick={onBack} disabled={loading}>
-          Back
-        </Button>
-        <Button
-          variant="contained"
-          onClick={onSubmit}
-          disabled={loading}
-          startIcon={loading && <CircularProgress size={20} />}
-        >
-          {loading ? "Submitting..." : "Submit Assessment"}
-        </Button>
-      </Box>
     </Box>
   );
 }

@@ -9,6 +9,7 @@ const client = generateClient({
 export const useMaturityStore = create((set, get) => ({
 	assessment: null,
 	assessments: [],
+	processedData: null,
 	loading: false,
 	error: null,
 
@@ -25,10 +26,25 @@ export const useMaturityStore = create((set, get) => ({
 			});
 
 			const assessments = response?.data || [];
+			const latestAssessment = assessments[0] || null;
+
+			// Process assessment data if available
+			let processedData = null;
+			if (latestAssessment?.answers) {
+				try {
+					const answers = JSON.parse(latestAssessment.answers);
+					processedData = latestAssessment.maturityScore
+						? JSON.parse(latestAssessment.maturityScore)
+						: processAssessmentData(answers);
+				} catch (err) {
+					console.error("Error parsing assessment data:", err);
+				}
+			}
 
 			set({
 				assessments,
-				assessment: assessments[0] || null,
+				assessment: latestAssessment,
+				processedData,
 				loading: false,
 				error: null,
 			});
@@ -46,39 +62,33 @@ export const useMaturityStore = create((set, get) => ({
 		set({ loading: true, error: null });
 		try {
 			const timestamp = new Date().toISOString();
+			const answers = JSON.stringify(data.answers);
 
 			// Process assessment data
-			const processedData = processAssessmentData(
-				data.answers,
-				data.title || `Maturity Assessment - ${new Date().toLocaleDateString()}`
-			);
-
-			if (!processedData) {
-				throw new Error("Failed to process assessment data");
-			}
+			const processedData = processAssessmentData(data.answers);
 
 			// Create assessment record
-			const response = await client.models.MaturityAssessment.create({
+			const assessmentData = {
 				companyId: data.companyId,
-				title: processedData.title,
-				answers: JSON.stringify(data.answers),
-				maturityScore: JSON.stringify({
-					sections: processedData.sections,
-					radarChartData: processedData.radarChartData,
-					overallScore: processedData.overallScore,
-				}),
+				title: data.title || `Maturity Assessment - ${new Date().toLocaleDateString()}`,
+				answers,
+				maturityScore: JSON.stringify(processedData),
 				status: data.status || "IN_PROGRESS",
 				completedAt: data.completedAt || null,
 				lastModified: timestamp,
-			});
+			};
+
+			const response = await client.models.MaturityAssessment.create(assessmentData);
 
 			if (!response?.data) {
 				throw new Error("Failed to save assessment");
 			}
 
+			// Update store state
 			set((state) => ({
 				assessment: response.data,
 				assessments: [response.data, ...state.assessments],
+				processedData,
 				loading: false,
 				error: null,
 			}));
@@ -95,9 +105,28 @@ export const useMaturityStore = create((set, get) => ({
 	},
 
 	selectAssessment: (assessmentId) => {
-		const assessment = get().assessments.find((a) => a.id === assessmentId);
-		if (assessment) {
-			set({ assessment });
+		const { assessments } = get();
+		const selectedAssessment = assessments.find((a) => a.id === assessmentId);
+
+		if (selectedAssessment) {
+			try {
+				const answers = JSON.parse(selectedAssessment.answers);
+				const processedData = selectedAssessment.maturityScore
+					? JSON.parse(selectedAssessment.maturityScore)
+					: processAssessmentData(answers);
+
+				set({
+					assessment: selectedAssessment,
+					processedData,
+				});
+			} catch (err) {
+				console.error("Error processing assessment data:", err);
+				set({
+					error: "Failed to process assessment data",
+					assessment: selectedAssessment,
+					processedData: null,
+				});
+			}
 		}
 	},
 
@@ -105,6 +134,7 @@ export const useMaturityStore = create((set, get) => ({
 		set({
 			assessment: null,
 			assessments: [],
+			processedData: null,
 			loading: false,
 			error: null,
 		});
