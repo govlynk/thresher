@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
 import React from "react";
-import { Box, IconButton, Typography } from "@mui/material";
 import { Menu } from "lucide-react"; // Replace MenuOutlinedIcon
 import logo from "../../assets/images/logo.png";
 

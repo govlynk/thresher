@@ -71,15 +71,66 @@ export function CompanySelector() {
 				<Select
 					value={activeCompanyId || ""}
 					onChange={handleCompanyChange}
+					MenuProps={{
+						PaperProps: {
+							sx: {
+								bgcolor: "grey.900",
+								borderRadius: 1,
+								boxShadow: (theme) => theme.shadows[4],
+								"& .MuiMenuItem-root": {
+									color: "common.white",
+									"&:hover": {
+										bgcolor: "grey.800",
+									},
+									"&.Mui-selected": {
+										bgcolor: "grey.800",
+										"&:hover": {
+											bgcolor: "grey.700",
+										},
+									},
+								},
+								"& .MuiChip-root": {
+									bgcolor: "grey.800",
+									borderColor: "grey.700",
+									color: "common.white",
+								},
+							},
+						},
+					}}
+					sx={{
+						color: "common.white",
+						".MuiOutlinedInput-notchedOutline": {
+							borderColor: "grey.700",
+						},
+						"&:hover .MuiOutlinedInput-notchedOutline": {
+							borderColor: "grey.600",
+						},
+						"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+							borderColor: "primary.main",
+						},
+						".MuiSvgIcon-root": {
+							color: "common.white",
+						},
+					}}
 					displayEmpty
 					renderValue={(selected) => {
 						const company = userCompanies.find((c) => c.id === selected);
 						return (
 							<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-								<Typography variant='body2' noWrap>
+								<Typography variant='body2' noWrap sx={{ color: "common.white" }}>
 									{company?.legalBusinessName || "Select a company"}
 								</Typography>
-								{company?.uei && <Chip label={`UEI: ${company.uei}`} size='small' variant='outlined' />}
+								{company?.uei && (
+									<Chip
+										label={`UEI: ${company.uei}`}
+										size='small'
+										variant='outlined'
+										sx={{
+											color: "common.white",
+											borderColor: "grey.700",
+										}}
+									/>
+								)}
 							</Box>
 						);
 					}}
@@ -93,12 +144,28 @@ export function CompanySelector() {
 								justifyContent: "space-between",
 								alignItems: "center",
 								gap: 2,
+								color: "common.white",
+								backgroundColor: "grey.900",
+								"&:hover": {
+									bgcolor: "grey.800",
+								},
 							}}
 						>
 							<Typography variant='body2' noWrap>
 								{company.legalBusinessName}
 							</Typography>
-							{company.uei && <Chip label={`UEI: ${company.uei}`} size='small' variant='outlined' />}
+							{company.uei && (
+								<Chip
+									label={`UEI: ${company.uei}`}
+									sx={{
+										color: "common.white",
+										borderColor: "grey.700",
+										backgroundColor: "grey.900",
+									}}
+									size='small'
+									variant='outlined'
+								/>
+							)}
 						</MenuItem>
 					))}
 				</Select>

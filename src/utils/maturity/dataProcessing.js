@@ -33,8 +33,7 @@ export function processAssessmentData(answers) {
 	const radarChartData = sections.map((section) => ({
 		dimension: section.name,
 		current: section.score || 0,
-		target: 5,
-		benchmark: 4,
+		target: 4,
 	}));
 
 	// Calculate overall maturity score

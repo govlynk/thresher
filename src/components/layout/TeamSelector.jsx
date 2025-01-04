@@ -55,10 +55,48 @@ export function TeamSelector() {
 					value={activeTeamId || ""}
 					onChange={handleTeamChange}
 					displayEmpty
+					MenuProps={{
+						PaperProps: {
+							sx: {
+								bgcolor: "grey.900",
+								borderRadius: 1,
+								boxShadow: (theme) => theme.shadows[4],
+								"& .MuiMenuItem-root": {
+									color: "common.white",
+									"&:hover": {
+										bgcolor: "grey.800",
+									},
+									"&.Mui-selected": {
+										bgcolor: "grey.800",
+										"&:hover": {
+											bgcolor: "grey.700",
+										},
+									},
+								},
+								"& .MuiChip-root": {
+									bgcolor: "grey.800",
+									borderColor: "grey.700",
+									color: "common.white",
+								},
+							},
+						},
+					}}
 					sx={{
-						bgcolor: "background.paper",
 						"& .MuiSelect-select": {
 							py: 1,
+						},
+						color: "common.white",
+						".MuiOutlinedInput-notchedOutline": {
+							borderColor: "grey.700",
+						},
+						"&:hover .MuiOutlinedInput-notchedOutline": {
+							borderColor: "grey.600",
+						},
+						"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+							borderColor: "primary.main",
+						},
+						".MuiSvgIcon-root": {
+							color: "common.white",
 						},
 					}}
 				>

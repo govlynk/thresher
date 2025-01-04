@@ -90,9 +90,16 @@ export default function TopBar() {
 			position='sticky'
 			elevation={0}
 			sx={{
-				bgcolor: "background.paper",
+				bgcolor: "black",
 				borderBottom: "1px solid",
 				borderColor: "divider",
+				color: "common.white",
+				"& .MuiIconButton-root": {
+					color: "common.white",
+				},
+				"& .MuiDivider-root": {
+					borderColor: "grey.800",
+				},
 			}}
 		>
 			<Toolbar sx={{ gap: 2 }}>

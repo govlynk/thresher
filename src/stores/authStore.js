@@ -41,76 +41,62 @@ export const useAuthStore = create()(
 						email: cognitoUser.signInDetails?.loginId,
 						authFlowType: cognitoUser.signInDetails?.authFlowType,
 					};
+					console.log("[AuthStore] Auth info:", authInfo);
 
 					// Extract groups from Cognito token
 					const groups = cognitoUser.signInUserSession?.accessToken?.payload?.["cognito:groups"] || [];
-					const isAdmin = groups.some(
-						(group) => typeof group === "string" && group.toLowerCase().includes === "admin"
-					);
-					const isGovLynk = groups.some(
-						(group) => typeof group === "string" && group.toLowerCase().includes === "govlynk"
-					);
-					const isGovLynkAdmin = groups.some(
-						(group) => typeof group === "string" && group.toLowerCase() === "govlynk_admin"
-					);
+					console.log("[AuthStore] User groups:", groups);
 
-					// Fetch user data from database using email
-					const normalizedEmail = authInfo.email?.toLowerCase();
-					const { data: users } = await client.models.User.list({
-						filter: { email: { eq: normalizedEmail } },
-						limit: 1,
-					});
-					let userData = users?.[0];
-
-					console.log("[AuthStore] User data", userData, users);
-
-					if (!userData) {
-						//throw new Error("User is not defined");
-					} else {
-						// Update last login
-						const { data: updatedUser } = await client.models.User.update({
-							id: userData.id,
-							lastLogin: new Date().toISOString(),
-						});
-						userData = updatedUser;
-					}
-
-					// Fetch user's company associations
-					const { data: UserCompanyAccesss } = await client.models.UserCompanyAccess.list({
-						filter: { userId: { eq: userData.id } },
-						include: {
-							company: true,
-						},
-					});
-
-					// Create normalized user object
+					// Create normalized user object without requiring database user
 					const normalizedUser = {
-						...userData,
 						...authInfo,
+						id: cognitoUser.userId, // Use Cognito ID as user ID
+						name: cognitoUser.username,
+						email: cognitoUser.signInDetails?.loginId,
 						groups,
-						companies:
-							UserCompanyAccesss?.map((ucr) => ({
-								...ucr.company,
-								access: ucr.access,
-								UserCompanyAccessId: ucr.id,
-								status: ucr.status,
-							})) || [],
+						companies: [],
 						signInUserSession: cognitoUser.signInUserSession,
 					};
+					console.log("[AuthStore] Normalized user:", normalizedUser);
+					// Try to fetch additional user data if it exists
+					try {
+						const response = await client.models.User.list();
+						// console.log("[**AuthStore] Users response:", response);
+
+						const { data: users } = await client.models.User.list({
+							filter: { cognitoId: { eq: cognitoUser.userId } },
+						});
+						// console.log("[&&&AuthStore] Users:", response.data?.[4], users?.[0]);
+
+						if (users?.[0]) {
+							normalizedUser.id = users[0].id;
+							normalizedUser.name = users[0].name;
+							normalizedUser.phone = users[0].phone;
+							normalizedUser.contactId = users[0].contactId;
+
+							// Update last login
+							await client.models.User.update({
+								id: users[0].id,
+								lastLogin: new Date().toISOString(),
+							});
+						}
+					} catch (err) {
+						console.warn("[AuthStore] Failed to fetch/update user data:", err);
+					}
 
 					set({
 						user: normalizedUser,
 						isAuthenticated: true,
-						isAdmin,
-						isGovLynk,
-						isGovLynkAdmin,
+						isAdmin: groups.includes("GOVLYNK_ADMIN"),
+						isGovLynk: groups.some((g) => g.includes("GOVLYNK")),
+						isGovLynkAdmin: groups.includes("GOVLYNK_ADMIN"),
 						groups,
 						authDetails: authInfo,
 					});
 
 					return normalizedUser;
 				} catch (err) {
-					console.error("[**AuthStore] Failed to initialize authentication", err);
+					console.error("[AuthStore] Failed to initialize authentication", err);
 					set({
 						error: "Failed to initialize authentication",
 						isAuthenticated: false,
@@ -118,7 +104,6 @@ export const useAuthStore = create()(
 						groups: [],
 						authDetails: null,
 					});
-					// throw err;
 				}
 			},
 
