@@ -209,12 +209,12 @@ const schema = a.schema({
 		.model({
 			projectName: a.string().required(),
 			contractNumber: a.string(),
-			client: a.string().required(),
+			client: a.string(),
 			description: a.string(),
 			customerAgency: a.string(),
 			contractValue: a.float(), // Changed to `a.float()` for numerical values
-			periodStart: a.date().required(),
-			periodEnd: a.date().required(),
+			periodStart: a.date(),
+			periodEnd: a.date(),
 			workScope: a.string(),
 			contractType: a.enum(["FIRM_FIXED_PRICE", "TIME_AND_MATERIALS", "COST_PLUS", "IDIQ", "BPA"]),
 			// Reference Information
