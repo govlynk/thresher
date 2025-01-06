@@ -2,7 +2,7 @@ import React from "react";
 import { Paper, Box, Typography, Collapse } from "@mui/material";
 import { motion } from "framer-motion";
 
-const MotionPaper = motion(Paper);
+const MotionPaper = motion.create(Paper);
 
 export function QuestionCard({ children, title, subtitle, expanded = true }) {
 	return (

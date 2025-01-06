@@ -115,6 +115,7 @@ export function CompanySelector() {
 					displayEmpty
 					renderValue={(selected) => {
 						const company = userCompanies.find((c) => c.id === selected);
+						console.log("***Selected company:", company);
 						return (
 							<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 								<Typography variant='body2' noWrap sx={{ color: "common.white" }}>

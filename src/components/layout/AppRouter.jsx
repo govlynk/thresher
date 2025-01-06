@@ -22,7 +22,6 @@ const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen
 const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
 
 const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
-const AssessmentScreen = lazy(() => import("../../screens/AssessmentScreen"));
 const StrategicPositioiningScreen = lazy(() => import("../../screens/StrategicPositioiningScreen"));
 
 const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
@@ -180,14 +179,6 @@ const AppRouter = ({ signOut, user }) => {
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<SAMRegistrationScreen />
-						</Suspense>
-					}
-				/>
-				<Route
-					path='assessment'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<AssessmentScreen />
 						</Suspense>
 					}
 				/>

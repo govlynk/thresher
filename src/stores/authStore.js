@@ -22,12 +22,20 @@ export const useAuthStore = create()(
 				if (!cognitoUser) {
 					set({
 						user: null,
+						username: "",
+						userId: "",
+						sub: "",
+						email: "",
+						authFlowType: "",
+						id: "",
+						name: "",
+						email: "",
+						groups: [],
+						companies: [],
 						isAuthenticated: false,
 						isAdmin: false,
 						isGovLynk: false,
 						isGovLynkAdmin: false,
-						groups: [],
-						authDetails: null,
 					});
 					return;
 				}
@@ -43,26 +51,17 @@ export const useAuthStore = create()(
 					};
 					console.log("[AuthStore] Auth info:", authInfo);
 
-					// Extract groups from Cognito token
-					const groups = cognitoUser.signInUserSession?.accessToken?.payload?.["cognito:groups"] || [];
-					console.log("[AuthStore] User groups:", groups);
-
 					// Create normalized user object without requiring database user
 					const normalizedUser = {
 						...authInfo,
 						id: cognitoUser.userId, // Use Cognito ID as user ID
 						name: cognitoUser.username,
 						email: cognitoUser.signInDetails?.loginId,
-						groups,
 						companies: [],
-						signInUserSession: cognitoUser.signInUserSession,
 					};
 					console.log("[AuthStore] Normalized user:", normalizedUser);
 					// Try to fetch additional user data if it exists
 					try {
-						const response = await client.models.User.list();
-						// console.log("[**AuthStore] Users response:", response);
-
 						const { data: users } = await client.models.User.list({
 							filter: { cognitoId: { eq: cognitoUser.userId } },
 						});
@@ -87,11 +86,9 @@ export const useAuthStore = create()(
 					set({
 						user: normalizedUser,
 						isAuthenticated: true,
-						isAdmin: groups.includes("GOVLYNK_ADMIN"),
-						isGovLynk: groups.some((g) => g.includes("GOVLYNK")),
+						isAdmin: groups.includes("ADMIN"),
+						isGovLynk: groups.includes("GOVLYNK"),
 						isGovLynkAdmin: groups.includes("GOVLYNK_ADMIN"),
-						groups,
-						authDetails: authInfo,
 					});
 
 					return normalizedUser;
@@ -102,7 +99,6 @@ export const useAuthStore = create()(
 						isAuthenticated: false,
 						user: null,
 						groups: [],
-						authDetails: null,
 					});
 				}
 			},
@@ -138,7 +134,6 @@ export const useAuthStore = create()(
 					isGovLynk: false,
 					isGovLynkAdmin: false,
 					groups: [],
-					authDetails: null,
 				});
 			},
 		}),
@@ -150,7 +145,6 @@ export const useAuthStore = create()(
 				isGovLynk: state.false,
 				isGovLynkAdmin: state.false,
 				groups: state.groups,
-				authDetails: state.authDetails,
 			}),
 		}
 	)

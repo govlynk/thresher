@@ -4,7 +4,6 @@ import InfoCard from "../InfoCard";
 import DataField from "../DataField";
 
 export default function CompanyContactSection({ company }) {
-	console.log("CompanyContactSection", company);
 	return (
 		<InfoCard title='Contact Information' icon={Phone}>
 			<DataField label='Email' value={company.companyEmail} isEmail />

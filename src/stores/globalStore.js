@@ -8,18 +8,24 @@ export const useGlobalStore = create(
 	persist(
 		(set, get) => ({
 			// Active entities
+			activeUser: null,
 			activeUserId: null,
+			activeUserData: null,
 			activeCompanyId: null,
 			activeTeamId: null,
 			activeCompanyData: null,
 
 			// User methods
-			setActiveUser: (userId) => {
-				set({ activeUserId: userId });
+			setActiveUser: (userProfile) => {
+				set({ activeUserId: userProfile.id, activeUserData: userProfile });
 			},
 
 			getActiveUser: () => {
 				return get().activeUserId;
+			},
+
+			getActiveUserData: () => {
+				return get().activeUserData;
 			},
 
 			// Company methods
@@ -71,6 +77,7 @@ export const useGlobalStore = create(
 			reset: () => {
 				set({
 					activeUserId: null,
+					activeUserData: null,
 					activeCompanyId: null,
 					activeTeamId: null,
 					activeCompanyData: null,
@@ -81,6 +88,7 @@ export const useGlobalStore = create(
 			name: "global-store",
 			partialize: (state) => ({
 				activeUserId: state.activeUserId,
+				activeUserData: state.activeUserData,
 				activeCompanyId: state.activeCompanyId,
 				activeTeamId: state.activeTeamId,
 				activeCompanyData: state.activeCompanyData,

@@ -132,10 +132,6 @@ const systemLinks = {
 			path: "/user-company-access",
 		},
 		{
-			title: "Form Components Example",
-			path: "/assessment",
-		},
-		{
 			title: "Test",
 			path: "/test",
 		},

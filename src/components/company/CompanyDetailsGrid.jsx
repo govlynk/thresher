@@ -9,7 +9,6 @@ import CompanyNaicsSection from "./sections/CompanyNaicsSection";
 import CompanyCertificationsSection from "./sections/CompanyCertificationsSection";
 
 export default function CompanyDetailsGrid({ company }) {
-	console.log("CompanyDetailsGrid", company);
 	return (
 		<Grid container spacing={3}>
 			<Grid item xs={12} md={6}>

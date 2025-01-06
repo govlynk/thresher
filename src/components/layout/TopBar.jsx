@@ -18,6 +18,8 @@ import { signOut } from "aws-amplify/auth";
 import { CompanySelector } from "./CompanySelector";
 import { TeamSelector } from "./TeamSelector";
 import ThemeToggle from "./ThemeToggle";
+
+import { useGlobalStore } from "../../stores/globalStore";
 import { useAuthStore } from "../../stores/authStore";
 
 function stringToColor(string) {
@@ -56,6 +58,7 @@ export default function TopBar() {
 	const navigate = useNavigate();
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [isSigningOut, setIsSigningOut] = useState(false);
+	const { activeUserData } = useGlobalStore();
 	const { user, reset } = useAuthStore();
 
 	const handleMenu = (event) => {
@@ -103,7 +106,7 @@ export default function TopBar() {
 			}}
 		>
 			<Toolbar sx={{ gap: 2 }}>
-				{user && (
+				{activeUserData && (
 					<>
 						<CompanySelector />
 						<TeamSelector />
@@ -114,7 +117,7 @@ export default function TopBar() {
 				<Box sx={{ flexGrow: 1 }} />
 				<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}></Box>
 				<ThemeToggle />
-				{user && (
+				{activeUserData && (
 					<Box sx={{ display: "flex", alignItems: "center" }}>
 						<IconButton
 							onClick={handleMenu}
@@ -124,7 +127,7 @@ export default function TopBar() {
 							aria-haspopup='true'
 							aria-expanded={Boolean(anchorEl) ? "true" : undefined}
 						>
-							<Avatar {...stringAvatar(user.name)} />
+							<Avatar {...stringAvatar(activeUserData.name)} />
 						</IconButton>
 
 						<Menu
@@ -151,10 +154,10 @@ export default function TopBar() {
 							}}
 						>
 							<MenuItem sx={{ pointerEvents: "none" }}>
-								<Typography variant='subtitle2'>{user.name}</Typography>
+								<Typography variant='subtitle2'>{activeUserData.name}</Typography>
 							</MenuItem>
 							<MenuItem sx={{ pointerEvents: "none", color: "text.secondary" }}>
-								<Typography variant='caption'>{user.email}</Typography>
+								<Typography variant='caption'>{activeUserData.email}</Typography>
 							</MenuItem>
 
 							<Divider />
