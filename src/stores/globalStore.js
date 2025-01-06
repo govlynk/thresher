@@ -3,7 +3,9 @@ import { persist } from "zustand/middleware";
 import { generateClient } from "aws-amplify/data";
 import { getAuthSession, extractUserGroups } from "../utils/auth/sessionUtils";
 
-const client = generateClient();
+const client = generateClient({
+	authMode: "userPool",
+});
 
 export const useGlobalStore = create(
 	persist(
@@ -24,24 +26,36 @@ export const useGlobalStore = create(
 
 				try {
 					// Fetch auth session and user data in parallel
+					console.log("[globalStore] Fetching user data for user:", userProfile.id);
 					const [session, userResponse] = await Promise.all([
 						getAuthSession(),
-						client.models.User.get({ id: userProfile.id }),
+						client.models.User.list({
+							filter: { cognitoId: { eq: userProfile.id } },
+						}),
 					]);
+					console.log("[globalStore] User data fetched successfully", session, userResponse);
 
-					const userData = userResponse?.data;
+					const userData = userResponse?.data[0];
+					console.log("***[globalStore] userData", userData);
 					if (!userData) {
 						throw new Error("User data not found");
 					}
 
 					// Extract groups and permissions
 					const authData = extractUserGroups(session);
+					console.log("[globalStore] authData", authData);
 
 					set({
-						activeUserId: userProfile.id,
+						activeUserId: userData.id,
 						activeUserData: {
-							...userData,
 							...userProfile,
+							userId: userData.id,
+							name: userData.name,
+							email: userData.email,
+							phone: userData.phone,
+							avatar: userData.avatar,
+							lastLogin: userData.lastLogin,
+
 							...authData,
 							isAuthenticated: true,
 						},

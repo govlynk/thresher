@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
-import { useGlobalStore } from "./globalStore";
 
 const client = generateClient({
 	authMode: "userPool",
@@ -12,9 +11,7 @@ export const useUserCompanyStore = create((set, get) => ({
 	loading: false,
 	error: null,
 
-	fetchUserCompanies: async () => {
-		const { activeUserId } = useGlobalStore();
-
+	fetchUserCompanies: async (activeUserId) => {
 		if (!activeUserId) {
 			console.log("UserCompanyStore: No user ID found, skipping fetch");
 			return;
@@ -23,9 +20,11 @@ export const useUserCompanyStore = create((set, get) => ({
 		set({ loading: true, error: null });
 
 		try {
+			console.log("UserCompanyStore: Fetching user companies for user ID", activeUserId);
 			const response = await client.models.UserCompanyAccess.list({
 				filter: { userId: { eq: activeUserId } },
 			});
+			console.log("UserCompanyStore: User companies", response);
 
 			if (!response?.data) {
 				throw new Error("Failed to fetch user companies");

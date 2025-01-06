@@ -168,7 +168,7 @@ export default function TopBar() {
 								Profile
 							</MenuItem>
 
-							{user.isAdmin && (
+							{activeUserData.isAdmin && (
 								<MenuItem onClick={() => navigate("/settings")}>
 									<ListItemIcon>
 										<Settings size={20} />

@@ -6,14 +6,14 @@ import { useGlobalStore } from "../../stores/globalStore";
 
 export function CompanySelector() {
 	const { userCompanies, fetchUserCompanies, loading } = useUserCompanyStore();
-	const { activeCompanyId, setActiveCompany, activeCompanyData, activeUserData } = useGlobalStore();
+	const { activeCompanyId, setActiveCompany, activeUserId } = useGlobalStore();
 	const [error, setError] = React.useState(null);
 
 	useEffect(() => {
-		if (activeUserData?.id) {
-			fetchUserCompanies();
+		if (activeUserId) {
+			fetchUserCompanies(activeUserId);
 		}
-	}, [activeUserData?.id, fetchUserCompanies]);
+	}, [activeUserId, fetchUserCompanies]);
 
 	useEffect(() => {
 		const initializeActiveCompany = async () => {
@@ -29,7 +29,7 @@ export function CompanySelector() {
 		};
 
 		initializeActiveCompany();
-	}, [userCompanies, activeCompanyId, setActiveCompany]);
+	}, [activeCompanyId, setActiveCompany]);
 
 	const handleCompanyChange = async (event) => {
 		const newCompanyId = event.target.value;

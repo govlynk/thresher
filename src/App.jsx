@@ -1,35 +1,58 @@
-import { StrictMode } from "react";
-import { Amplify } from "aws-amplify";
+import { useEffect, useState } from "react";
 import { Authenticator } from "@aws-amplify/ui-react";
-import CssBaseline from "@mui/material/CssBaseline";
-import { ThemeProvider } from "./context/ThemeContext";
-import { BrowserRouter } from "react-router-dom";
 import { useGlobalStore } from "./stores/globalStore";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import AppRouter from "./components/layout/AppRouter";
 
-export default function App() {
-	const setActiveUser = useGlobalStore((state) => state.setActiveUser);
+// Create a client
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			staleTime: 1000 * 60 * 5, // 5 minutes
+			refetchOnWindowFocus: false,
+		},
+	},
+});
 
-	const handleAuthChange = async (user) => {
-		if (!user) return;
+// Separate component to handle authenticated state
+const AuthenticatedApp = ({ signOut, user }) => {
+	const { setActiveUser, setActiveCompany, setActiveTeam, activeUserData } = useGlobalStore();
+	const [initError, setInitError] = useState(null);
+
+	// Debug current user state
+	useEffect(() => {
+		console.log("Auth change detected:", user);
+
+		if (!user) {
+			console.log("No user data provided");
+			return;
+		}
 
 		try {
-			await setActiveUser({
+			const userData = {
 				id: user.userId,
 				email: user.signInDetails?.loginId,
-				name: user.username,
 				cognitoId: user.userId,
-			});
+			};
+
+			setActiveUser(userData);
+			console.log("Active user set successfully");
 		} catch (err) {
 			console.error("Error setting active user:", err);
 		}
-	};
 
+		console.log("Current activeUserData:", activeUserData);
+	}, [user]);
+
+	return <AppRouter signOut={signOut} user={user} />;
+};
+
+export default function App() {
 	return (
-		<Authenticator.Provider>
-			<Authenticator loginMechanisms={["email"]} onSignIn={handleAuthChange}>
-				{(props) => <AppRouter {...props} />}
-			</Authenticator>
-		</Authenticator.Provider>
+		<QueryClientProvider client={queryClient}>
+			<Authenticator loginMechanisms={["email"]}>{(props) => <AuthenticatedApp {...props} />}</Authenticator>
+			<ReactQueryDevtools initialIsOpen={false} />
+		</QueryClientProvider>
 	);
 }
