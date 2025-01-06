@@ -20,7 +20,6 @@ import { TeamSelector } from "./TeamSelector";
 import ThemeToggle from "./ThemeToggle";
 
 import { useGlobalStore } from "../../stores/globalStore";
-import { useAuthStore } from "../../stores/authStore";
 
 function stringToColor(string) {
 	if (!string) return "#666666";
@@ -59,7 +58,7 @@ export default function TopBar() {
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [isSigningOut, setIsSigningOut] = useState(false);
 	const { activeUserData } = useGlobalStore();
-	const { user, reset } = useAuthStore();
+	// const { user, reset } = useAuthStore();
 
 	const handleMenu = (event) => {
 		setAnchorEl(event.currentTarget);

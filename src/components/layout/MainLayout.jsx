@@ -2,11 +2,11 @@ import { Outlet } from "react-router-dom";
 import { Box, useTheme } from "@mui/material";
 import TopBar from "./TopBar";
 import SidebarMenu from "./SidebarMenu";
-import { useAuthStore } from "../../stores/authStore";
+import { useGlobalStore } from "../../stores/globalStore";
 
 export default function MainLayout({ signOut }) {
 	const theme = useTheme();
-	const user = useAuthStore((state) => state.user);
+	const { activeUserData } = useGlobalStore();
 
 	return (
 		<Box
@@ -26,7 +26,7 @@ export default function MainLayout({ signOut }) {
 					overflow: "hidden",
 				}}
 			>
-				<TopBar user={user} signOut={signOut} />
+				<TopBar />
 				<Box
 					component='main'
 					sx={{

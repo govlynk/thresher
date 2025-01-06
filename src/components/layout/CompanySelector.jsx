@@ -3,19 +3,17 @@ import { Box, Select, MenuItem, FormControl, Typography, Chip, CircularProgress,
 import { Building2 } from "lucide-react";
 import { useUserCompanyStore } from "../../stores/userCompanyStore";
 import { useGlobalStore } from "../../stores/globalStore";
-import { useAuthStore } from "../../stores/authStore";
 
 export function CompanySelector() {
 	const { userCompanies, fetchUserCompanies, loading } = useUserCompanyStore();
-	const { activeCompanyId, setActiveCompany, activeCompanyData } = useGlobalStore();
-	const { user } = useAuthStore();
+	const { activeCompanyId, setActiveCompany, activeCompanyData, activeUserData } = useGlobalStore();
 	const [error, setError] = React.useState(null);
 
 	useEffect(() => {
-		if (user?.id) {
+		if (activeUserData?.id) {
 			fetchUserCompanies();
 		}
-	}, [user?.id, fetchUserCompanies]);
+	}, [activeUserData?.id, fetchUserCompanies]);
 
 	useEffect(() => {
 		const initializeActiveCompany = async () => {
