@@ -5,7 +5,7 @@ import NotFoundPage from "../../screens/NotFoundPage";
 // Lazy load screens for better performance
 import React, { lazy, Suspense } from "react";
 import { Box, CircularProgress } from "@mui/material";
-import StrategicPositioiningForm from "../marketPositioning/StrategicPositioningForm";
+import { useGlobalStore } from "../../stores/globalStore";
 
 // Loading component for suspense fallback
 const LoadingScreen = () => (
@@ -40,6 +40,10 @@ const ContactAdminScreen = lazy(() => import("../../screens/ContactAdminScreen")
 const TestScreen = lazy(() => import("../../screens/TestScreen"));
 
 const AppRouter = ({ signOut, user }) => {
+	const { activeUserData } = useGlobalStore();
+	console.log("AppRouter -> user", user);
+	console.log("AppRouter -> activeUserData", activeUserData);
+
 	return (
 		<Routes>
 			<Route path='/' element={<MainLayout signOut={signOut} />}>

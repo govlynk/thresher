@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { Tag, X } from "lucide-react";
 import { useTodoStore } from "../../stores/todoStore";
-import { useAuthStore } from "../../stores/authStore";
+import { useGlobalStore } from "../../stores/globalStore";
 import { useTeamStore } from "../../stores/teamStore";
 import { useTeamTodoStore } from "../../stores/teamTodoStore";
 
@@ -36,7 +36,7 @@ const initialFormState = {
 };
 
 export function TodoDialog({ open, onClose, editTodo = null }) {
-	const user = useAuthStore((state) => state.user);
+	const { activeUserData } = useGlobalStore();
 	const { todos, addTodo, updateTodo } = useTodoStore();
 	const { teams } = useTeamStore();
 	const selectedTeamId = useTeamTodoStore((state) => state.selectedTeamId);
@@ -75,7 +75,7 @@ export function TodoDialog({ open, onClose, editTodo = null }) {
 				teamId: selectedTeamId === "all" ? teams[0]?.id || "" : selectedTeamId,
 			});
 		}
-	}, [open, editTodo, user, todos, teams, selectedTeamId]);
+	}, [open, editTodo, todos, teams, selectedTeamId]);
 
 	const validateForm = () => {
 		if (!formData.title.trim()) {

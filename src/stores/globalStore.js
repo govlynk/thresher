@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { generateClient } from "aws-amplify/data";
+import { getAuthSession, extractUserGroups } from "../utils/auth/sessionUtils";
 
 const client = generateClient();
 
@@ -8,7 +9,6 @@ export const useGlobalStore = create(
 	persist(
 		(set, get) => ({
 			// Active entities
-			activeUser: null,
 			activeUserId: null,
 			activeUserData: null,
 			activeCompanyId: null,
@@ -16,32 +16,58 @@ export const useGlobalStore = create(
 			activeCompanyData: null,
 
 			// User methods
-			setActiveUser: (userProfile) => {
-				set({ activeUserId: userProfile.id, activeUserData: userProfile });
+			setActiveUser: async (userProfile) => {
+				if (!userProfile?.id) {
+					console.error("Invalid user profile:", userProfile);
+					return;
+				}
+
+				try {
+					// Fetch auth session and user data in parallel
+					const [session, userResponse] = await Promise.all([
+						getAuthSession(),
+						client.models.User.get({ id: userProfile.id }),
+					]);
+
+					const userData = userResponse?.data;
+					if (!userData) {
+						throw new Error("User data not found");
+					}
+
+					// Extract groups and permissions
+					const authData = extractUserGroups(session);
+
+					set({
+						activeUserId: userProfile.id,
+						activeUserData: {
+							...userData,
+							...userProfile,
+							...authData,
+							isAuthenticated: true,
+						},
+					});
+
+					return userData;
+				} catch (err) {
+					console.error("Error setting active user:", err);
+					throw err;
+				}
 			},
 
-			getActiveUser: () => {
-				return get().activeUserId;
-			},
+			getActiveUser: () => get().activeUserId,
 
-			getActiveUserData: () => {
-				return get().activeUserData;
-			},
+			getActiveUserData: () => get().activeUserData,
 
 			// Company methods
 			setActiveCompany: async (companyId) => {
-				console.log("setActiveCompany called with:", companyId);
 				try {
 					const response = await client.models.Company.get({ id: companyId });
-					console.log("Company data response:", response);
 					const companyData = response?.data;
 
 					if (!companyData) {
-						console.error("No company data found for ID:", companyId);
 						throw new Error("Company data not found");
 					}
 
-					// Reset team selection when company changes
 					set({
 						activeCompanyId: companyId,
 						activeCompanyData: companyData,
@@ -55,23 +81,15 @@ export const useGlobalStore = create(
 				}
 			},
 
-			getActiveCompany: () => {
-				const state = get();
-				return state.activeCompanyData || null;
-			},
+			getActiveCompany: () => get().activeCompanyData,
 
 			// Team methods
 			setActiveTeam: (teamId) => {
-				console.log("Setting active team:", teamId);
 				set({ activeTeamId: teamId });
-
-				// Trigger a custom event to notify dependent components
 				window.dispatchEvent(new CustomEvent("teamChanged", { detail: { teamId } }));
 			},
 
-			getActiveTeam: () => {
-				return get().activeTeamId;
-			},
+			getActiveTeam: () => get().activeTeamId,
 
 			// Reset all state
 			reset: () => {
