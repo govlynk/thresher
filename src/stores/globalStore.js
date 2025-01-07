@@ -34,17 +34,18 @@ export const useGlobalStore = create(
 						}),
 					]);
 					console.log("[globalStore] User data fetched successfully", session, userResponse);
-
+					// set user data from the User table
 					const userData = userResponse?.data[0];
 					console.log("***[globalStore] userData", userData);
 					if (!userData) {
 						throw new Error("User data not found");
 					}
 
-					// Extract groups and permissions
+					// Set groups and permissions
 					const authData = extractUserGroups(session);
 					console.log("[globalStore] authData", authData);
 
+					//set user variables
 					set({
 						activeUserId: userData.id,
 						activeUserData: {

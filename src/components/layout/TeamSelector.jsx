@@ -1,26 +1,16 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { FormControl, Select, MenuItem, Box, CircularProgress, Alert } from "@mui/material";
 import { Users } from "lucide-react";
 import { useTeamStore } from "../../stores/teamStore";
 import { useGlobalStore } from "../../stores/globalStore";
 
 export function TeamSelector() {
-	const { teams, loading, error, fetchTeams } = useTeamStore();
-	const { activeCompanyId, activeTeamId, setActiveTeam } = useGlobalStore();
+	const { teams, loading, error } = useTeamStore();
+	const { activeTeamId, setActiveTeam } = useGlobalStore();
 
-	// Fetch teams when company changes
-	useEffect(() => {
-		if (activeCompanyId) {
-			fetchTeams(activeCompanyId);
-		}
-	}, [activeCompanyId, fetchTeams]);
-
-	// Set first team as default when teams load and no team is selected
-	useEffect(() => {
-		if (teams.length > 0 && !activeTeamId) {
-			setActiveTeam(teams[0].id);
-		}
-	}, [teams, activeTeamId, setActiveTeam]);
+	const handleTeamChange = (event) => {
+		setActiveTeam(event.target.value);
+	};
 
 	if (loading) {
 		return (
@@ -41,11 +31,6 @@ export function TeamSelector() {
 	if (!teams?.length) {
 		return null;
 	}
-
-	const handleTeamChange = (event) => {
-		const newTeamId = event.target.value;
-		setActiveTeam(newTeamId);
-	};
 
 	return (
 		<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -73,18 +58,10 @@ export function TeamSelector() {
 										},
 									},
 								},
-								"& .MuiChip-root": {
-									bgcolor: "grey.800",
-									borderColor: "grey.700",
-									color: "common.white",
-								},
 							},
 						},
 					}}
 					sx={{
-						"& .MuiSelect-select": {
-							py: 1,
-						},
 						color: "common.white",
 						".MuiOutlinedInput-notchedOutline": {
 							borderColor: "grey.700",

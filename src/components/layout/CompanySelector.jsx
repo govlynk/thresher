@@ -1,44 +1,18 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Box, Select, MenuItem, FormControl, Typography, Chip, CircularProgress, Alert } from "@mui/material";
 import { Building2 } from "lucide-react";
 import { useUserCompanyStore } from "../../stores/userCompanyStore";
 import { useGlobalStore } from "../../stores/globalStore";
 
 export function CompanySelector() {
-	const { userCompanies, fetchUserCompanies, loading } = useUserCompanyStore();
-	const { activeCompanyId, setActiveCompany, activeUserId } = useGlobalStore();
-	const [error, setError] = React.useState(null);
-
-	useEffect(() => {
-		if (activeUserId) {
-			fetchUserCompanies(activeUserId);
-		}
-	}, [activeUserId, fetchUserCompanies]);
-
-	useEffect(() => {
-		const initializeActiveCompany = async () => {
-			if (userCompanies.length > 0 && activeCompanyId) {
-				try {
-					await setActiveCompany(userCompanies[0].id);
-					setError(null);
-				} catch (err) {
-					console.error("Error initializing active company:", err);
-					setError("Failed to set active company");
-				}
-			}
-		};
-
-		initializeActiveCompany();
-	}, [activeCompanyId, setActiveCompany]);
+	const { userCompanies, loading } = useUserCompanyStore();
+	const { activeCompanyId, setActiveCompany } = useGlobalStore();
 
 	const handleCompanyChange = async (event) => {
-		const newCompanyId = event.target.value;
 		try {
-			await setActiveCompany(newCompanyId);
-			setError(null);
+			await setActiveCompany(event.target.value);
 		} catch (err) {
 			console.error("Error changing company:", err);
-			setError("Failed to change company");
 		}
 	};
 
@@ -47,14 +21,6 @@ export function CompanySelector() {
 			<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
 				<CircularProgress size={20} />
 			</Box>
-		);
-	}
-
-	if (error) {
-		return (
-			<Alert severity='error' sx={{ maxWidth: 300 }}>
-				{error}
-			</Alert>
 		);
 	}
 
@@ -87,11 +53,6 @@ export function CompanySelector() {
 										},
 									},
 								},
-								"& .MuiChip-root": {
-									bgcolor: "grey.800",
-									borderColor: "grey.700",
-									color: "common.white",
-								},
 							},
 						},
 					}}
@@ -110,61 +71,19 @@ export function CompanySelector() {
 							color: "common.white",
 						},
 					}}
-					displayEmpty
-					renderValue={(selected) => {
-						const company = userCompanies.find((c) => c.id === selected);
-						console.log("***Selected company:", company);
-						return (
-							<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-								<Typography variant='body2' noWrap sx={{ color: "common.white" }}>
-									{company?.legalBusinessName || "Select a company"}
-								</Typography>
-								{company?.uei && (
-									<Chip
-										label={`UEI: ${company.uei}`}
-										size='small'
-										variant='outlined'
-										sx={{
-											color: "common.white",
-											borderColor: "grey.700",
-										}}
-									/>
-								)}
-							</Box>
-						);
-					}}
 				>
 					{userCompanies.map((company) => (
-						<MenuItem
-							key={company.id}
-							value={company.id}
-							sx={{
-								display: "flex",
-								justifyContent: "space-between",
-								alignItems: "center",
-								gap: 2,
-								color: "common.white",
-								backgroundColor: "grey.900",
-								"&:hover": {
-									bgcolor: "grey.800",
-								},
-							}}
-						>
-							<Typography variant='body2' noWrap>
-								{company.legalBusinessName}
-							</Typography>
-							{company.uei && (
-								<Chip
-									label={`UEI: ${company.uei}`}
-									sx={{
-										color: "common.white",
-										borderColor: "grey.700",
-										backgroundColor: "grey.900",
-									}}
-									size='small'
-									variant='outlined'
-								/>
-							)}
+						<MenuItem key={company.id} value={company.id}>
+							<Box
+								sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}
+							>
+								<Typography variant='body2' noWrap>
+									{company.legalBusinessName}
+								</Typography>
+								{company.uei && (
+									<Chip label={`UEI: ${company.uei}`} size='small' variant='outlined' sx={{ ml: 1 }} />
+								)}
+							</Box>
 						</MenuItem>
 					))}
 				</Select>

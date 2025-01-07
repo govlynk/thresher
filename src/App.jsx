@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Authenticator } from "@aws-amplify/ui-react";
 import { useGlobalStore } from "./stores/globalStore";
+import { useUserCompanyStore } from "./stores/userCompanyStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import AppRouter from "./components/layout/AppRouter";
@@ -17,7 +18,8 @@ const queryClient = new QueryClient({
 
 // Separate component to handle authenticated state
 const AuthenticatedApp = ({ signOut, user }) => {
-	const { setActiveUser, setActiveCompany, setActiveTeam, activeUserData } = useGlobalStore();
+	const { setActiveUser, setActiveCompany, setActiveTeam, activeUserData, activeUserId } = useGlobalStore();
+	const { userCompanies, fetchUserCompanies, loading } = useUserCompanyStore();
 	const [initError, setInitError] = useState(null);
 
 	// Debug current user state
@@ -37,6 +39,11 @@ const AuthenticatedApp = ({ signOut, user }) => {
 			};
 
 			setActiveUser(userData);
+			if (activeUserId) {
+				fetchUserCompanies(activeUserId);
+				console.log("@@@@userCompanies", userCompanies);
+				setActiveCompany(userCompanies[0].id);
+			}
 			console.log("Active user set successfully");
 		} catch (err) {
 			console.error("Error setting active user:", err);
