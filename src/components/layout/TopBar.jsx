@@ -58,7 +58,6 @@ export default function TopBar() {
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [isSigningOut, setIsSigningOut] = useState(false);
 	const { activeUserData } = useGlobalStore();
-	// const { user, reset } = useAuthStore();
 
 	const handleMenu = (event) => {
 		setAnchorEl(event.currentTarget);

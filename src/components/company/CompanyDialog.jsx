@@ -16,7 +16,7 @@ import {
 	Alert,
 } from "@mui/material";
 import { generateClient } from "aws-amplify/data";
-import { useAuthStore } from "../../stores/authStore";
+import { useGlobalStore } from "../../stores/globalStore";
 
 const client = generateClient({
 	authMode: "userPool",
@@ -40,7 +40,7 @@ export function CompanyDialog({ open, onClose, editCompany = null }) {
 	const [formData, setFormData] = useState(initialFormState);
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(false);
-	const currentUser = useAuthStore((state) => state.user);
+	const { activeUserId } = useGlobalStore();
 
 	useEffect(() => {
 		if (!open) {
@@ -104,9 +104,9 @@ export function CompanyDialog({ open, onClose, editCompany = null }) {
 			} else {
 				const company = await client.models.Company.create(companyData);
 
-				if (formData.associateCurrentUser && currentUser?.sub) {
+				if (formData.associateCurrentUser) {
 					await client.models.UserCompanyAccess.create({
-						userId: currentUser.sub,
+						userId: activeUserId,
 						companyId: company.id,
 						roleId: formData.userRole,
 						status: "ACTIVE",
