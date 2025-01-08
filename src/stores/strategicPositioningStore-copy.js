@@ -3,7 +3,7 @@ import { generateClient } from "aws-amplify/data";
 
 const client = generateClient();
 
-export const useStrategicPositioningStore = create((set, get) => ({
+export const strategicPositioningStore = create((set, get) => ({
 	capabilityStatement: null,
 	loading: false,
 	error: null,
@@ -23,7 +23,7 @@ export const useStrategicPositioningStore = create((set, get) => ({
 				error: null,
 			});
 		} catch (err) {
-			console.error("Error fetching strategic positioning:", err);
+			console.error("Error fetching strategic positioing:", err);
 			set({ error: err.message, loading: false });
 		}
 	},
@@ -46,6 +46,7 @@ export const useStrategicPositioningStore = create((set, get) => ({
 				const response = await client.models.CapabilityStatement.update({
 					id: currentStatement.id,
 					...data,
+					companyId: activeCompanyId,
 					lastModified: timestamp,
 				});
 
@@ -58,6 +59,7 @@ export const useStrategicPositioningStore = create((set, get) => ({
 				// Create new statement
 				const response = await client.models.CapabilityStatement.create({
 					...data,
+					companyId: activeCompanyId,
 					lastModified: timestamp,
 				});
 

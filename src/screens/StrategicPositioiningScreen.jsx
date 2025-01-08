@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { Container, Box, Typography, Alert, CircularProgress } from "@mui/material";
-import StrategicPositioningForm from "../components/marketPositioning/StrategicPositioningForm - copy";
+import StrategicPositioningForm from "../components/marketPositioning/StrategicPositioningForm";
 import { ErrorBoundary } from "../components/common/ErrorBoundary";
 import { useGlobalStore } from "../stores/globalStore";
 
