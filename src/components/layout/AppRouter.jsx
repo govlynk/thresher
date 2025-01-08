@@ -33,7 +33,14 @@ const ContactAdminScreen = lazy(() => import("../../screens/ContactAdminScreen")
 const TestScreen = lazy(() => import("../../screens/TestScreen"));
 
 const ProtectedRoute = ({ children, requiredGroups }) => {
-	isAllowed = requiredGroups.some((requiredGroup) => activeUserData.groups.includes(requiredGroup));
+	const { activeUserData } = useGlobalStore();
+
+	// Add null check for requiredGroups and activeUserData.groups
+	const isAllowed =
+		requiredGroups && activeUserData?.groups
+			? requiredGroups.some((requiredGroup) => activeUserData.groups.includes(requiredGroup))
+			: false;
+
 	if (!isAllowed) {
 		return <Navigate to='/' />;
 	}
@@ -177,7 +184,7 @@ const AppRouter = ({ signOut }) => {
 				<Route
 					path='user-admin'
 					element={
-						<ProtectedRoute isAllowed={isGovLynkAdmin}>
+						<ProtectedRoute isAllowed={["GOVLYNK_ADMIN"]}>
 							<Suspense fallback={<LoadingScreen />}>
 								<UserScreen />
 							</Suspense>
@@ -188,7 +195,7 @@ const AppRouter = ({ signOut }) => {
 				<Route
 					path='test'
 					element={
-						<ProtectedRoute isAllowed={isGovLynkAdmin}>
+						<ProtectedRoute isAllowed={["COMPANY_ADMIN"]}>
 							<Suspense fallback={<LoadingScreen />}>
 								<TestScreen />
 							</Suspense>
