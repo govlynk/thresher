@@ -61,6 +61,14 @@ const marketPositioningLinks = {
 			title: "Strategic Positioning",
 			path: "/strategy",
 		},
+		{
+			title: "Experience",
+			path: "/experience",
+		},
+		{
+			title: "Certifications",
+			path: "/certification",
+		},
 	],
 };
 

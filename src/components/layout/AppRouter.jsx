@@ -14,15 +14,23 @@ const LoadingScreen = () => (
 
 // Lazy loaded components
 const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
-const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
+
+//Sales
 const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen"));
 const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
+//Market Positioning
 const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
 const StrategicPositioiningScreen = lazy(() => import("../../screens/StrategicPositioiningScreen"));
+const PastPerformanceScreen = lazy(() => import("../../screens/PastPerformanceScreen"));
+const CertificationScreen = lazy(() => import("../../screens/CertificationScreen"));
+//Profile
 const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
+const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
 const CapabilityStatementScreen = lazy(() => import("../../screens/CapabilityStatementScreen"));
+//Regulation
 const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
 const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));
+//Admin
 const ClientSetupScreen = lazy(() => import("../../screens/ClientSetupScreen"));
 const UserScreen = lazy(() => import("../../screens/UserScreen"));
 const CompanyScreen = lazy(() => import("../../screens/CompanyScreen"));
@@ -30,6 +38,7 @@ const TeamScreen = lazy(() => import("../../screens/TeamScreen"));
 const UserCompanyAccessScreen = lazy(() => import("../../screens/UserCompanyAccessScreen"));
 const ContactsScreen = lazy(() => import("../../screens/ContactsScreen"));
 const ContactAdminScreen = lazy(() => import("../../screens/ContactAdminScreen"));
+//Development
 const TestScreen = lazy(() => import("../../screens/TestScreen"));
 
 const ProtectedRoute = ({ children, requiredGroups }) => {
@@ -69,6 +78,22 @@ const AppRouter = ({ signOut }) => {
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<StrategicPositioiningScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='experience'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<PastPerformanceScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='certification'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<CertificationScreen />
 						</Suspense>
 					}
 				/>
