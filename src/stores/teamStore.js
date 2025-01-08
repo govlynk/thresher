@@ -29,49 +29,13 @@ export const useTeamStore = create((set, get) => ({
 
 		set({ loading: true });
 		try {
-			// First fetch teams
-			const teamsResponse = await client.models.Team.list({
-				filter: { companyId: { eq: companyId } },
-			});
-
-			if (!teamsResponse?.data) {
-				throw new Error("Failed to fetch teams");
-			}
-
-			// Then fetch members for each team
-			const teamsWithMembers = await Promise.all(
-				teamsResponse.data.map(async (team) => {
-					const membersResponse = await client.models.TeamMember.list({
-						filter: { teamId: { eq: team.id } },
-					});
-
-					// Fetch contact details for each member
-					const membersWithContacts = await Promise.all(
-						(membersResponse?.data || []).map(async (member) => {
-							const contactResponse = await client.models.Contact.get({
-								id: member.contactId,
-							});
-							return {
-								...member,
-								contact: contactResponse?.data || null,
-							};
-						})
-					);
-
-					return {
-						...team,
-						members: membersWithContacts,
-					};
-				})
-			);
-
 			// Set up subscription for real-time updates
 			const subscription = client.models.Team.observeQuery({
 				filter: { companyId: { eq: companyId } },
 			}).subscribe({
 				next: async ({ items }) => {
-					// When teams update, fetch fresh member data
-					const updatedTeamsWithMembers = await Promise.all(
+					// Fetch members for each team
+					const teamsWithMembers = await Promise.all(
 						items.map(async (team) => {
 							const membersResponse = await client.models.TeamMember.list({
 								filter: { teamId: { eq: team.id } },
@@ -97,7 +61,7 @@ export const useTeamStore = create((set, get) => ({
 					);
 
 					set({
-						teams: updatedTeamsWithMembers,
+						teams: teamsWithMembers,
 						loading: false,
 						error: null,
 					});
@@ -111,45 +75,21 @@ export const useTeamStore = create((set, get) => ({
 				},
 			});
 
-			set({
-				teams: teamsWithMembers,
-				loading: false,
-				error: null,
-				subscription,
-			});
+			set({ subscription });
 		} catch (err) {
 			console.error("Error fetching teams:", err);
 			set({
 				error: err.message || "Failed to fetch teams",
 				loading: false,
-				teams: [],
 			});
 		}
 	},
 
 	addTeam: async (teamData) => {
-		if (!teamData.companyId) {
-			throw new Error("Company ID is required");
-		}
-
-		if (!teamData.name?.trim()) {
-			throw new Error("Team name is required");
-		}
-
-		set({ loading: true });
+		set({ loading: true, error: null });
 		try {
-			const response = await client.models.Team.create({
-				name: teamData.name.trim(),
-				description: teamData.description?.trim() || null,
-				companyId: teamData.companyId,
-			});
-
-			if (!response?.data) {
-				throw new Error("Failed to create team");
-			}
-
-			// Let subscription handle state update
-			set({ loading: false, error: null });
+			const response = await client.models.Team.create(teamData);
+			set({ loading: false });
 			return response.data;
 		} catch (err) {
 			console.error("Error creating team:", err);
@@ -161,25 +101,14 @@ export const useTeamStore = create((set, get) => ({
 		}
 	},
 
-	updateTeam: async (id, teamData) => {
-		if (!id) {
-			throw new Error("Team ID is required");
-		}
-
-		set({ loading: true });
+	updateTeam: async (id, updates) => {
+		set({ loading: true, error: null });
 		try {
 			const response = await client.models.Team.update({
 				id,
-				name: teamData.name?.trim(),
-				description: teamData.description?.trim() || null,
+				...updates,
 			});
-
-			if (!response?.data) {
-				throw new Error("Failed to update team");
-			}
-
-			// Let subscription handle state update
-			set({ loading: false, error: null });
+			set({ loading: false });
 			return response.data;
 		} catch (err) {
 			console.error("Error updating team:", err);
@@ -192,32 +121,14 @@ export const useTeamStore = create((set, get) => ({
 	},
 
 	removeTeam: async (id) => {
-		if (!id) {
-			throw new Error("Team ID is required");
-		}
-
-		set({ loading: true });
+		set({ loading: true, error: null });
 		try {
-			// First remove all team members
-			const teamMembers = await client.models.TeamMember.list({
-				filter: { teamId: { eq: id } },
-			});
-
-			if (teamMembers?.data) {
-				for (const member of teamMembers.data) {
-					await client.models.TeamMember.delete({ id: member.id });
-				}
-			}
-
-			// Then remove the team
 			await client.models.Team.delete({ id });
-
-			// Let subscription handle state update
-			set({ loading: false, error: null });
+			set({ loading: false });
 		} catch (err) {
 			console.error("Error removing team:", err);
 			set({
-				error: err.message || "Failed to delete team",
+				error: err.message || "Failed to remove team",
 				loading: false,
 			});
 			throw err;

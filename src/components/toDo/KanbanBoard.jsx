@@ -140,7 +140,8 @@ function DroppableColumn({ status, title, todos = [], onEditTodo, activeId, team
 }
 
 export function KanbanBoard({ onEditTodo }) {
-	const { todos, updateTodos, fetchTodos, loading, error } = useTodoStore();
+	const { todos, updateTodos, fetchTodos, loading, error, cleanup } = useTodoStore();
+
 	const { teams } = useTeamStore();
 	const { selectedTeamId } = useTeamTodoStore();
 	const [activeId, setActiveId] = useState(null);
