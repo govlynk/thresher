@@ -81,7 +81,12 @@ export function CompanySelector() {
 									{company.legalBusinessName}
 								</Typography>
 								{company.uei && (
-									<Chip label={`UEI: ${company.uei}`} size='small' variant='outlined' sx={{ ml: 1 }} />
+									<Chip
+										label={`UEI: ${company.uei}`}
+										size='small'
+										variant='outlined'
+										sx={{ ml: 1, color: "common.white" }}
+									/>
 								)}
 							</Box>
 						</MenuItem>
