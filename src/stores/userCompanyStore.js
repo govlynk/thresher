@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
+import { useGlobalStore } from "./globalStore";
 
 const client = generateClient({
 	authMode: "userPool",
@@ -10,6 +11,14 @@ export const useUserCompanyStore = create((set, get) => ({
 	activeCompanyId: null,
 	loading: false,
 	error: null,
+
+	reset: () =>
+		set({
+			userCompanies: [],
+			activeCompanyId: null,
+			loading: false,
+			error: null,
+		}),
 
 	fetchUserCompanies: async (activeUserId) => {
 		if (!activeUserId) {
@@ -34,7 +43,6 @@ export const useUserCompanyStore = create((set, get) => ({
 			const companiesWithDetails = await Promise.all(
 				response.data.map(async (ucr) => {
 					const companyResponse = await client.models.Company.get({ id: ucr.companyId });
-
 					return {
 						...companyResponse.data,
 						access: ucr.access,
@@ -44,13 +52,19 @@ export const useUserCompanyStore = create((set, get) => ({
 				})
 			);
 
+			// Set companies and initialize active company if needed
 			set((state) => {
 				const newState = {
 					userCompanies: companiesWithDetails,
-					activeCompanyId: state.activeCompanyId || (companiesWithDetails[0]?.id ?? null),
 					loading: false,
 					error: null,
 				};
+
+				// Set first company as active if none selected
+				if (companiesWithDetails.length > 0 && !state.activeCompanyId) {
+					useGlobalStore.getState().setActiveCompany(companiesWithDetails[0].id);
+				}
+
 				return newState;
 			});
 		} catch (err) {
@@ -62,13 +76,16 @@ export const useUserCompanyStore = create((set, get) => ({
 		}
 	},
 
-	setActiveCompany: (companyId) => {
-		set({ activeCompanyId: companyId });
-	},
-
 	getActiveCompany: () => {
 		const state = get();
-		const activeCompany = state.userCompanies.find((company) => company.id === state.activeCompanyId);
-		return activeCompany;
+		return state.userCompanies.find((company) => company.id === state.activeCompanyId);
+	},
+	// Add reset method
+	reset: () => {
+		set({
+			userCompanies: [],
+			loading: false,
+			error: null,
+		});
 	},
 }));

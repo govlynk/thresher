@@ -208,6 +208,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -218,7 +226,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -815,6 +823,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -825,7 +841,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -973,6 +989,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -983,7 +1007,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -1100,6 +1124,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -1110,7 +1142,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -1339,6 +1371,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -1349,7 +1389,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -1475,6 +1515,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -1485,7 +1533,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -1622,6 +1670,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -1632,7 +1688,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -1662,11 +1718,32 @@
               "isRequired": true,
               "attributes": []
             },
+            "contractNumber": {
+              "name": "contractNumber",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "client": {
               "name": "client",
               "isArray": false,
               "type": "String",
-              "isRequired": true,
+              "isRequired": false,
+              "attributes": []
+            },
+            "description": {
+              "name": "description",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "customerAgency": {
+              "name": "customerAgency",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
               "attributes": []
             },
             "contractValue": {
@@ -1676,22 +1753,97 @@
               "isRequired": false,
               "attributes": []
             },
-            "startDate": {
-              "name": "startDate",
+            "periodStart": {
+              "name": "periodStart",
               "isArray": false,
               "type": "AWSDate",
               "isRequired": false,
               "attributes": []
             },
-            "endDate": {
-              "name": "endDate",
+            "periodEnd": {
+              "name": "periodEnd",
               "isArray": false,
               "type": "AWSDate",
               "isRequired": false,
               "attributes": []
             },
-            "description": {
-              "name": "description",
+            "workScope": {
+              "name": "workScope",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "contractType": {
+              "name": "contractType",
+              "isArray": false,
+              "type": {
+                "enum": "PastPerformanceContractType"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "pointOfContactName": {
+              "name": "pointOfContactName",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "pointOfContactTitle": {
+              "name": "pointOfContactTitle",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "pointOfContactEmail": {
+              "name": "pointOfContactEmail",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "pointOfContactPhone": {
+              "name": "pointOfContactPhone",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "pointOfContactAgency": {
+              "name": "pointOfContactAgency",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "performanceRating": {
+              "name": "performanceRating",
+              "isArray": false,
+              "type": {
+                "enum": "PastPerformancePerformanceRating"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "relevantSINs": {
+              "name": "relevantSINs",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "cparsReference": {
+              "name": "cparsReference",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "deliverables": {
+              "name": "deliverables",
               "isArray": false,
               "type": "String",
               "isRequired": false,
@@ -1760,6 +1912,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -1770,7 +1930,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -1891,6 +2051,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -1901,7 +2069,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -2065,6 +2233,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -2075,7 +2251,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -2189,6 +2365,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -2199,7 +2383,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -2308,6 +2492,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -2318,7 +2510,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -2448,6 +2640,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -2458,7 +2658,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -2861,6 +3061,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -2871,7 +3079,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -3047,6 +3255,14 @@
                     ]
                   },
                   {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
                     "groupClaim": "cognito:groups",
                     "provider": "userPools",
                     "allow": "groups",
@@ -3057,7 +3273,7 @@
                       "delete"
                     ],
                     "groups": [
-                      "Admin"
+                      "GOVLYNK_ADMIN"
                     ]
                   }
                 ]
@@ -3119,6 +3335,26 @@
           "values": [
             "ACTIVE",
             "INACTIVE"
+          ]
+        },
+        "PastPerformanceContractType": {
+          "name": "PastPerformanceContractType",
+          "values": [
+            "FIRM_FIXED_PRICE",
+            "TIME_AND_MATERIALS",
+            "COST_PLUS",
+            "IDIQ",
+            "BPA"
+          ]
+        },
+        "PastPerformancePerformanceRating": {
+          "name": "PastPerformancePerformanceRating",
+          "values": [
+            "EXCEPTIONAL",
+            "VERY_GOOD",
+            "SATISFACTORY",
+            "MARGINAL",
+            "UNSATISFACTORY"
           ]
         },
         "FederalRegulationType": {

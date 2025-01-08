@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Select, MenuItem, FormControl, Typography, Chip, CircularProgress, Alert } from "@mui/material";
 import { Building2 } from "lucide-react";
 import { useUserCompanyStore } from "../../stores/userCompanyStore";
@@ -7,6 +7,13 @@ import { useGlobalStore } from "../../stores/globalStore";
 export function CompanySelector() {
 	const { userCompanies, loading } = useUserCompanyStore();
 	const { activeCompanyId, setActiveCompany } = useGlobalStore();
+
+	// Select first company if none selected
+	useEffect(() => {
+		if (!loading && userCompanies.length > 0 && !activeCompanyId) {
+			setActiveCompany(userCompanies[0].id);
+		}
+	}, [loading, userCompanies, activeCompanyId, setActiveCompany]);
 
 	const handleCompanyChange = async (event) => {
 		try {

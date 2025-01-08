@@ -4,20 +4,20 @@ import { TodoDialog } from "../components/toDo/TodoDialog";
 import { TodoHeader } from "../components/toDo/TodoHeader";
 import { KanbanBoard } from "../components/toDo/KanbanBoard";
 import { useTeamStore } from "../stores/teamStore";
-import { useUserCompanyStore } from "../stores/userCompanyStore";
+import { useGlobalStore } from "../stores/globalStore";
 
 function TodoScreen() {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editTodo, setEditTodo] = useState(null);
-	const { getActiveCompany } = useUserCompanyStore();
+	const { activeCompanyId } = useGlobalStore();
 	const { fetchTeams } = useTeamStore();
-	const activeCompany = getActiveCompany();
 
+	// Fetch teams when company changes
 	useEffect(() => {
-		if (activeCompany?.id) {
-			fetchTeams(activeCompany.id);
+		if (activeCompanyId) {
+			fetchTeams(activeCompanyId);
 		}
-	}, [activeCompany?.id, fetchTeams]);
+	}, [activeCompanyId, fetchTeams]);
 
 	const handleAddClick = () => {
 		setEditTodo(null);
@@ -34,7 +34,7 @@ function TodoScreen() {
 		setEditTodo(null);
 	};
 
-	if (!activeCompany) {
+	if (!activeCompanyId) {
 		return (
 			<Container maxWidth={false}>
 				<Box sx={{ p: 4 }}>
