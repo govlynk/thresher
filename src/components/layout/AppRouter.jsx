@@ -1,13 +1,12 @@
 import { Routes, Route } from "react-router-dom";
-import MainLayout from "../layout/MainLayout";
-import NotFoundPage from "../../screens/NotFoundPage";
-
-// Lazy load screens for better performance
-import React, { lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { useGlobalStore } from "../../stores/globalStore";
+import MainLayout from "../layout/MainLayout";
+import NotFoundPage from "../../screens/NotFoundPage";
+import { activeUserData } from "../../stores/globalStore";
 
-// Loading component for suspense fallback
+// Loading component
 const LoadingScreen = () => (
 	<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
 		<CircularProgress />
@@ -16,20 +15,15 @@ const LoadingScreen = () => (
 
 // Lazy loaded components
 const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
-
 const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
 const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen"));
 const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
-
 const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
 const StrategicPositioiningScreen = lazy(() => import("../../screens/StrategicPositioiningScreen"));
-
 const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
 const CapabilityStatementScreen = lazy(() => import("../../screens/CapabilityStatementScreen"));
-
 const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
 const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));
-
 const ClientSetupScreen = lazy(() => import("../../screens/ClientSetupScreen"));
 const UserScreen = lazy(() => import("../../screens/UserScreen"));
 const CompanyScreen = lazy(() => import("../../screens/CompanyScreen"));
@@ -39,10 +33,22 @@ const ContactsScreen = lazy(() => import("../../screens/ContactsScreen"));
 const ContactAdminScreen = lazy(() => import("../../screens/ContactAdminScreen"));
 const TestScreen = lazy(() => import("../../screens/TestScreen"));
 
-const AppRouter = ({ signOut, user }) => {
-	const { activeUserData } = useGlobalStore();
-	console.log("AppRouter -> user", user);
-	console.log("AppRouter -> activeUserData", activeUserData);
+const ProtectedRoute = ({ children, isAllowed }) => {
+	if (!isAllowed) {
+		return <Navigate to='/' replace />;
+	}
+	return children;
+};
+
+const AppRouter = ({ signOut }) => {
+	const { isGovLynkAdmin } = activeUserData?.isGovLynkAdmin;
+	console.log("isGovLynkAdmin", activeUserData);
+
+	// Use selective state subscription with memoized selector
+	const activeUserData = useGlobalStore(
+		(state) => state.activeUserData,
+		(a, b) => a?.id === b?.id // Custom equality function
+	);
 
 	return (
 		<Routes>
@@ -55,7 +61,8 @@ const AppRouter = ({ signOut, user }) => {
 						</Suspense>
 					}
 				/>
-				{/* Market Positioning Routes */}
+
+				{/* Market Positioning */}
 				<Route
 					path='strategy'
 					element={
@@ -65,7 +72,7 @@ const AppRouter = ({ signOut, user }) => {
 					}
 				/>
 
-				{/* Market Intelligence Routes */}
+				{/* Market Intelligence */}
 				<Route
 					path='spending-analysis'
 					element={
@@ -75,7 +82,7 @@ const AppRouter = ({ signOut, user }) => {
 					}
 				/>
 
-				{/* Sales Routes */}
+				{/* Sales */}
 				<Route
 					path='opportunities'
 					element={
@@ -93,7 +100,7 @@ const AppRouter = ({ signOut, user }) => {
 					}
 				/>
 
-				{/* Management Routes */}
+				{/* Management */}
 				<Route
 					path='todos'
 					element={
@@ -119,14 +126,6 @@ const AppRouter = ({ signOut, user }) => {
 					}
 				/>
 				<Route
-					path='company/:companyId/team'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<TeamScreen />
-						</Suspense>
-					}
-				/>
-				<Route
 					path='team'
 					element={
 						<Suspense fallback={<LoadingScreen />}>
@@ -143,20 +142,12 @@ const AppRouter = ({ signOut, user }) => {
 					}
 				/>
 
-				{/* Administration Routes */}
+				{/* Administration */}
 				<Route
 					path='user-company-access'
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<UserCompanyAccessScreen />
-						</Suspense>
-					}
-				/>
-				<Route
-					path='client-setup'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<ClientSetupScreen />
 						</Suspense>
 					}
 				/>
@@ -177,7 +168,41 @@ const AppRouter = ({ signOut, user }) => {
 					}
 				/>
 
-				{/* Profile Routes */}
+				{/* Protected GovLynk Routes */}
+				<Route
+					path='client-setup'
+					element={
+						<ProtectedRoute isAllowed={isGovLynkAdmin}>
+							<Suspense fallback={<LoadingScreen />}>
+								<ClientSetupScreen />
+							</Suspense>
+						</ProtectedRoute>
+					}
+				/>
+
+				<Route
+					path='user-admin'
+					element={
+						<ProtectedRoute isAllowed={isGovLynkAdmin}>
+							<Suspense fallback={<LoadingScreen />}>
+								<UserScreen />
+							</Suspense>
+						</ProtectedRoute>
+					}
+				/>
+				{/* Development */}
+				<Route
+					path='test'
+					element={
+						<ProtectedRoute isAllowed={isGovLynkAdmin}>
+							<Suspense fallback={<LoadingScreen />}>
+								<TestScreen />
+							</Suspense>
+						</ProtectedRoute>
+					}
+				/>
+
+				{/* Profile */}
 				<Route
 					path='sam'
 					element={
@@ -194,7 +219,6 @@ const AppRouter = ({ signOut, user }) => {
 						</Suspense>
 					}
 				/>
-
 				<Route
 					path='capability'
 					element={
@@ -212,21 +236,11 @@ const AppRouter = ({ signOut, user }) => {
 					}
 				/>
 
-				{/* Development Routes */}
-				<Route
-					path='test'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<TestScreen />
-						</Suspense>
-					}
-				/>
-
-				{/* 404 Route */}
+				{/* 404 */}
 				<Route path='*' element={<NotFoundPage />} />
 			</Route>
 		</Routes>
 	);
 };
 
-export default AppRouter;
+export default React.memo(AppRouter); // Memoize the component

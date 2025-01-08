@@ -26,24 +26,20 @@ export const useGlobalStore = create(
 
 				try {
 					// Fetch auth session and user data in parallel
-					console.log("[globalStore] Fetching user data for user:", userProfile.id);
 					const [session, userResponse] = await Promise.all([
 						getAuthSession(),
 						client.models.User.list({
 							filter: { cognitoId: { eq: userProfile.id } },
 						}),
 					]);
-					console.log("[globalStore] User data fetched successfully", session, userResponse);
 					// set user data from the User table
 					const userData = userResponse?.data[0];
-					console.log("***[globalStore] userData", userData);
 					if (!userData) {
 						throw new Error("User data not found");
 					}
 
 					// Set groups and permissions
 					const authData = extractUserGroups(session);
-					console.log("[globalStore] authData", authData);
 
 					//set user variables
 					set({
