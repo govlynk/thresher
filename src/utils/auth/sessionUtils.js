@@ -12,8 +12,8 @@ export function extractUserGroups(session) {
 	const groups = session.tokens.accessToken.payload["cognito:groups"] || [];
 	return {
 		groups,
-		isAdmin: groups.includes("ADMIN"),
-		isGovLynk: groups.includes("GOVLYNK"),
+		isAdmin: groups?.some((group) => ["COMPANY_ADMIN", "GOVLYNK_ADMIN"].includes(group)),
+		isGovLynk: groups?.some((group) => group?.toUpperCase().includes("GOVLYNK")),
 		isGovLynkAdmin: groups.includes("GOVLYNK_ADMIN"),
 	};
 }

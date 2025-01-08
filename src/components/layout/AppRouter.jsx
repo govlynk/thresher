@@ -1,10 +1,9 @@
-import { Routes, Route } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense, memo } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { useGlobalStore } from "../../stores/globalStore";
 import MainLayout from "../layout/MainLayout";
 import NotFoundPage from "../../screens/NotFoundPage";
-import { activeUserData } from "../../stores/globalStore";
 
 // Loading component
 const LoadingScreen = () => (
@@ -33,22 +32,17 @@ const ContactsScreen = lazy(() => import("../../screens/ContactsScreen"));
 const ContactAdminScreen = lazy(() => import("../../screens/ContactAdminScreen"));
 const TestScreen = lazy(() => import("../../screens/TestScreen"));
 
-const ProtectedRoute = ({ children, isAllowed }) => {
+const ProtectedRoute = ({ children, requiredGroups }) => {
+	isAllowed = requiredGroups.some((requiredGroup) => activeUserData.groups.includes(requiredGroup));
 	if (!isAllowed) {
-		return <Navigate to='/' replace />;
+		return <Navigate to='/' />;
 	}
 	return children;
 };
 
 const AppRouter = ({ signOut }) => {
-	const { isGovLynkAdmin } = activeUserData?.isGovLynkAdmin;
-	console.log("isGovLynkAdmin", activeUserData);
-
-	// Use selective state subscription with memoized selector
-	const activeUserData = useGlobalStore(
-		(state) => state.activeUserData,
-		(a, b) => a?.id === b?.id // Custom equality function
-	);
+	const { activeUserData } = useGlobalStore();
+	const isGovLynkAdmin = activeUserData?.isGovLynk;
 
 	return (
 		<Routes>
@@ -172,7 +166,7 @@ const AppRouter = ({ signOut }) => {
 				<Route
 					path='client-setup'
 					element={
-						<ProtectedRoute isAllowed={isGovLynkAdmin}>
+						<ProtectedRoute isAllowed={["GOVLYNK_ADMIN"]}>
 							<Suspense fallback={<LoadingScreen />}>
 								<ClientSetupScreen />
 							</Suspense>
@@ -243,4 +237,4 @@ const AppRouter = ({ signOut }) => {
 	);
 };
 
-export default React.memo(AppRouter); // Memoize the component
+export default memo(AppRouter); // Memoize the component

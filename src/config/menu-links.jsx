@@ -97,6 +97,7 @@ const administrationLinks = {
 	id: "administration",
 	title: "Administration",
 	icon: Settings2,
+	requiredGroups: ["COMPANY_ADMIN", "GOVLYNK_ADMIN"], // Can also protect individual links
 	links: [
 		{
 			title: "Manage Contacts",
@@ -117,6 +118,7 @@ const systemLinks = {
 	id: "govlynk",
 	title: "GovLynk",
 	icon: Settings,
+	requiredGroups: ["GOVLYNK_ADMIN"], // Can also protect individual links
 	links: [
 		{
 			title: "Client Setup",

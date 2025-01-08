@@ -4,6 +4,7 @@ import { Typography } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import { menuLinks } from "../../config/menu-links";
 import SidebarHeader from "./SidebarHeader";
+import { useGlobalStore } from "../../stores/globalStore";
 
 // Keep existing themes configuration
 const themes = {
@@ -53,30 +54,44 @@ const hexToRgba = (hex, alpha) => {
 
 // Updated Item Component to use menuLinks structure
 const MenuItems = ({ items, selected, setSelected, theme }) => {
+	const { activeUserData } = useGlobalStore();
+	const hasAccess = (requiredGroups) => {
+		// Return true if no groups required
+		if (!requiredGroups?.length) return true;
+
+		// Return false if no user groups
+		if (!activeUserData?.groups?.length) return false;
+		// Check if any required group exists in user groups
+		return requiredGroups.some((requiredGroup) => activeUserData.groups.includes(requiredGroup));
+	};
+
 	return (
 		<>
-			{items.map((item) => (
-				<Fragment key={item.id}>
-					<SubMenu label={item.title} icon={item.icon && <item.icon size={20} />}>
-						{item.links?.map((link) => (
-							<MenuItem
-								key={link.path}
-								onClick={() => setSelected(link.title)}
-								component={
-									<NavLink
-										to={link.path}
-										style={({ isActive }) => ({
-											backgroundColor: isActive ? "#00458b" : "#0b2948",
-										})}
-									/>
-								}
-							>
-								{link.title}
-							</MenuItem>
-						))}
-					</SubMenu>
-				</Fragment>
-			))}
+			{items.map(
+				(item) =>
+					hasAccess(item.requiredGroups) && (
+						<Fragment key={item.id}>
+							<SubMenu label={item.title} icon={item.icon && <item.icon size={20} />}>
+								{item.links?.map((link) => (
+									<MenuItem
+										key={link.path}
+										onClick={() => setSelected(link.title)}
+										component={
+											<NavLink
+												to={link.path}
+												style={({ isActive }) => ({
+													backgroundColor: isActive ? "#00458b" : "#0b2948",
+												})}
+											/>
+										}
+									>
+										{link.title}
+									</MenuItem>
+								))}
+							</SubMenu>
+						</Fragment>
+					)
+			)}
 		</>
 	);
 };
