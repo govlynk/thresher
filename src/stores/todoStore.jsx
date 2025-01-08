@@ -32,14 +32,8 @@ export const useTodoStore = create((set, get) => ({
 
 		set({ loading: true });
 		try {
-			// Build filter with companyId and optional teamId
-			const filter = {
-				companyId: { eq: activeCompanyId },
-				...(activeTeamId && activeTeamId !== "all" ? { teamId: { eq: activeTeamId } } : {}),
-			};
-
 			const subscription = client.models.Todo.observeQuery({
-				filter,
+				filter: activeTeamId === "all" ? undefined : { teamId: { eq: activeTeamId } },
 			}).subscribe({
 				next: ({ items }) => {
 					set({
