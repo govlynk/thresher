@@ -27,16 +27,29 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 200, 
 	const handleToolbarToggle = useCallback(
 		(type, newState) => {
 			if (!newState) return;
-			// Ensure we maintain focus after toolbar actions
-			const withFocus = EditorState.moveFocusToEnd(newState);
-			setEditorState(withFocus);
+			setEditorState(newState);
 		},
 		[setEditorState]
 	);
 
 	const handleFocus = useCallback(() => {
 		if (!readOnly && editorState) {
-			setEditorState(EditorState.moveFocusToEnd(editorState));
+			const selection = editorState.getSelection();
+			const content = editorState.getCurrentContent();
+			const blockMap = content.getBlockMap();
+			const key = selection.getStartKey();
+			const offset = selection.getStartOffset();
+
+			const newSelection = selection.merge({
+				anchorKey: key,
+				anchorOffset: offset,
+				focusKey: key,
+				focusOffset: offset,
+				hasFocus: true,
+			});
+
+			const newEditorState = EditorState.forceSelection(editorState, newSelection);
+			setEditorState(newEditorState);
 		}
 	}, [editorState, readOnly, setEditorState]);
 

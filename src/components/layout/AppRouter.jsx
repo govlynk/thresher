@@ -20,13 +20,13 @@ const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen
 const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
 //Market Positioning
 const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
-const StrategicPositioiningScreen = lazy(() => import("../../screens/StrategicPositioiningScreen"));
 const PastPerformanceScreen = lazy(() => import("../../screens/PastPerformanceScreen"));
 const CertificationScreen = lazy(() => import("../../screens/CertificationScreen"));
 //Profile
+const StrategicPositioiningScreen = lazy(() => import("../../screens/StrategicPositioiningScreen"));
 const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
 const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
-const CapabilityStatementScreen = lazy(() => import("../../screens/CapabilityStatementScreen"));
+
 //Regulation
 const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
 const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));

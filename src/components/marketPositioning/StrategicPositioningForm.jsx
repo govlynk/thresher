@@ -69,8 +69,8 @@ export default function StrategicPositioningForm() {
 
 		try {
 			await saveCapabilityStatement({
-				companyId: activeCompanyId,
 				...formData,
+				companyId: activeCompanyId,
 			});
 		} catch (err) {
 			console.error("Error submitting form:", err);
