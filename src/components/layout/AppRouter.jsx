@@ -246,14 +246,6 @@ const AppRouter = ({ signOut }) => {
 					}
 				/>
 				<Route
-					path='capability'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<CapabilityStatementScreen />
-						</Suspense>
-					}
-				/>
-				<Route
 					path='far'
 					element={
 						<Suspense fallback={<LoadingScreen />}>
