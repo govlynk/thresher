@@ -1,20 +1,17 @@
 import React, { useState } from "react";
 import {
-	FormControl,
-	FormLabel,
-	FormControlLabel,
 	Box,
 	TextField,
+	Button,
 	Typography,
 	List,
 	ListItem,
 	ListItemText,
 	IconButton,
-	Button,
-	Paper,
+	FormHelperText,
 } from "@mui/material";
+import { Plus, X } from "lucide-react";
 import { FormField } from "../FormField";
-import { Plus, X, GripVertical } from "lucide-react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -28,31 +25,35 @@ function SortableCapability({ capability, onRemove, id }) {
 	};
 
 	return (
-		<Paper ref={setNodeRef} style={style} sx={{ mb: 1 }}>
-			<ListItem
-				secondaryAction={
-					<IconButton edge='end' onClick={onRemove}>
-						<X size={18} />
-					</IconButton>
-				}
-			>
-				<Box {...attributes} {...listeners} sx={{ cursor: "grab", mr: 2 }}>
-					<GripVertical size={20} />
-				</Box>
-				<ListItemText primary={capability} />
-			</ListItem>
-		</Paper>
+		<ListItem
+			ref={setNodeRef}
+			style={style}
+			sx={{
+				bgcolor: "background.paper",
+				mb: 1,
+				borderRadius: 1,
+				boxShadow: 1,
+			}}
+		>
+			<Box {...attributes} {...listeners} sx={{ cursor: "grab", mr: 2 }}>
+				⋮
+			</Box>
+			<ListItemText primary={capability} />
+			<IconButton edge='end' onClick={onRemove} size='small'>
+				<X size={18} />
+			</IconButton>
+		</ListItem>
 	);
 }
 
-export function SortableListQuestion({ question, value, onChange }) {
-	const [newCapability, setNewCapability] = useState("");
+export function SortableListQuestion({ question, value = [], onChange, error }) {
 	const [inputValue, setInputValue] = useState("");
 
-	// Update handleAdd function
 	const handleAdd = () => {
 		if (inputValue.trim()) {
-			onChange([...(Array.isArray(value) ? value : []), inputValue.trim()]);
+			const newValue = Array.isArray(value) ? [...value] : [];
+			newValue.push(inputValue.trim());
+			onChange(newValue);
 			setInputValue("");
 		}
 	};
@@ -65,68 +66,58 @@ export function SortableListQuestion({ question, value, onChange }) {
 
 	const handleDragEnd = (event) => {
 		const { active, over } = event;
-		if (active.id !== over.id) {
-			const oldIndex = value.findIndex((item) => item === active.id);
-			const newIndex = value.findIndex((item) => item === over.id);
-			const newItems = [...value];
-			newItems.splice(oldIndex, 1);
-			newItems.splice(newIndex, 0, value[oldIndex]);
-			onChange(newItems);
+		if (!active || !over || active.id === over.id) return;
+
+		const oldIndex = value.indexOf(active.id);
+		const newIndex = value.indexOf(over.id);
+
+		const newValue = [...value];
+		newValue.splice(oldIndex, 1);
+		newValue.splice(newIndex, 0, active.id);
+		onChange(newValue);
+	};
+
+	const handleKeyPress = (e) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			handleAdd();
 		}
 	};
-
-	const handleChange = (e) => {
-		onChange(question.id, e.target.value);
-	};
-
-	const validateContent = () => {
-		if (question.required && (!value || value === "{}")) {
-			return "This field is required";
-		}
-
-		return null;
-	};
-
-	const error = validateContent();
 
 	return (
 		<Box sx={{ width: "100%" }}>
-			<FormField question={question} error={error} helperText={question.helpText}>
+			<FormField question={question} error={error}>
 				<Box sx={{ mb: 3 }}>
 					<TextField
 						fullWidth
 						value={inputValue}
 						onChange={(e) => setInputValue(e.target.value)}
-						onKeyPress={(e) => {
-							if (e.key === "Enter") {
-								handleAdd();
-							}
-						}}
+						onKeyPress={handleKeyPress}
+						placeholder={question.placeholder}
 					/>
 					<Button startIcon={<Plus size={20} />} onClick={handleAdd} sx={{ mt: 1 }}>
-						Add Capability
+						Add Item
 					</Button>
 				</Box>
+
 				<DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-					<SortableContext items={value} strategy={verticalListSortingStrategy}>
+					<SortableContext items={Array.isArray(value) ? value : []} strategy={verticalListSortingStrategy}>
 						<List>
-							{value.map((capability, index) => (
-								<SortableCapability
-									key={capability}
-									id={capability}
-									capability={capability}
-									onRemove={() => handleRemove(index)}
-								/>
-							))}
+							{Array.isArray(value) &&
+								value.map((item, index) => (
+									<SortableCapability
+										key={item}
+										id={item}
+										capability={item}
+										onRemove={() => handleRemove(index)}
+									/>
+								))}
 						</List>
 					</SortableContext>
 				</DndContext>
+
+				{question.helpText && <FormHelperText>{question.helpText}</FormHelperText>}
 			</FormField>
-			{question.helpText && (
-				<Typography variant='body2' color='text.secondary' sx={{ mt: 2 }}>
-					{question.helpText}
-				</Typography>
-			)}
 		</Box>
 	);
 }

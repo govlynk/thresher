@@ -7,6 +7,7 @@ export const useStrategicPositioningStore = create((set, get) => ({
 	capabilityStatement: null,
 	loading: false,
 	error: null,
+	success: false,
 	history: [],
 
 	fetchCapabilityStatement: async (activeCompanyId) => {
@@ -29,7 +30,7 @@ export const useStrategicPositioningStore = create((set, get) => ({
 	},
 
 	saveCapabilityStatement: async (data) => {
-		set({ loading: true, error: null });
+		set({ loading: true, error: null, success: false });
 		try {
 			const currentStatement = get().capabilityStatement;
 			const timestamp = new Date().toISOString();
@@ -46,6 +47,7 @@ export const useStrategicPositioningStore = create((set, get) => ({
 				const response = await client.models.CapabilityStatement.update({
 					id: currentStatement.id,
 					...data,
+					companyId: activeCompanyId,
 					lastModified: timestamp,
 				});
 
@@ -53,11 +55,13 @@ export const useStrategicPositioningStore = create((set, get) => ({
 					capabilityStatement: response.data,
 					loading: false,
 					error: null,
+					success: true,
 				});
 			} else {
 				// Create new statement
 				const response = await client.models.CapabilityStatement.create({
 					...data,
+					companyId: activeCompanyId,
 					lastModified: timestamp,
 				});
 
@@ -65,20 +69,24 @@ export const useStrategicPositioningStore = create((set, get) => ({
 					capabilityStatement: response.data,
 					loading: false,
 					error: null,
+					success: true,
 				});
 			}
 		} catch (err) {
 			console.error("Error saving capability statement:", err);
-			set({ error: err.message, loading: false });
+			set({ error: err.message, loading: false, success: false });
 			throw err;
 		}
 	},
+
+	resetSuccess: () => set({ success: false }),
 
 	reset: () => {
 		set({
 			capabilityStatement: null,
 			loading: false,
 			error: null,
+			success: false,
 		});
 	},
 }));

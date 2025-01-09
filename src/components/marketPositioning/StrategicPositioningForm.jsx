@@ -1,5 +1,5 @@
-import React from "react";
-import { Box } from "@mui/material";
+import React, { useEffect } from "react";
+import { Box, Alert } from "@mui/material";
 import { FormController } from "../common/form/FormController";
 import { useStrategicPositioningStore } from "../../stores/strategicPositioningStore";
 import { useGlobalStore } from "../../stores/globalStore";
@@ -17,14 +17,34 @@ const QUESTION_COMPONENTS = {
 
 export default function StrategicPositioningForm() {
 	const { activeCompanyId } = useGlobalStore();
-	const { saveCapabilityStatement, loading, error } = useStrategicPositioningStore();
+	const {
+		capabilityStatement,
+		loading,
+		error,
+		success,
+		fetchCapabilityStatement,
+		saveCapabilityStatement,
+		resetSuccess,
+	} = useStrategicPositioningStore();
+
+	// Fetch initial data when component mounts
+	useEffect(() => {
+		if (activeCompanyId) {
+			fetchCapabilityStatement(activeCompanyId);
+		}
+	}, [activeCompanyId, fetchCapabilityStatement]);
 
 	const formSteps = questions.map((question) => ({
 		id: question.id,
 		title: question.title,
 		component: ({ formData, onChange, errors, onInfoClick }) => {
-			const QuestionComponent = QUESTION_COMPONENTS[question.type.toLowerCase()];
-			return QuestionComponent ? (
+			const QuestionComponent = QUESTION_COMPONENTS[question.type];
+			if (!QuestionComponent) {
+				console.error(`No component found for question type: ${question.type}`);
+				return null;
+			}
+
+			return (
 				<QuestionCard title={question.title} subtitle={question.instructions}>
 					<QuestionComponent
 						question={question}
@@ -34,7 +54,7 @@ export default function StrategicPositioningForm() {
 						onInfoClick={onInfoClick}
 					/>
 				</QuestionCard>
-			) : null;
+			);
 		},
 		validate: (data) => {
 			if (question.required && !data[question.id]) {
@@ -60,14 +80,24 @@ export default function StrategicPositioningForm() {
 
 	return (
 		<Box>
+			{success && (
+				<Alert severity='success' onClose={resetSuccess} sx={{ mb: 3 }}>
+					Strategic positioning statement saved successfully!
+				</Alert>
+			)}
+
 			<FormController
 				steps={formSteps}
-				initialData={{}}
+				initialData={capabilityStatement || {}}
 				onSubmit={handleSubmit}
 				loading={loading}
 				error={error}
 				questionInfo={questionInfo}
 				StepperComponent={StepperProgress}
+				onSuccess={() => {
+					// Reset to first step after successful save
+					return { resetStep: true };
+				}}
 			/>
 		</Box>
 	);
