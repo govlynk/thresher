@@ -8,11 +8,13 @@ import { getPlainText } from "../../../../utils/richTextUtils";
 export function RichTextQuestion({ question, value, onChange, onInfoClick }) {
 	const handleEditorChange = React.useCallback(
 		(editorContent) => {
+			// Don't pass the question.id as the first parameter anymore
+			// Just pass the editor content directly
 			if (editorContent !== value) {
-				onChange(question.id, editorContent);
+				onChange(editorContent);
 			}
 		},
-		[question.id, onChange, value]
+		[onChange, value]
 	);
 
 	const validateContent = () => {

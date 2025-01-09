@@ -1,7 +1,20 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
+import { useGlobalStore } from "./globalStore";
 
 const client = generateClient();
+
+// Define the expected fields for a capability statement
+const sanitizeCapabilityData = (data) => ({
+	companyId: data.companyId,
+	aboutUs: data.aboutUs || null,
+	keyCapabilities: Array.isArray(data.keyCapabilities) ? data.keyCapabilities : [],
+	competitiveAdvantage: data.competitiveAdvantage || null,
+	mission: data.mission || null,
+	vision: data.vision || null,
+	keywords: Array.isArray(data.keywords) ? data.keywords : [],
+	lastModified: new Date().toISOString(),
+});
 
 export const useStrategicPositioningStore = create((set, get) => ({
 	capabilityStatement: null,
@@ -10,14 +23,19 @@ export const useStrategicPositioningStore = create((set, get) => ({
 	success: false,
 	history: [],
 
-	fetchCapabilityStatement: async (activeCompanyId) => {
+	fetchCapabilityStatement: async (companyId) => {
+		if (!companyId) {
+			set({ error: "No company ID provided" });
+			return;
+		}
+
 		set({ loading: true, error: null });
 		try {
 			const response = await client.models.CapabilityStatement.list({
-				filter: { companyId: { eq: activeCompanyId } },
+				filter: { companyId: { eq: companyId } },
 				limit: 1,
 			});
-			console.log("response", response);
+
 			set({
 				capabilityStatement: response?.data?.[0] || null,
 				loading: false,
@@ -30,51 +48,52 @@ export const useStrategicPositioningStore = create((set, get) => ({
 	},
 
 	saveCapabilityStatement: async (data) => {
+		const { activeCompanyId } = useGlobalStore.getState();
+		if (!activeCompanyId) {
+			throw new Error("No active company selected");
+		}
+
 		set({ loading: true, error: null, success: false });
 		try {
 			const currentStatement = get().capabilityStatement;
-			const timestamp = new Date().toISOString();
 
-			// Save current version to history if it exists
-			if (currentStatement) {
-				await client.models.CapabilityStatementHistory.create({
-					...currentStatement,
-					statementId: currentStatement.id,
-					modifiedAt: timestamp,
-				});
+			// Sanitize the data to ensure it matches the expected schema
+			const sanitizedData = sanitizeCapabilityData({
+				...data,
+				companyId: activeCompanyId,
+			});
 
+			let response;
+			if (currentStatement?.id) {
 				// Update existing statement
-				const response = await client.models.CapabilityStatement.update({
+				response = await client.models.CapabilityStatement.update({
 					id: currentStatement.id,
-					...data,
-					companyId: activeCompanyId,
-					lastModified: timestamp,
-				});
-
-				set({
-					capabilityStatement: response.data,
-					loading: false,
-					error: null,
-					success: true,
+					...sanitizedData,
 				});
 			} else {
 				// Create new statement
-				const response = await client.models.CapabilityStatement.create({
-					...data,
-					companyId: activeCompanyId,
-					lastModified: timestamp,
-				});
-
-				set({
-					capabilityStatement: response.data,
-					loading: false,
-					error: null,
-					success: true,
-				});
+				response = await client.models.CapabilityStatement.create(sanitizedData);
 			}
+
+			if (!response?.data) {
+				throw new Error("Failed to save capability statement");
+			}
+
+			set({
+				capabilityStatement: response.data,
+				loading: false,
+				error: null,
+				success: true,
+			});
+
+			return response.data;
 		} catch (err) {
 			console.error("Error saving capability statement:", err);
-			set({ error: err.message, loading: false, success: false });
+			set({
+				error: err.message || "Failed to save capability statement",
+				loading: false,
+				success: false,
+			});
 			throw err;
 		}
 	},
