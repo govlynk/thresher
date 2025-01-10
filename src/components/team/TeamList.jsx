@@ -19,8 +19,7 @@ import { Edit, Trash2, UserPlus, Filter, Search, ChevronDown, ChevronUp, Users }
 import { TeamDialog } from "./TeamDialog";
 import { TeamMemberDialog } from "./TeamMemberDialog";
 import { useTeamStore } from "../../stores/teamStore";
-import { useTeamMemberStore } from "../../stores/teamMemberStore";
-import { useUserCompanyStore } from "../../stores/userCompanyStore";
+import { useGlobalStore } from "../../stores/globalStore";
 
 export function TeamList() {
 	const [searchTerm, setSearchTerm] = React.useState("");
@@ -30,14 +29,13 @@ export function TeamList() {
 	const [expandedTeamId, setExpandedTeamId] = React.useState(null);
 
 	const { teams, removeTeam, loading, error, fetchTeams } = useTeamStore();
-	const { getActiveCompany } = useUserCompanyStore();
-	const activeCompany = getActiveCompany();
+	const { activeCompanyId } = useGlobalStore.getState();
 
 	useEffect(() => {
-		if (activeCompany?.id) {
-			fetchTeams(activeCompany.id);
+		if (activeCompanyId) {
+			fetchTeams(activeCompanyId);
 		}
-	}, [activeCompany?.id, fetchTeams]);
+	}, [activeCompanyId, fetchTeams]);
 
 	const filteredTeams =
 		teams?.filter(
@@ -79,7 +77,7 @@ export function TeamList() {
 		}
 	};
 
-	if (!activeCompany) {
+	if (!activeCompanyId) {
 		return (
 			<Alert severity='warning' sx={{ mt: 2 }}>
 				Please select a company to manage teams

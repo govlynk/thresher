@@ -37,8 +37,8 @@ const initialFormState = {
 
 export function TodoDialog({ open, onClose, editTodo = null }) {
 	const { activeUserData } = useGlobalStore();
-	const { todos, addTodo, updateTodo } = useTodoStore();
 	const { teams } = useTeamStore();
+	const { todos, addTodo, updateTodo } = useTodoStore();
 	const selectedTeamId = useTeamTodoStore((state) => state.selectedTeamId);
 	const [tagInput, setTagInput] = useState("");
 	const [formData, setFormData] = useState(initialFormState);
@@ -71,7 +71,7 @@ export function TodoDialog({ open, onClose, editTodo = null }) {
 			setFormData({
 				...initialFormState,
 				position: maxPosition + 1,
-				assigneeId: user?.sub,
+				assigneeId: activeUserData?.userId,
 				teamId: selectedTeamId === "all" ? teams[0]?.id || "" : selectedTeamId,
 			});
 		}
@@ -90,7 +90,7 @@ export function TodoDialog({ open, onClose, editTodo = null }) {
 			setError("Due date is required");
 			return false;
 		}
-		if (!user?.sub) {
+		if (!activeUserData?.userId) {
 			setError("User information is missing. Please sign in again.");
 			return false;
 		}

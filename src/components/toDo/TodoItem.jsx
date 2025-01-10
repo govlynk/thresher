@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Box, Paper, Typography, IconButton, Chip, useTheme } from "@mui/material";
-import { Trash2, GripVertical, Calendar, AlertCircle, Edit, Tag, Users } from "lucide-react";
+import { Box, Paper, Typography, IconButton, Chip, useTheme, Collapse } from "@mui/material";
+import { Trash2, GripVertical, Calendar, AlertCircle, Edit, Tag, Users, ChevronDown, ChevronUp, Repeat2 } from "lucide-react";
 import { useTodoStore } from "../../stores/todoStore";
+import { formatDate } from "../../utils/formatters";
 
 const getPriorityColors = (mode) => ({
   LOW: {
@@ -23,6 +24,7 @@ const getPriorityColors = (mode) => ({
 export function TodoItem({ todo, onEdit, isDragging, teamName }) {
   const theme = useTheme();
   const { removeTodo } = useTodoStore();
+  const [expanded, setExpanded] = useState(false);
   const tags = Array.isArray(todo.tags) ? todo.tags : [];
   const priorityColors = getPriorityColors(theme.palette.mode);
 
@@ -61,13 +63,23 @@ export function TodoItem({ todo, onEdit, isDragging, teamName }) {
         </Box>
 
         <Box sx={{ flexGrow: 1 }}>
+          {/* Summary View */}
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-            <Typography variant='subtitle1' sx={{ fontWeight: 500, color: "text.primary" }}>
-              {todo.title}
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 500, color: "text.primary" }}>
+                {todo.title}
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => setExpanded(!expanded)}
+                sx={{ ml: 1 }}
+              >
+                {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </IconButton>
+            </Box>
             <Box sx={{ display: "flex", gap: 0.5 }}>
               <IconButton
-                size='small'
+                size="small"
                 onClick={() => onEdit?.(todo)}
                 sx={{
                   transition: "all 0.2s ease",
@@ -81,7 +93,7 @@ export function TodoItem({ todo, onEdit, isDragging, teamName }) {
                 <Edit size={18} />
               </IconButton>
               <IconButton
-                size='small'
+                size="small"
                 onClick={() => !isDragging && removeTodo(todo.id)}
                 sx={{
                   transition: "all 0.2s ease",
@@ -96,50 +108,12 @@ export function TodoItem({ todo, onEdit, isDragging, teamName }) {
             </Box>
           </Box>
 
-          <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
-            {todo.description}
-          </Typography>
-
-          {teamName && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <Users size={14} />
-              <Typography variant='caption' color='text.secondary'>
-                {teamName}
-              </Typography>
-            </Box>
-          )}
-
-          {tags.length > 0 && (
-            <Box sx={{ display: "flex", gap: 0.5, mb: 2, flexWrap: "wrap" }}>
-              {tags.map((tag, index) => (
-                <Chip
-                  key={`${tag}-${index}`}
-                  icon={<Tag size={14} />}
-                  label={tag}
-                  size='small'
-                  sx={{
-                    borderRadius: "4px",
-                    bgcolor: theme.palette.mode === "dark" ? "rgba(156, 39, 176, 0.15)" : "secondary.50",
-                    color: theme.palette.mode === "dark" ? "#ce93d8" : "secondary.main",
-                    border: "none",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      bgcolor: theme.palette.mode === "dark" ? "rgba(156, 39, 176, 0.25)" : "secondary.100",
-                    },
-                    "& .MuiChip-icon": {
-                      color: "inherit",
-                    },
-                  }}
-                />
-              ))}
-            </Box>
-          )}
-
-          <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+          {/* Priority and Due Date */}
+          <Box sx={{ display: "flex", gap: 1, mb: expanded ? 2 : 0 }}>
             <Chip
               icon={<AlertCircle size={14} />}
               label={todo.priority}
-              size='small'
+              size="small"
               sx={{
                 ...priorityColors[todo.priority],
                 transition: "all 0.2s ease",
@@ -155,7 +129,7 @@ export function TodoItem({ todo, onEdit, isDragging, teamName }) {
             <Chip
               icon={<Calendar size={14} />}
               label={`${daysUntilDue} days left`}
-              size='small'
+              size="small"
               sx={{
                 bgcolor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "grey.100",
                 color: theme.palette.mode === "dark" ? "grey.300" : "text.secondary",
@@ -169,24 +143,77 @@ export function TodoItem({ todo, onEdit, isDragging, teamName }) {
                 },
               }}
             />
+
+            {todo.sprintId && (
+              <Chip
+                icon={<Sprint size={14} />}
+                label={`Sprint`}
+                size="small"
+                color="primary"
+                variant="outlined"
+              />
+            )}
           </Box>
 
-          {todo.estimatedEffort > 0 && (
-            <Typography
-              variant='caption'
-              sx={{
-                display: "block",
-                mb: 1,
-                color: theme.palette.mode === "dark" ? "grey.400" : "text.secondary",
-                transition: "color 0.2s ease",
-                "&:hover": {
-                  color: theme.palette.mode === "dark" ? "grey.300" : "text.primary",
-                },
-              }}
-            >
-              Effort: {todo.actualEffort || 0}/{todo.estimatedEffort} hours
-            </Typography>
-          )}
+          {/* Expanded Details */}
+          <Collapse in={expanded}>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {todo.description}
+              </Typography>
+
+              {teamName && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Users size={14} />
+                  <Typography variant="caption" color="text.secondary">
+                    {teamName}
+                  </Typography>
+                </Box>
+              )}
+
+              {tags.length > 0 && (
+                <Box sx={{ display: "flex", gap: 0.5, mb: 2, flexWrap: "wrap" }}>
+                  {tags.map((tag, index) => (
+                    <Chip
+                      key={`${tag}-${index}`}
+                      icon={<Tag size={14} />}
+                      label={tag}
+                      size="small"
+                      sx={{
+                        borderRadius: "4px",
+                        bgcolor: theme.palette.mode === "dark" ? "rgba(156, 39, 176, 0.15)" : "secondary.50",
+                        color: theme.palette.mode === "dark" ? "#ce93d8" : "secondary.main",
+                        border: "none",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          bgcolor: theme.palette.mode === "dark" ? "rgba(156, 39, 176, 0.25)" : "secondary.100",
+                        },
+                        "& .MuiChip-icon": {
+                          color: "inherit",
+                        },
+                      }}
+                    />
+                  ))}
+                </Box>
+              )}
+
+              {todo.estimatedEffort > 0 && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: "block",
+                    color: theme.palette.mode === "dark" ? "grey.400" : "text.secondary",
+                    transition: "color 0.2s ease",
+                    "&:hover": {
+                      color: theme.palette.mode === "dark" ? "grey.300" : "text.primary",
+                    },
+                  }}
+                >
+                  Effort: {todo.actualEffort || 0}/{todo.estimatedEffort} hours
+                </Typography>
+              )}
+            </Box>
+          </Collapse>
         </Box>
       </Box>
     </Paper>

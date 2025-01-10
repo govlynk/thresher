@@ -17,20 +17,19 @@ import {
 import { UserPlus, Edit, Trash2 } from "lucide-react";
 import { ContactDialog } from "../components/contacts/ContactDialog";
 import { useContactStore } from "../stores/contactStore";
-import { useUserCompanyStore } from "../stores/userCompanyStore";
+import { useGlobalStore } from "../stores/globalStore";
 
 export default function ContactsScreen() {
 	const { contacts, fetchContacts, loading, error, removeContact } = useContactStore();
-	const { getActiveCompany } = useUserCompanyStore();
-	const activeCompany = getActiveCompany();
+	const { activeCompanyId } = useGlobalStore.getState();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editContact, setEditContact] = useState(null);
 
 	useEffect(() => {
-		if (activeCompany?.id) {
-			fetchContacts(activeCompany.id);
+		if (activeCompanyId) {
+			fetchContacts(activeCompanyId);
 		}
-	}, [activeCompany?.id, fetchContacts]);
+	}, [activeCompanyId, fetchContacts]);
 
 	const handleAddContact = () => {
 		setEditContact(null);
@@ -52,7 +51,7 @@ export default function ContactsScreen() {
 		}
 	};
 
-	if (!activeCompany) {
+	if (!activeCompanyId) {
 		return (
 			<Box sx={{ p: 3 }}>
 				<Alert severity='warning'>Please select a company to manage contacts</Alert>

@@ -86,6 +86,14 @@ const salesLinks = {
 			title: "Pipeline",
 			path: "/pipeline",
 		},
+		{
+			title: "Sprints",
+			path: "/sprints",
+		},
+		{
+			title: "Calendar",
+			path: "/calendar",
+		},
 	],
 };
 

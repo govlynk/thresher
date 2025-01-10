@@ -13,11 +13,13 @@ const LoadingScreen = () => (
 );
 
 // Lazy loaded components
+const SprintScreen = lazy(() => import("../../screens/SprintScreen")); // Add Sprint Screen
 const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
 
 //Sales
 const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen"));
 const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
+const CalendarScreen = lazy(() => import("../../screens/CalendarScreen"));
 //Market Positioning
 const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
 const PastPerformanceScreen = lazy(() => import("../../screens/PastPerformanceScreen"));
@@ -68,6 +70,14 @@ const AppRouter = ({ signOut }) => {
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<TodoScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='sprints'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<SprintScreen />
 						</Suspense>
 					}
 				/>
@@ -122,6 +132,14 @@ const AppRouter = ({ signOut }) => {
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<PipelineScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='calendar'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<CalendarScreen />
 						</Suspense>
 					}
 				/>

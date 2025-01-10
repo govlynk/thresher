@@ -120,7 +120,6 @@ const schema = a.schema({
 			company: a.belongsTo("Company", "companyId"),
 			members: a.hasMany("TeamMember", "teamId"),
 			opportunities: a.hasMany("Opportunity", "teamId"),
-			sprints: a.hasMany("Sprint", "teamId"),
 			todos: a.hasMany("Todo", "teamId"),
 		})
 		.authorization((allow) => [
@@ -134,7 +133,6 @@ const schema = a.schema({
 			teamId: a.string().required(),
 			contactId: a.string().required(),
 			role: a.enum(COMPANY_ROLES),
-			workload: a.integer(),
 			team: a.belongsTo("Team", "teamId"),
 			contact: a.belongsTo("Contact", "contactId"),
 		})

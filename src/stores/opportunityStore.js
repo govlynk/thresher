@@ -18,7 +18,7 @@ export const useOpportunityStore = create((set, get) => ({
 	subscription: null,
 
 	initializeStore: async () => {
-		const { activeCompanyId, activeUserId, activeTeamId } = useGlobalStore.getState();
+		const { activeCompanyId } = useGlobalStore.getState();
 
 		if (!activeCompanyId) {
 			set({
