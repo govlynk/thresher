@@ -134,6 +134,7 @@ const schema = a.schema({
 			teamId: a.string().required(),
 			contactId: a.string().required(),
 			role: a.enum(COMPANY_ROLES),
+			workload: a.integer(),
 			team: a.belongsTo("Team", "teamId"),
 			contact: a.belongsTo("Contact", "contactId"),
 		})
