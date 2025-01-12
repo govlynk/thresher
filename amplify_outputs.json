@@ -932,8 +932,8 @@
                 ]
               }
             },
-            "sprints": {
-              "name": "sprints",
+            "sprint": {
+              "name": "sprint",
               "isArray": true,
               "type": {
                 "model": "Sprint"
