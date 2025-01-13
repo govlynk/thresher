@@ -1,63 +1,49 @@
-import { get } from "@aws-amplify/api";
-import { fetchAuthSession } from "@aws-amplify/auth";
+import axios from "axios";
 
 const sanitizeData = (data) => {
 	if (!data) return null;
+
+	// Convert data to plain object, removing any Symbol or non-serializable content
 	return JSON.parse(JSON.stringify(data));
 };
 
 export async function getEntity(uei) {
-	try {
-		const session = await fetchAuthSession();
-		const response = await get({
-			apiName: "samApi",
-			path: "/",
-			options: {
-				queryParams: {
-					uei,
-					action: "entity",
-				},
-				headers: {
-					Authorization: `Bearer ${session.tokens?.accessToken.toString()}`,
-				},
-			},
-		});
+	const api_key = `&api_key=${import.meta.env.VITE_SAM_API_KEY}`;
+	const url = "https://api.sam.gov/entity-information/v3/entities?" + api_key + `&ueiSAM=${uei}`;
 
-		if (!response.body) {
+	try {
+		const response = await axios.get(url);
+		if (response.status !== 200) {
 			throw new Error("Network response was not ok");
 		}
-
-		return sanitizeData(response.body);
+		console.log(response);
+		// Sanitize the data before returning
+		const sanitizedData = sanitizeData(response.data.entityData[0]);
+		return sanitizedData;
 	} catch (error) {
+		// Ensure error is serializable
 		const serializedError = new Error(error.message || "Failed to fetch entity data");
 		throw serializedError;
 	}
 }
 
 export async function getRepsAndCerts(uei) {
-	try {
-		const session = await fetchAuthSession();
-		const response = await get({
-			apiName: "samApi",
-			path: "/",
-			options: {
-				queryParams: {
-					uei,
-					action: "repsAndCerts",
-				},
-				headers: {
-					Authorization: `Bearer ${session.tokens?.accessToken.toString()}`,
-				},
-			},
-		});
+	const api_key = `&api_key=${import.meta.env.VITE_SAM_API_KEY}`;
+	const url =
+		"https://api.sam.gov/entity-information/v3/entities?" + api_key + `&ueiSAM=${uei}&includeSections=repsAndCerts`;
 
-		if (!response.body) {
+	try {
+		const response = await axios.get(url);
+		if (response.status !== 200) {
 			throw new Error("Network response was not ok");
 		}
-
-		return sanitizeData(response.body);
+		console.log("Reps and Cert", response.data.entityData[0].repsAndCerts);
+		// Sanitize the data before returning
+		const sanitizedData = sanitizeData(response.data.entityData[0].repsAndCerts);
+		return sanitizedData;
 	} catch (error) {
-		const serializedError = new Error(error.message || "Failed to fetch reps and certs data");
+		// Ensure error is serializable
+		const serializedError = new Error(error.message || "Failed to fetch entity data");
 		throw serializedError;
 	}
 }
