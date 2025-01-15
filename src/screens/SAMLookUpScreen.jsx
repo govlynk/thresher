@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { Building2, MapPin, Phone, Mail, Globe, Calendar, FileText, Award } from "lucide-react";
 import { getEntity } from "../utils/samApi";
-import { formatCompanyData } from "../utils/companyDataMapper";
+import { formatCompanyData } from "../utils/companyDataMapper.js";
 
 const InfoSection = ({ title, icon: Icon, children }) => {
 	const theme = useTheme();

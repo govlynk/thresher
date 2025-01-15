@@ -1,6 +1,6 @@
 import { generateClient } from "aws-amplify/data";
 import { getEntity } from "./samApi";
-import { formatCompanyData } from "../companyDataMapper";
+import { formatCompanyData } from "../companyDataMapper.js";
 import { initializeCompanyData } from "../setupUtils";
 
 const client = generateClient();

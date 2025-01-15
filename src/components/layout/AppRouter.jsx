@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { lazy, Suspense, memo } from "react";
+import { lazy, Suspense, useMemo, memo } from "react";
 import { Box, CircularProgress } from "@mui/material";
 import { useGlobalStore } from "../../stores/globalStore";
 import MainLayout from "../layout/MainLayout";
@@ -45,14 +45,17 @@ const TestScreen = lazy(() => import("../../screens/TestScreen"));
 
 const ProtectedRoute = ({ children, requiredGroups }) => {
 	const { activeUserData } = useGlobalStore();
-
+	console.log("Active User Data", activeUserData);
+	console.log("Required Groups", requiredGroups);
 	// Memoize access check
 	const isAllowed = useMemo(() => {
+		console.log("Required Groups", requiredGroups, activeUserData?.groups);
 		if (!requiredGroups || !activeUserData?.groups) return false;
 		return requiredGroups.some((requiredGroup) => activeUserData.groups.includes(requiredGroup));
 	}, [requiredGroups, activeUserData?.groups]);
 
 	if (!isAllowed) {
+		console.log("Not Authorized", requiredGroups);
 		return <Navigate to='/' />;
 	}
 	return children;
@@ -60,7 +63,6 @@ const ProtectedRoute = ({ children, requiredGroups }) => {
 
 const AppRouter = ({ signOut }) => {
 	const { activeUserData } = useGlobalStore();
-	const isGovLynkAdmin = activeUserData?.isGovLynk;
 
 	return (
 		<Routes>
@@ -216,7 +218,7 @@ const AppRouter = ({ signOut }) => {
 				<Route
 					path='client-setup'
 					element={
-						<ProtectedRoute isAllowed={["GOVLYNK_ADMIN"]}>
+						<ProtectedRoute requiredGroups={["GOVLYNK_ADMIN", "COMPANY_ADMIN"]}>
 							<Suspense fallback={<LoadingScreen />}>
 								<ClientSetupScreen />
 							</Suspense>
@@ -227,7 +229,7 @@ const AppRouter = ({ signOut }) => {
 				<Route
 					path='user-admin'
 					element={
-						<ProtectedRoute isAllowed={["GOVLYNK_ADMIN"]}>
+						<ProtectedRoute requiredGroups={["GOVLYNK_ADMIN", "COMPANY_ADMIN"]}>
 							<Suspense fallback={<LoadingScreen />}>
 								<UserScreen />
 							</Suspense>
@@ -238,7 +240,7 @@ const AppRouter = ({ signOut }) => {
 				<Route
 					path='test'
 					element={
-						<ProtectedRoute isAllowed={["COMPANY_ADMIN"]}>
+						<ProtectedRoute requiredGroups={["GOVLYNK_ADMIN", "COMPANY_ADMIN"]}>
 							<Suspense fallback={<LoadingScreen />}>
 								<TestScreen />
 							</Suspense>

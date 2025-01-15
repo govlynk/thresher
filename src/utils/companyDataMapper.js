@@ -1,4 +1,4 @@
-import { formatUrl } from "./formatters";
+import { formatUrl } from "./formatters.js";
 
 export const mapAddressData = (addressData, prefix = "") => {
 	if (!addressData) return {};

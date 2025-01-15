@@ -3,7 +3,7 @@ import { Box, TextField, Button, Typography, Paper, useTheme, CircularProgress, 
 import { Search, ArrowRight, Building2 } from "lucide-react";
 import { getEntity } from "../../utils/sam/samApi";
 import { useSetupWorkflowStore } from "../../stores/setupWorkflowStore";
-import { formatCompanyData } from "../../utils/companyDataMapper";
+import { formatCompanyData } from "../../utils/companyDataMapper.js";
 
 export function CompanySearchStep() {
 	const [selectedCompany, setSelectedCompany] = useState(null);
