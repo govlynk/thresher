@@ -4,25 +4,25 @@ export const storage = defineStorage({
 	name: "govlynkWorkDrive",
 	access: (allow) => ({
 		// Allow listing bucket contents and company directories
-		"": [
+		"*": [
 			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN", "GOVLYNK_USER", "COMPANY_USER"]).to(["list"]),
 			allow.entity("identity").to(["list"]),
 		],
-		"company/": [
+		"company/*": [
 			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN", "GOVLYNK_USER", "COMPANY_USER"]).to(["list"]),
 			allow.entity("identity").to(["list"]),
 		],
-		"company/{company_id}/": [
+		"company/{company_id}/*": [
 			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN", "GOVLYNK_USER", "COMPANY_USER"]).to(["list"]),
 			allow.entity("identity").to(["list"]),
 		],
 
 		// Company root directory
-		"company/{company_id}/*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
-			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["read"]), // Add read permissions for user groups
-			allow.entity("identity").to(["read"]),
-		],
+		// "company/{company_id}/": [
+		// 	allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
+		// 	allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["read"]), // Add read permissions for user groups
+		// 	allow.entity("identity").to(["read"]),
+		// ],
 
 		// Documents subdirectory
 		"company/{company_id}/documents/*": [
