@@ -5,10 +5,6 @@ export const storage = defineStorage({
 	access: (allow) => ({
 		// Allow listing bucket contents and company directories
 
-		"company/*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN", "GOVLYNK_USER", "COMPANY_USER"]).to(["list"]),
-			allow.entity("identity").to(["list"]),
-		],
 		"company/{company_id}/*": [
 			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN", "GOVLYNK_USER", "COMPANY_USER"]).to(["list"]),
 			allow.entity("identity").to(["list"]),
