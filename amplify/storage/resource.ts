@@ -1,5 +1,6 @@
 import { defineStorage } from "@aws-amplify/backend";
 
+// FIxing config issues
 export const storage = defineStorage({
 	name: "govlynkWorkDrive",
 	access: (allow) => ({
