@@ -4,7 +4,7 @@ export const storage = defineStorage({
 	name: "govlynkWorkDrive",
 	access: (allow) => ({
 		// Allow listing bucket contents and company directories
-		"/*": [
+		"*": [
 			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN", "GOVLYNK_USER", "COMPANY_USER"]).to(["list"]),
 			allow.entity("identity").to(["list"]),
 		],
