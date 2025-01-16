@@ -9,6 +9,7 @@ const sanitizeData = (data) => {
 
 export async function getEntity(uei) {
 	const api_key = `&api_key=${import.meta.env.VITE_SAM_API_KEY}`;
+	console.log(api_key);
 	const url = "https://api.sam.gov/entity-information/v3/entities?" + api_key + `&ueiSAM=${uei}`;
 
 	try {

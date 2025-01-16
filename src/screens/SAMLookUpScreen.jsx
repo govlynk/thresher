@@ -15,7 +15,7 @@ import {
 	CircularProgress,
 } from "@mui/material";
 import { Building2, MapPin, Phone, Mail, Globe, Calendar, FileText, Award } from "lucide-react";
-import { getEntity } from "../utils/samApi";
+import { getEntity } from "../utils/sam/samApi";
 import { formatCompanyData } from "../utils/companyDataMapper.js";
 
 const InfoSection = ({ title, icon: Icon, children }) => {
