@@ -21,7 +21,17 @@ const client = generateClient({
 	authMode: "userPool",
 });
 
-const ROLES = ["EXECUTIVE", "SALES", "CUSTOMER_SERVICE", "MARKETING", "FINANCE", "LEGAL", "CONTRACTS", "ENGINEERING"];
+const ROLES = [
+	"Decision Maker",
+	"Business Development",
+	"Sales",
+	"Marketing",
+	"Finance",
+	"Engineering",
+	"Contracts",
+	"SME",
+	"Other",
+];
 
 const initialFormState = {
 	firstName: "",

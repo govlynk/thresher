@@ -21,18 +21,14 @@ const client = generateClient({
 });
 
 const ROLES = [
-	"Executive",
+	"Decision Maker",
+	"Business Development",
 	"Sales",
 	"Marketing",
 	"Finance",
-	"Risk",
-	"Technology",
 	"Engineering",
-	"Operations",
-	"HumanResources",
-	"Legal",
-	"Contracting",
-	"Servicing",
+	"Contracts",
+	"SME",
 	"Other",
 ];
 

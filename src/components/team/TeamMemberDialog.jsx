@@ -27,18 +27,14 @@ import { useContactStore } from "../../stores/contactStore";
 import { useTeamMemberStore } from "../../stores/teamMemberStore";
 
 const ROLES = [
-	"Executive",
+	"Decision Maker",
+	"Business Development",
 	"Sales",
 	"Marketing",
 	"Finance",
-	"Risk",
-	"Technology",
 	"Engineering",
-	"Operations",
-	"HumanResources",
-	"Legal",
-	"Contracting",
-	"Servicing",
+	"Contracts",
+	"SME",
 	"Other",
 ];
 

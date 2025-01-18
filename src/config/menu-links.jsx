@@ -24,8 +24,12 @@ const profileLinks = {
 	icon: Users,
 	links: [
 		{
-			title: "Maturity Assessment",
-			path: "/maturity",
+			title: "Experience",
+			path: "/experience",
+		},
+		{
+			title: "Certifications",
+			path: "/certification",
 		},
 		{
 			title: "SAM Registration",
@@ -38,6 +42,26 @@ const profileLinks = {
 	],
 };
 
+const strategyLinks = {
+	id: "strategy",
+	title: "Strategic Positioning",
+	icon: Users,
+	links: [
+		{
+			title: "Maturity Assessment",
+			path: "/maturity",
+		},
+		{
+			title: "Strategic Positioning",
+			path: "/strategy",
+		},
+		{
+			title: "SWOT",
+			path: "/swot",
+		},
+	],
+};
+
 // Group related menu items
 const marketIntelligenceLinks = {
 	id: "market",
@@ -45,8 +69,16 @@ const marketIntelligenceLinks = {
 	icon: Briefcase,
 	links: [
 		{
-			title: "Spending Analysis",
+			title: "Spending Dashboard",
 			path: "/spending-analysis",
+		},
+		{
+			title: "Spending Analysis by NAICS",
+			path: "/spending-analysis-naics",
+		},
+		{
+			title: "Agency Analysis",
+			path: "/agency-analysis",
 		},
 	],
 };
@@ -58,16 +90,33 @@ const marketPositioningLinks = {
 	icon: PieChart,
 	links: [
 		{
-			title: "Strategic Positioning",
-			path: "/strategy",
+			title: "Competitor Analysis",
+			path: "/Competitor-analysis",
 		},
 		{
-			title: "Experience",
-			path: "/experience",
+			title: "Agency Analysis",
+			path: "/agency-analysis",
+		},
+	],
+};
+
+// Group related menu items
+const productLinks = {
+	id: "product",
+	title: "Product Positioning",
+	icon: PieChart,
+	links: [
+		{
+			title: "Product/Service",
+			path: "/product",
 		},
 		{
-			title: "Certifications",
-			path: "/certification",
+			title: "Cost Breakdown",
+			path: "/competitive-pricing",
+		},
+		{
+			title: "Profit Margin Analysis",
+			path: "/profit-margin",
 		},
 	],
 };
@@ -83,16 +132,28 @@ const salesLinks = {
 			path: "/opportunities",
 		},
 		{
+			title: "Qualification",
+			path: "/qualification",
+		},
+		{
 			title: "Pipeline",
 			path: "/pipeline",
 		},
+	],
+};
+
+const postAwardLinks = {
+	id: "postAward",
+	title: "Post Award",
+	icon: Medal,
+	links: [
 		{
-			title: "Sprints",
-			path: "/sprints",
+			title: "KPIs",
+			path: "/kpi",
 		},
 		{
-			title: "Calendar",
-			path: "/calendar",
+			title: "Compliance",
+			path: "/compliance",
 		},
 	],
 };
@@ -126,6 +187,10 @@ const administrationLinks = {
 		{
 			title: "Manage Users",
 			path: "/user-admin",
+		},
+		{
+			title: "Sprints",
+			path: "/sprints",
 		},
 	],
 };
@@ -164,9 +229,13 @@ export const menuLinks = [
 		icon: Home,
 		links: [
 			{
-				title: "Dashboard",
-				path: "/dashboard",
+				title: "Calendar",
+				path: "/calendar",
 			},
+			// {
+			// 	title: "Dashboard",
+			// 	path: "/dashboard",
+			// },
 			{
 				title: "To Do",
 				path: "/todos",
@@ -175,9 +244,12 @@ export const menuLinks = [
 	},
 
 	profileLinks,
-	marketPositioningLinks,
+	strategyLinks,
 	marketIntelligenceLinks,
+	marketPositioningLinks,
+	productLinks,
 	salesLinks,
+	postAwardLinks,
 	regulationLinks,
 	administrationLinks,
 	systemLinks,

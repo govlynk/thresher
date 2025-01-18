@@ -3,18 +3,14 @@ import { type DefaultAuthorizationMode } from "@aws-amplify/backend-data";
 // add settings table
 
 const COMPANY_ROLES = [
-	"Executive",
+	"Decision Maker",
+	"Business Development",
 	"Sales",
 	"Marketing",
 	"Finance",
-	"Risk",
-	"Technology",
 	"Engineering",
-	"Operations",
-	"HumanResources",
-	"Legal",
-	"Contracting",
-	"Servicing",
+	"Contracts",
+	"SME",
 	"Other",
 ] as const;
 
