@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Box } from "@mui/material";
-import SwotAnalysis from "../components/marketPositioning/SwotAnalysis";
+import SwotAnalysis from "../components/swot/SwotAnalysis";
 import { useGlobalStore } from "../stores/globalStore";
 
 export default function SwotScreen() {
