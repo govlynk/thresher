@@ -43,7 +43,7 @@ const SwotSection = ({ title, items = [], onAdd, onRemove, color }) => (
 		</Box>
 
 		<Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-			{items.map((item, index) => (
+			{(items || []).map((item, index) => (
 				<Chip
 					key={index}
 					label={item}
@@ -73,7 +73,7 @@ export default function SwotAnalysis() {
 
 	const handleAdd = (section) => (item) => {
 		const updatedData = {
-			...swotData,
+			...(swotData || {}),
 			companyId: activeCompanyId,
 			[section]: [...(swotData?.[section] || []), item],
 		};
@@ -82,7 +82,7 @@ export default function SwotAnalysis() {
 
 	const handleRemove = (section) => (index) => {
 		const updatedData = {
-			...swotData,
+			...(swotData || {}),
 			companyId: activeCompanyId,
 			[section]: (swotData?.[section] || []).filter((_, i) => i !== index),
 		};
@@ -127,7 +127,7 @@ export default function SwotAnalysis() {
 				<Grid item xs={12} md={6}>
 					<SwotSection
 						title='Strengths'
-						items={swotData?.strengths}
+						items={swotData?.strengths || []}
 						onAdd={handleAdd("strengths")}
 						onRemove={handleRemove("strengths")}
 						color='success.main'
@@ -137,7 +137,7 @@ export default function SwotAnalysis() {
 				<Grid item xs={12} md={6}>
 					<SwotSection
 						title='Weaknesses'
-						items={swotData?.weaknesses}
+						items={swotData?.weaknesses || []}
 						onAdd={handleAdd("weaknesses")}
 						onRemove={handleRemove("weaknesses")}
 						color='error.main'
@@ -147,7 +147,7 @@ export default function SwotAnalysis() {
 				<Grid item xs={12} md={6}>
 					<SwotSection
 						title='Opportunities'
-						items={swotData?.opportunities}
+						items={swotData?.opportunities || []}
 						onAdd={handleAdd("opportunities")}
 						onRemove={handleRemove("opportunities")}
 						color='primary.main'
@@ -157,7 +157,7 @@ export default function SwotAnalysis() {
 				<Grid item xs={12} md={6}>
 					<SwotSection
 						title='Threats'
-						items={swotData?.threats}
+						items={swotData?.threats || []}
 						onAdd={handleAdd("threats")}
 						onRemove={handleRemove("threats")}
 						color='warning.main'
