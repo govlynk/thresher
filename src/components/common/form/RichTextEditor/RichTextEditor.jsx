@@ -32,26 +32,21 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 200, 
 		[setEditorState]
 	);
 
-	const handleFocus = useCallback(() => {
-		if (!readOnly && editorState) {
-			const selection = editorState.getSelection();
-			const content = editorState.getCurrentContent();
-			const blockMap = content.getBlockMap();
-			const key = selection.getStartKey();
-			const offset = selection.getStartOffset();
+	const handleFocus = useCallback(
+		(e) => {
+			e.stopPropagation();
+			if (readOnly) return;
+		},
+		[readOnly]
+	);
 
-			const newSelection = selection.merge({
-				anchorKey: key,
-				anchorOffset: offset,
-				focusKey: key,
-				focusOffset: offset,
-				hasFocus: true,
-			});
-
-			const newEditorState = EditorState.forceSelection(editorState, newSelection);
-			setEditorState(newEditorState);
-		}
-	}, [editorState, readOnly, setEditorState]);
+	const handleClick = useCallback(
+		(e) => {
+			e.stopPropagation();
+			if (readOnly) return;
+		},
+		[readOnly]
+	);
 
 	// Return null if no valid editorState
 	if (!editorState) return null;
@@ -71,6 +66,7 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 200, 
 				sx={{
 					minHeight,
 					padding: 2,
+					userSelect: "text",
 					cursor: readOnly ? "default" : "text",
 					"& .DraftEditor-root": {
 						height: "100%",
@@ -84,12 +80,14 @@ export function RichTextEditor({ value, onChange, placeholder, minHeight = 200, 
 						minHeight: minHeight - 32,
 					},
 				}}
-				onClick={handleFocus}
+				onClick={handleClick}
 			>
 				<Editor
 					editorState={editorState}
 					onChange={setEditorState}
 					placeholder={placeholder}
+					onFocus={handleFocus}
+					onSelect={() => {}}
 					readOnly={readOnly}
 					handleKeyCommand={handleKeyCommand}
 					spellCheck={true}

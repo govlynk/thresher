@@ -1,14 +1,14 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { Container, Box, Typography, Alert, CircularProgress } from "@mui/material";
 import StrategicPositioningForm from "../components/marketPositioning/StrategicPositioningForm";
 import { ErrorBoundary } from "../components/common/ErrorBoundary";
 import { useGlobalStore } from "../stores/globalStore";
 
 export function StrategicPositioiningScreen() {
-	const { activeCompanyId, loading } = useGlobalStore();
+	const activeCompanyId = useGlobalStore((state) => state.activeCompanyId);
+	const loading = useGlobalStore((state) => state.loading);
 
 	if (!activeCompanyId) {
-		console.error("No active company selected", activeCompanyId);
 		return (
 			<Container>
 				<Box sx={{ p: 3 }}>
@@ -33,11 +33,7 @@ export function StrategicPositioiningScreen() {
 					Strategic Positioning
 				</Typography>
 
-				<ErrorBoundary>
-					<Suspense fallback={<CircularProgress />}>
-						<StrategicPositioningForm />
-					</Suspense>
-				</ErrorBoundary>
+				<StrategicPositioningForm />
 			</Box>
 		</Container>
 	);

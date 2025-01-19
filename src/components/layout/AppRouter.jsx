@@ -25,7 +25,7 @@ const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysis
 const PastPerformanceScreen = lazy(() => import("../../screens/PastPerformanceScreen"));
 const CertificationScreen = lazy(() => import("../../screens/CertificationScreen"));
 //Profile
-const StrategicPositioiningScreen = lazy(() => import("../../screens/StrategicPositioiningScreen"));
+const StrategicPositioningScreen = lazy(() => import("../../screens/StrategicPositioningScreen"));
 const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
 const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
 
@@ -89,7 +89,7 @@ const AppRouter = ({ signOut }) => {
 					path='strategy'
 					element={
 						<Suspense fallback={<LoadingScreen />}>
-							<StrategicPositioiningScreen />
+							<StrategicPositioningScreen />
 						</Suspense>
 					}
 				/>
