@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { generateClient } from "aws-amplify/data";
 import { getAuthSession, extractUserGroups } from "../utils/auth/sessionUtils";
+import { Contact } from "lucide-react";
 
 const client = generateClient({
 	authMode: "userPool",
@@ -52,6 +53,7 @@ export const useGlobalStore = create(
 							phone: userData.phone,
 							avatar: userData.avatar,
 							lastLogin: userData.lastLogin,
+							contactId: userData.contactId,
 
 							...authData,
 							isAuthenticated: true,

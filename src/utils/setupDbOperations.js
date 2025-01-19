@@ -1,11 +1,13 @@
 import { generateClient } from "aws-amplify/data";
 import { initializeCompanyData, initializeContactData, initializeTeamData } from "./setupUtils";
+import { useGlobalStore } from "../stores/globalStore";
 
 const client = generateClient({
 	authMode: "userPool",
 });
 
 export async function setupCompany({ companyData, contactsData, adminData, teamData }) {
+	const { activeUserData } = useGlobalStore();
 	try {
 		// 1. Create company
 		const company = await createCompany(companyData);
@@ -71,6 +73,16 @@ export async function setupCompany({ companyData, contactsData, adminData, teamD
 						userId: user.id,
 						companyId: company.id,
 						access: admin.accessLevel,
+						status: "ACTIVE",
+					});
+				}
+
+				//Add GovLynk Consultant to the company Access
+				if (!activeUserData) {
+					await client.models.UserCompanyAccess.create({
+						userId: activeUserData.UserId,
+						companyId: company.id,
+						access: "COMPANY_ADMIN",
 						status: "ACTIVE",
 					});
 				}

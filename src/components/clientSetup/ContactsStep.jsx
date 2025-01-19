@@ -2,36 +2,14 @@ import { useState, useEffect, useMemo } from "react";
 import { Box, Button, Typography, Alert } from "@mui/material";
 import { UserPlus } from "lucide-react";
 import { useSetupWorkflowStore } from "../../stores/setupWorkflowStore";
-import { useGlobalStore } from "../../stores/globalStore";
 import { ContactDialog } from "./contacts/ContactDialog";
 import { ContactsTable } from "./contacts/ContactsTable";
 
 export function ContactsStep() {
 	const { companyData, contactsData, setContactsData, nextStep, prevStep } = useSetupWorkflowStore();
-	const { activeUserData } = useGlobalStore();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editContact, setEditContact] = useState(null);
 	const [error, setError] = useState(null);
-
-	// Create contact from logged-in user data
-	const loggedInUserContact = useMemo(() => {
-		if (!activeUserData) return null;
-
-		const [firstName, ...lastNameParts] = activeUserData.name.split(" ");
-		const lastName = lastNameParts.join(" ");
-
-		return {
-			rowId: "current-user",
-			firstName,
-			lastName,
-			email: activeUserData.email,
-			phone: activeUserData.phone || "",
-			dateLastContacted: new Date().toISOString(),
-			companyId: companyData.id,
-			role: "Executive",
-			notes: "Initial contact created during company setup. Role: Company Administrator",
-		};
-	}, [activeUserData]);
 
 	// Helper function to check if two contacts are duplicates based on name
 	const isDuplicateContact = (contact1, contact2) => {
@@ -62,7 +40,7 @@ export function ContactsStep() {
 						workAddressCountryCode: companyData.shippingAddressCountryCode || "USA",
 						dateLastContacted: new Date().toISOString(),
 						companyId: companyData.id,
-						role: "Executive",
+						role: "Contracts",
 						notes: `Initial contact created during company setup. Role: Electronic Business POC`,
 				  }
 				: null;
@@ -83,7 +61,7 @@ export function ContactsStep() {
 						workAddressCountryCode: companyData.shippingAddressCountryCode || "USA",
 						dateLastContacted: new Date().toISOString(),
 						companyId: companyData.id,
-						role: "Executive",
+						role: "Contracts",
 						notes: `Initial contact created during company setup. Role: Government Business POC`,
 				  }
 				: null;
@@ -98,14 +76,9 @@ export function ContactsStep() {
 				initialContacts.push(gbContact);
 			}
 
-			// Add logged-in user contact if not already included
-			if (loggedInUserContact && !initialContacts.some((contact) => contact.email === loggedInUserContact.email)) {
-				initialContacts.push(loggedInUserContact);
-			}
-
 			setContactsData(initialContacts);
 		}
-	}, [companyData, setContactsData, loggedInUserContact]);
+	}, [companyData, setContactsData]);
 
 	const handleSaveContact = (formData) => {
 		const newContact = {
