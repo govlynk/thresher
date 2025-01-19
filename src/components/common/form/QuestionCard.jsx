@@ -3,7 +3,7 @@ import { Paper, Box, Typography, Collapse } from "@mui/material";
 import { motion } from "framer-motion";
 
 // Create motion component outside of component scope
-const MotionPaper = motion(Paper);
+const MotionPaper = motion.create(Paper);
 
 export function QuestionCard({ children, title, subtitle, expanded = true }) {
 	return (
