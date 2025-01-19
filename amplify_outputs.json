@@ -718,6 +718,22 @@
                 ]
               }
             },
+            "swot": {
+              "name": "swot",
+              "isArray": true,
+              "type": {
+                "model": "SwotAnalysis"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "companyId"
+                ]
+              }
+            },
             "federalRegulations": {
               "name": "federalRegulations",
               "isArray": true,
@@ -1063,10 +1079,8 @@
             "role": {
               "name": "role",
               "isArray": false,
-              "type": {
-                "enum": "TeamMemberRole"
-              },
-              "isRequired": false,
+              "type": "String",
+              "isRequired": true,
               "attributes": []
             },
             "workload": {
@@ -2694,6 +2708,149 @@
             "sortKeyFieldNames": []
           }
         },
+        "SwotAnalysis": {
+          "name": "SwotAnalysis",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "companyId": {
+              "name": "companyId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "strengths": {
+              "name": "strengths",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "weaknesses": {
+              "name": "weaknesses",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "opportunities": {
+              "name": "opportunities",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "threats": {
+              "name": "threats",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "lastModified": {
+              "name": "lastModified",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "company": {
+              "name": "company",
+              "isArray": false,
+              "type": {
+                "model": "Company"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "companyId"
+                ]
+              }
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "SwotAnalyses",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "provider": "userPools",
+                    "ownerField": "owner",
+                    "allow": "owner",
+                    "identityClaim": "cognito:username",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  },
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "GOVLYNK_ADMIN"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
         "Opportunity": {
           "name": "Opportunity",
           "fields": {
@@ -3506,24 +3663,6 @@
             "ACTIVE",
             "INACTIVE",
             "PENDING"
-          ]
-        },
-        "TeamMemberRole": {
-          "name": "TeamMemberRole",
-          "values": [
-            "Executive",
-            "Sales",
-            "Marketing",
-            "Finance",
-            "Risk",
-            "Technology",
-            "Engineering",
-            "Operations",
-            "HumanResources",
-            "Legal",
-            "Contracting",
-            "Servicing",
-            "Other"
           ]
         },
         "UserCompanyAccessAccess": {
