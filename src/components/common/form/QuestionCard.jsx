@@ -1,16 +1,9 @@
 import React from "react";
 import { Paper, Box, Typography, Collapse } from "@mui/material";
-import { motion } from "framer-motion";
-
-// Create motion component outside of component scope
-const MotionPaper = motion.create(Paper);
 
 export function QuestionCard({ children, title, subtitle, expanded = true }) {
 	return (
-		<MotionPaper
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.3 }}
+		<Paper
 			sx={{
 				p: 3,
 				mb: 3,
@@ -22,6 +15,6 @@ export function QuestionCard({ children, title, subtitle, expanded = true }) {
 			<Collapse in={expanded}>
 				<Box>{children}</Box>
 			</Collapse>
-		</MotionPaper>
+		</Paper>
 	);
 }
