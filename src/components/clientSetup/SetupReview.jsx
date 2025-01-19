@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import { Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useSetupWorkflowStore } from "../../stores/setupWorkflowStore";
-import { SetupReviewHeader } from "./review/SetupReviewHeader";
 import { SetupReviewContent } from "./review/SetupReviewContent";
-import { SetupReviewFooter } from "./review/SetupReviewFooter";
 import { setupCompany } from "../../utils/setupDbOperations";
 
 export function SetupReview() {
@@ -38,8 +36,6 @@ export function SetupReview() {
 
 	return (
 		<Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
-			<SetupReviewHeader />
-
 			<SetupReviewContent
 				companyData={companyData}
 				contactsData={contactsData}
@@ -47,8 +43,6 @@ export function SetupReview() {
 				teamData={teamData}
 				error={error}
 			/>
-
-			<SetupReviewFooter onComplete={handleComplete} loading={loading} />
 		</Box>
 	);
 }

@@ -20,7 +20,6 @@ export function ContactsSection({ contacts }) {
 						<DataField label='Last Name' value={contact.lastName} />
 						<DataField label='Email' value={contact.email || contact.contactEmail} />
 						<DataField label='Phone' value={contact.phone || contact.contactMobilePhone} />
-						<DataField label='Role' value={contact.role} />
 						<DataField label='Department' value={contact.department} />
 					</Box>
 

@@ -5,9 +5,11 @@ import { useUserStore } from "../../stores/userStore";
 import { useTeamStore } from "../../stores/teamStore";
 import { AdminTable } from "./admin/AdminTable";
 import { filterContactsWithEmail } from "../../utils/contactUtils";
+import { useGlobalStore } from "../../stores/globalStore";
 
 export function AdminSetupStep() {
 	const { contactsData, setAdminData, nextStep, prevStep } = useSetupWorkflowStore();
+	const { activeUserData } = useGlobalStore();
 	const { addUser } = useUserStore();
 	const { addTeamMember } = useTeamStore();
 	const [error, setError] = useState(null);
@@ -16,16 +18,20 @@ export function AdminSetupStep() {
 	// Filter contacts to only show those with email addresses
 	const contactsWithEmail = filterContactsWithEmail(contactsData);
 
+	// Initialize rows with current user's contact pre-filled
 	const [rows, setRows] = useState(
-		contactsWithEmail.map((contact) => ({
-			...contact,
-			contactId: contact.id,
-			email: contact.email || contact.contactEmail || "",
-			phone: contact.phone || contact.contactMobilePhone || "",
-			cognitoId: "",
-			accessLevel: "",
-			isAuthorized: false,
-		}))
+		contactsWithEmail.map((contact) => {
+			const isCurrentUser = contact.email === activeUserData?.email;
+			return {
+				...contact,
+				contactId: contact.id,
+				email: contact.email || contact.contactEmail || "",
+				phone: contact.phone || contact.contactMobilePhone || "",
+				cognitoId: isCurrentUser ? activeUserData.id : "",
+				accessLevel: isCurrentUser ? "COMPANY_ADMIN" : "",
+				isAuthorized: false,
+			};
+		})
 	);
 
 	const handleAuthorizeUser = async (row) => {

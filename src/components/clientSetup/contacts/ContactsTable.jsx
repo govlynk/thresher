@@ -21,7 +21,7 @@ export function ContactsTable({ contacts, onEdit, onDelete }) {
 						<TableCell>Name</TableCell>
 						<TableCell>Email</TableCell>
 						<TableCell>Phone</TableCell>
-						<TableCell>Role</TableCell>
+						<TableCell>Title</TableCell>
 						<TableCell align='right'>Actions</TableCell>
 					</TableRow>
 				</TableHead>
@@ -43,7 +43,7 @@ export function ContactsTable({ contacts, onEdit, onDelete }) {
 									</Box>
 								)}
 							</TableCell>
-							<TableCell>{contact.role || "-"}</TableCell>
+							<TableCell>{contact.title || "-"}</TableCell>
 							<TableCell align='right'>
 								<IconButton onClick={() => onEdit(contact)} size='small'>
 									<Edit size={18} />

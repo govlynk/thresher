@@ -19,22 +19,6 @@ import {
 	useTheme,
 } from "@mui/material";
 
-const ROLES = [
-	"Executive",
-	"Sales",
-	"Marketing",
-	"Finance",
-	"Risk",
-	"Technology",
-	"Engineering",
-	"Operations",
-	"HumanResources",
-	"Legal",
-	"Contracting",
-	"Servicing",
-	"Other",
-];
-
 export function ContactDialog({ open, onClose, onSave, initialData, error }) {
 	const theme = useTheme();
 	const [errors, setErrors] = useState({});
@@ -51,7 +35,6 @@ export function ContactDialog({ open, onClose, onSave, initialData, error }) {
 		workAddressStateCode: "",
 		workAddressZipCode: "",
 		workAddressCountryCode: "",
-		role: "",
 		notes: "",
 	});
 
@@ -62,8 +45,8 @@ export function ContactDialog({ open, onClose, onSave, initialData, error }) {
 				lastName: initialData.lastName || "",
 				contactEmail: initialData.email || "",
 				contactMobilePhone: initialData.phone || "",
-				title: "",
-				department: "",
+				title: initialData.title || "",
+				department: initialData.department || "",
 				workAddressStreetLine1: initialData?.workAddressStreetLine1 || "",
 				workAddressStreetLine2: initialData?.workAddressStreetLine2 || "",
 				workAddressCity: initialData?.workAddressCity || "",
@@ -87,7 +70,6 @@ export function ContactDialog({ open, onClose, onSave, initialData, error }) {
 				workAddressStateCode: "",
 				workAddressZipCode: "",
 				workAddressCountryCode: "USA",
-				role: "",
 				notes: "",
 			});
 		}
@@ -168,16 +150,6 @@ export function ContactDialog({ open, onClose, onSave, initialData, error }) {
 								Company Position
 							</Typography>
 							<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-								<FormControl fullWidth required>
-									<InputLabel>Role</InputLabel>
-									<Select name='role' value={formData.role} onChange={handleChange} label='Role'>
-										{ROLES.map((role) => (
-											<MenuItem key={role} value={role}>
-												{role}
-											</MenuItem>
-										))}
-									</Select>
-								</FormControl>
 								<TextField
 									fullWidth
 									label='Title'
