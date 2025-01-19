@@ -2,18 +2,6 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { type DefaultAuthorizationMode } from "@aws-amplify/backend-data";
 // add settings table
 
-const COMPANY_ROLES = [
-	"Decision Maker",
-	"Business Development",
-	"Sales",
-	"Marketing",
-	"Finance",
-	"Engineering",
-	"Contracts",
-	"SME",
-	"Other",
-] as const;
-
 const schema = a.schema({
 	User: a
 		.model({
@@ -129,7 +117,7 @@ const schema = a.schema({
 		.model({
 			teamId: a.string().required(),
 			contactId: a.string().required(),
-			role: a.enum(COMPANY_ROLES),
+			role: a.string().required(),
 			workload: a.integer(),
 			team: a.belongsTo("Team", "teamId"),
 			contact: a.belongsTo("Contact", "contactId"),

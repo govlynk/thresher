@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { EditorState, convertToRaw, convertFromRaw, ContentState } from "draft-js";
 
+// Helper to preserve selection
+const preserveEditorSelection = (editorState, newContentState) => {
+	const selection = editorState.getSelection();
+	const newEditorState = EditorState.createWithContent(newContentState);
+	return EditorState.forceSelection(newEditorState, selection);
+};
+
 export function useEditorState({ value, onChange, readOnly }) {
 	// Store selection state
 	const selectionRef = useRef(null);
@@ -14,12 +21,14 @@ export function useEditorState({ value, onChange, readOnly }) {
 			// Handle string value (JSON)
 			if (typeof value === "string") {
 				const content = JSON.parse(value);
-				return EditorState.createWithContent(convertFromRaw(content));
+				const contentState = convertFromRaw(content);
+				return EditorState.createWithContent(contentState);
 			}
 
 			// Handle raw content state
 			if (typeof value === "object") {
-				return EditorState.createWithContent(convertFromRaw(value));
+				const contentState = convertFromRaw(value);
+				return EditorState.createWithContent(contentState);
 			}
 
 			return EditorState.createEmpty();
@@ -42,15 +51,16 @@ export function useEditorState({ value, onChange, readOnly }) {
 				}
 
 				const content = typeof value === "string" ? JSON.parse(value) : value;
-				const newState = EditorState.createWithContent(convertFromRaw(content));
+				const contentState = convertFromRaw(content);
+				let newState;
 
 				// Restore selection if available
 				if (selectionRef.current) {
-					const stateWithSelection = EditorState.forceSelection(newState, selectionRef.current);
-					setEditorState(stateWithSelection);
+					newState = preserveEditorSelection(editorState, contentState);
 				} else {
-					setEditorState(newState);
+					newState = EditorState.createWithContent(contentState);
 				}
+				setEditorState(newState);
 			} catch (err) {
 				console.warn("Error updating editor state:", err);
 			}
@@ -61,8 +71,11 @@ export function useEditorState({ value, onChange, readOnly }) {
 	const handleEditorStateChange = (newState) => {
 		if (!newState) return;
 
-		// Store selection state
-		selectionRef.current = newState.getSelection();
+		// Update selection state
+		const selection = newState.getSelection();
+		if (selection.getHasFocus()) {
+			selectionRef.current = selection;
+		}
 
 		setEditorState(newState);
 
