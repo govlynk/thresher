@@ -72,6 +72,7 @@ export default function StrategicPositioningForm() {
 				...formData,
 				companyId: activeCompanyId,
 			});
+			return { resetStep: true };
 		} catch (err) {
 			console.error("Error submitting form:", err);
 			throw err;

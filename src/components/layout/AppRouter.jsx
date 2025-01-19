@@ -13,25 +13,31 @@ const LoadingScreen = () => (
 );
 
 // Lazy loaded components
+const CalendarScreen = lazy(() => import("../../screens/CalendarScreen"));
 const SprintScreen = lazy(() => import("../../screens/SprintScreen")); // Add Sprint Screen
 const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
+//Profile
+
+const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
+const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));
+
+//Strategic Positioning
+const SwotScreen = lazy(() => import("../../screens/SwotScreen"));
+const StrategicPositioningScreen = lazy(() => import("../../screens/StrategicPositioningScreen"));
+const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
 
 //Sales
 const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen"));
 const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
-const CalendarScreen = lazy(() => import("../../screens/CalendarScreen"));
+
 //Market Positioning
 const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
 const PastPerformanceScreen = lazy(() => import("../../screens/PastPerformanceScreen"));
 const CertificationScreen = lazy(() => import("../../screens/CertificationScreen"));
-//Profile
-const StrategicPositioningScreen = lazy(() => import("../../screens/StrategicPositioningScreen"));
-const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
-const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
 
 //Regulation
 const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
-const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));
+
 //Admin
 const ClientSetupScreen = lazy(() => import("../../screens/ClientSetupScreen"));
 const UserScreen = lazy(() => import("../../screens/UserScreen"));
@@ -93,6 +99,15 @@ const AppRouter = ({ signOut }) => {
 						</Suspense>
 					}
 				/>
+				<Route
+					path='swot'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<SwotScreen />
+						</Suspense>
+					}
+				/>
+
 				<Route
 					path='experience'
 					element={

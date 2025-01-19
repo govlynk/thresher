@@ -312,6 +312,22 @@ const schema = a.schema({
 			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
 		]),
 
+	SwotAnalysis: a
+		.model({
+			companyId: a.string().required(),
+			strengths: a.string().array(),
+			weaknesses: a.string().array(),
+			opportunities: a.string().array(),
+			threats: a.string().array(),
+			lastModified: a.datetime(),
+			company: a.belongsTo("Company", "companyId"),
+		})
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
+
 	Opportunity: a
 		.model({
 			noticeId: a.string().required(),

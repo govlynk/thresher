@@ -1,9 +1,9 @@
 import React from "react";
-import { Container, Box, Typography, Alert, CircularProgress } from "@mui/material";
-import StrategicPositioningForm from "../components/marketPositioning/StrategicPositioningForm";
+import { Container, Box } from "@mui/material";
+import SwotAnalysis from "../components/marketPositioning/SwotAnalysis";
 import { useGlobalStore } from "../stores/globalStore";
 
-export function StrategicPositioiningScreen() {
+export default function SwotScreen() {
 	const activeCompanyId = useGlobalStore((state) => state.activeCompanyId);
 	const loading = useGlobalStore((state) => state.loading);
 
@@ -27,15 +27,12 @@ export function StrategicPositioiningScreen() {
 
 	return (
 		<Container maxWidth={false} disableGutters>
-			<Box sx={{ p: 2, width: "100%" }}>
+			<Box sx={{ width: "100%" }}>
 				<Typography variant='h4' gutterBottom>
-					Strategic Positioning
+					SWOT Analysis
 				</Typography>
-
-				<StrategicPositioningForm />
+				<SwotAnalysis />
 			</Box>
 		</Container>
 	);
 }
-
-export default StrategicPositioiningScreen;
