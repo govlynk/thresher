@@ -10,7 +10,7 @@ export default function CompanyNaicsSection({ company }) {
 				{company.naicsCode.map((code, index) => (
 					<Chip
 						key={index}
-						label={code}
+						label={`${code} - ${company.naicsDescription?.[index] || "No description"}`}
 						variant='outlined'
 						color={code === company.primaryNaics ? "primary" : "default"}
 					/>

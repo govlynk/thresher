@@ -7,6 +7,8 @@ import CompanyBusinessSection from "./sections/CompanyBusinessSection";
 import CompanyStructureSection from "./sections/CompanyStructureSection";
 import CompanyNaicsSection from "./sections/CompanyNaicsSection";
 import CompanyCertificationsSection from "./sections/CompanyCertificationsSection";
+import CompanyPscSection from "./sections/CompanyPSCSection";
+import CompanySbaSection from "./sections/CompanySbaSection";
 
 export default function CompanyDetailsGrid({ company }) {
 	return (
@@ -55,14 +57,24 @@ export default function CompanyDetailsGrid({ company }) {
 				<CompanyStructureSection company={company} />
 			</Grid>
 
+			<Grid item xs={12} md={6}>
+				<CompanyPscSection company={company} />
+			</Grid>
+
 			{company.naicsCode?.length > 0 && (
-				<Grid item xs={12}>
+				<Grid item xs={12} md={6}>
 					<CompanyNaicsSection company={company} />
 				</Grid>
 			)}
 
-			{company.certificationEntryDate?.length > 0 && (
-				<Grid item xs={12}>
+			{company.sbaBusinessTypeDesc?.length > 0 && (
+				<Grid item xs={12} md={6}>
+					<CompanySbaSection company={company} />
+				</Grid>
+			)}
+
+			{company.sbaCertificationEntryDate?.length > 0 && (
+				<Grid item xs={12} md={6}>
 					<CompanyCertificationsSection company={company} />
 				</Grid>
 			)}
