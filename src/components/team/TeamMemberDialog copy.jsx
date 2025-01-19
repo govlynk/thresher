@@ -28,6 +28,7 @@ const ROLES = [
 	"Finance",
 	"Engineering",
 	"Contracts",
+	"Negotiator",
 	"SME",
 	"Other",
 ];
