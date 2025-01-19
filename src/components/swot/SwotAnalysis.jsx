@@ -15,7 +15,7 @@ import { Plus, X, Save } from "lucide-react";
 import { useSwotStore } from "../../stores/swotStore";
 import { useGlobalStore } from "../../stores/globalStore";
 
-const SwotSection = ({ title, items = [], onAdd, onRemove, color }) => (
+const SwotSection = ({ title, items, onAdd, onRemove, color }) => (
 	<Paper
 		sx={{
 			p: 3,
@@ -40,23 +40,27 @@ const SwotSection = ({ title, items = [], onAdd, onRemove, color }) => (
 					}
 				}}
 			/>
+			<Button startIcon={<Plus size={20} />} onClick={onAdd} sx={{ mt: 1 }}>
+				Add Item
+			</Button>
 		</Box>
 
 		<Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-			{(items || []).map((item, index) => (
-				<Chip
-					key={index}
-					label={item}
-					onDelete={() => onRemove(index)}
-					sx={{
-						bgcolor: `${color}15`,
-						borderColor: color,
-						"&:hover": {
-							bgcolor: `${color}25`,
-						},
-					}}
-				/>
-			))}
+			{Array.isArray(items) &&
+				items.map((item, index) => (
+					<Chip
+						key={index}
+						label={item}
+						onDelete={() => onRemove(index)}
+						sx={{
+							bgcolor: `${color}15`,
+							borderColor: color,
+							"&:hover": {
+								bgcolor: `${color}25`,
+							},
+						}}
+					/>
+				))}
 		</Box>
 	</Paper>
 );
@@ -64,7 +68,7 @@ const SwotSection = ({ title, items = [], onAdd, onRemove, color }) => (
 export default function SwotAnalysis() {
 	const { activeCompanyId } = useGlobalStore();
 	const { swotData, loading, error, success, fetchSwotAnalysis, saveSwotAnalysis, resetSuccess } = useSwotStore();
-
+	console.log("Swot Data", swotData);
 	useEffect(() => {
 		if (activeCompanyId) {
 			fetchSwotAnalysis(activeCompanyId);
@@ -74,6 +78,10 @@ export default function SwotAnalysis() {
 	const handleAdd = (section) => (item) => {
 		const updatedData = {
 			...(swotData || {}),
+			strengths: swotData?.strengths || [],
+			weaknesses: swotData?.weaknesses || [],
+			opportunities: swotData?.opportunities || [],
+			threats: swotData?.threats || [],
 			companyId: activeCompanyId,
 			[section]: [...(swotData?.[section] || []), item],
 		};
@@ -83,6 +91,10 @@ export default function SwotAnalysis() {
 	const handleRemove = (section) => (index) => {
 		const updatedData = {
 			...(swotData || {}),
+			strengths: swotData?.strengths || [],
+			weaknesses: swotData?.weaknesses || [],
+			opportunities: swotData?.opportunities || [],
+			threats: swotData?.threats || [],
 			companyId: activeCompanyId,
 			[section]: (swotData?.[section] || []).filter((_, i) => i !== index),
 		};
@@ -127,7 +139,7 @@ export default function SwotAnalysis() {
 				<Grid item xs={12} md={6}>
 					<SwotSection
 						title='Strengths'
-						items={swotData?.strengths || []}
+						items={swotData?.strengths}
 						onAdd={handleAdd("strengths")}
 						onRemove={handleRemove("strengths")}
 						color='success.main'
@@ -137,7 +149,7 @@ export default function SwotAnalysis() {
 				<Grid item xs={12} md={6}>
 					<SwotSection
 						title='Weaknesses'
-						items={swotData?.weaknesses || []}
+						items={swotData?.weaknesses}
 						onAdd={handleAdd("weaknesses")}
 						onRemove={handleRemove("weaknesses")}
 						color='error.main'
@@ -147,7 +159,7 @@ export default function SwotAnalysis() {
 				<Grid item xs={12} md={6}>
 					<SwotSection
 						title='Opportunities'
-						items={swotData?.opportunities || []}
+						items={swotData?.opportunities}
 						onAdd={handleAdd("opportunities")}
 						onRemove={handleRemove("opportunities")}
 						color='primary.main'
@@ -157,7 +169,7 @@ export default function SwotAnalysis() {
 				<Grid item xs={12} md={6}>
 					<SwotSection
 						title='Threats'
-						items={swotData?.threats || []}
+						items={swotData?.threats}
 						onAdd={handleAdd("threats")}
 						onRemove={handleRemove("threats")}
 						color='warning.main'
