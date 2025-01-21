@@ -40,14 +40,30 @@ export const useUserCompanyAccessStore = create((set, get) => ({
 
 		set({ loading: true, error: null });
 		try {
-			const response = await client.models.UserCompanyAccess.create({
-				userId: roleData.userId,
-				companyId: roleData.companyId,
-				access: roleData.access,
-				status: roleData.status || "ACTIVE",
+			// Check if access already exists
+			const existingAccess = await client.models.UserCompanyAccess.list({
+				filter: {
+					and: [{ userId: { eq: roleData.userId } }, { companyId: { eq: roleData.companyId } }],
+				},
 			});
 
-			console.log("User company access created:", response);
+			let response;
+			if (existingAccess.data?.length > 0) {
+				// Update existing access
+				response = await client.models.UserCompanyAccess.update({
+					id: existingAccess.data[0].id,
+					access: roleData.access,
+					status: roleData.status || "ACTIVE",
+				});
+			} else {
+				// Create new access
+				response = await client.models.UserCompanyAccess.create({
+					userId: roleData.userId,
+					companyId: roleData.companyId,
+					access: roleData.access,
+					status: roleData.status || "ACTIVE",
+				});
+			}
 
 			if (!response?.data) {
 				throw new Error("Failed to create user company access");
@@ -67,15 +83,15 @@ export const useUserCompanyAccessStore = create((set, get) => ({
 		}
 	},
 
-	updateUserCompanyAccess: async (access, updates) => {
-		if (!access) {
-			throw new Error("Access is required");
+	updateUserCompanyAccess: async (id, updates) => {
+		if (!id) {
+			throw new Error("Access ID is required");
 		}
 
 		set({ loading: true, error: null });
 		try {
 			const response = await client.models.UserCompanyAccess.update({
-				access,
+				id,
 				...updates,
 			});
 
@@ -84,7 +100,7 @@ export const useUserCompanyAccessStore = create((set, get) => ({
 			}
 
 			set((state) => ({
-				UserCompanyAccesss: state.UserCompanyAccesss.map((role) => (role.access === access ? response.data : role)),
+				UserCompanyAccesss: state.UserCompanyAccesss.map((role) => (role.id === id ? response.data : role)),
 				loading: false,
 				error: null,
 			}));

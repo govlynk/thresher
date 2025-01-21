@@ -24,6 +24,13 @@ import { UserCompanyAccessDialog } from "../components/userCompanyAccess/UserCom
 import { useUserCompanyAccessStore } from "../stores/userCompanyAccessStore";
 import { generateClient } from "aws-amplify/data";
 
+const ACCESS_LEVELS = {
+	COMPANY_ADMIN: "Company Administrator",
+	COMPANY_USER: "Company User",
+	GOVLYNK_ADMIN: "GovLynk Administrator",
+	GOVLYNK_USER: "GovLynk User",
+};
+
 const client = generateClient({
 	authMode: "userPool",
 });
@@ -45,6 +52,7 @@ export default function UserCompanyAccessScreen() {
 	useEffect(() => {
 		if (selectedCompany) {
 			fetchUserCompanyAccesss(selectedCompany);
+			fetchUsers();
 		}
 	}, [selectedCompany, fetchUserCompanyAccesss]);
 
@@ -69,25 +77,21 @@ export default function UserCompanyAccessScreen() {
 		}
 	};
 
-	const fetchUsers = async (userIds) => {
+	const fetchUsers = async () => {
+		setLocalLoading(true);
 		try {
-			const uniqueUserIds = [...new Set(userIds)];
-			const userPromises = uniqueUserIds.map((id) =>
-				client.models.User.get({
-					id,
-				})
-			);
-			const userResponses = await Promise.all(userPromises);
+			const response = await client.models.User.list();
 			const userMap = {};
-			userResponses.forEach((response) => {
-				if (response?.data) {
-					userMap[response.data.id] = response.data;
-				}
+			response.data.forEach((user) => {
+				userMap[user.id] = user;
 			});
 			setUsers(userMap);
+			setLocalError(null);
 		} catch (err) {
 			console.error("Failed to fetch users", err);
-			setLocalError("Failed to load user details");
+			setLocalError("Failed to load users");
+		} finally {
+			setLocalLoading(false);
 		}
 	};
 
@@ -115,11 +119,11 @@ export default function UserCompanyAccessScreen() {
 			if (!userResponse?.data || !companyResponse?.data) {
 				throw new Error("Failed to load role details");
 			}
-
 			const completeRole = {
 				...role,
 				user: userResponse.data,
 				company: companyResponse.data,
+				access: role.access,
 			};
 
 			setEditRole(completeRole);
@@ -210,7 +214,7 @@ export default function UserCompanyAccessScreen() {
 									<TableRow key={role.id} hover>
 										<TableCell>{user.name || "Loading..."}</TableCell>
 										<TableCell>{user.email || "Loading..."}</TableCell>
-										<TableCell>{role.roleId || "-"}</TableCell>
+										<TableCell>{ACCESS_LEVELS[role.access] || "-"}</TableCell>
 										<TableCell>
 											<Chip
 												label={role.status || "INACTIVE"}

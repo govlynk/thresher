@@ -16,22 +16,21 @@ import {
 import { useUserCompanyAccessStore } from "../../stores/userCompanyAccessStore";
 import { generateClient } from "aws-amplify/data";
 
+const ACCESS_LEVELS = {
+	COMPANY_ADMIN: "Company Administrator",
+	COMPANY_USER: "Company User",
+	GOVLYNK_ADMIN: "Govlynk Administrator",
+	GOVLYNK_USER: "Govlynk User",
+};
+
 const client = generateClient({
 	authMode: "userPool",
 });
 
-// Define access level roles separately from company roles
-const ACCESS_LEVELS = {
-	ADMIN: "System Administrator",
-	COMPANY_ADMIN: "Company Administrator",
-	MANAGER: "Company Manager",
-	MEMBER: "Company Member",
-};
-
 const initialFormState = {
 	userId: "",
 	companyId: "",
-	accessLevel: "MEMBER", // Changed from roleId to accessLevel for clarity
+	access: "COMPANY_USER",
 	status: "ACTIVE",
 };
 
@@ -62,7 +61,7 @@ export function UserCompanyAccessDialog({ open, onClose, role = null, companyId 
 			setFormData({
 				userId: role.userId || "",
 				companyId: role.companyId || companyId || "",
-				accessLevel: role.roleId || "MEMBER",
+				access: role.access || "COMPANY_USER",
 				status: role.status || "ACTIVE",
 			});
 			if (role.companyId) {
@@ -157,7 +156,7 @@ export function UserCompanyAccessDialog({ open, onClose, role = null, companyId 
 			setError("Please select a company");
 			return false;
 		}
-		if (!formData.accessLevel) {
+		if (!formData.access) {
 			setError("Please select an access level");
 			return false;
 		}
@@ -172,12 +171,15 @@ export function UserCompanyAccessDialog({ open, onClose, role = null, companyId 
 			const roleData = {
 				userId: formData.userId,
 				companyId: formData.companyId,
-				roleId: formData.accessLevel,
+				access: formData.access,
 				status: formData.status,
 			};
 
 			if (role?.id) {
-				await updateUserCompanyAccess(role.id, roleData);
+				await updateUserCompanyAccess(role.id, {
+					access: formData.access,
+					status: formData.status,
+				});
 			} else {
 				await addUserCompanyAccess(roleData);
 			}
@@ -262,8 +264,8 @@ export function UserCompanyAccessDialog({ open, onClose, role = null, companyId 
 					)}
 
 					<FormControl fullWidth required disabled={loading}>
-						<InputLabel>Access Level</InputLabel>
-						<Select name='accessLevel' value={formData.accessLevel} onChange={handleChange} label='Access Level'>
+						<InputLabel>Role</InputLabel>
+						<Select name='access' value={formData.access} onChange={handleChange} label='Access Level'>
 							{Object.entries(ACCESS_LEVELS).map(([value, label]) => (
 								<MenuItem key={value} value={value}>
 									{label}
