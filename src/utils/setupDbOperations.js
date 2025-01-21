@@ -1,13 +1,11 @@
 import { generateClient } from "aws-amplify/data";
 import { initializeCompanyData, initializeContactData, initializeTeamData } from "./setupUtils";
-import { useGlobalStore } from "../stores/globalStore";
 
 const client = generateClient({
 	authMode: "userPool",
 });
 
-export async function setupCompany({ companyData, contactsData, adminData, teamData }) {
-	const { activeUserData } = useGlobalStore();
+export async function setupCompany({ companyData, contactsData, adminData, teamData, activeUserData }) {
 	try {
 		// 1. Create company
 		const company = await createCompany(companyData);
@@ -21,96 +19,100 @@ export async function setupCompany({ companyData, contactsData, adminData, teamD
 		const team = await createTeam(teamData, company.id);
 		console.log("Created team:", team);
 
-		// 4. Create admin users and their associations
-		const adminUsers = await Promise.all(
-			adminData.map(async (admin) => {
-				console.log("+++++++admin++++++", admin);
+		let adminUsers = [];
+		// 4. Create admin users and their associations if adminData exists
+		if (adminData && adminData.length > 0) {
+			adminUsers = await Promise.all(
+				adminData.map(async (admin) => {
+					console.log("+++++++admin++++++", admin);
 
-				// Find matching contact
-				const contact = contacts.find((c) => c.contactEmail === admin.email || c.email === admin.email);
+					// Find matching contact
+					const contact = contacts.find((c) => c.contactEmail === admin.email || c.email === admin.email);
 
-				if (!contact) {
-					throw new Error(`No matching contact found for admin email: ${admin.email}`);
-				}
+					if (!contact) {
+						throw new Error(`No matching contact found for admin email: ${admin.email}`);
+					}
 
-				// Check if user already exists with this email
-				const existingUsers = await client.models.User.list({
-					filter: { email: { eq: admin.email } },
-				});
-
-				let user;
-				if (existingUsers.data?.length > 0) {
-					// Update existing user
-					user = existingUsers.data[0];
-					await client.models.User.update({
-						id: user.id,
-						contactId: contact.id,
-						lastLogin: new Date().toISOString(),
+					// Check if user already exists with this email
+					const existingUsers = await client.models.User.list({
+						filter: { email: { eq: admin.email } },
 					});
-				} else {
-					// Create new user
-					const userResponse = await client.models.User.create({
-						cognitoId: admin.cognitoId,
-						email: admin.email,
-						name: `${admin.firstName} ${admin.lastName}`,
-						phone: admin.phone,
-						contactId: contact.id,
-						status: "ACTIVE",
-						lastLogin: new Date().toISOString(),
+
+					let user;
+					if (existingUsers.data?.length > 0) {
+						// Update existing user
+						user = existingUsers.data[0];
+						await client.models.User.update({
+							id: user.id,
+							contactId: contact.id,
+							lastLogin: new Date().toISOString(),
+						});
+					} else {
+						// Create new user
+						const userResponse = await client.models.User.create({
+							cognitoId: admin.cognitoId,
+							email: admin.email,
+							name: `${admin.firstName} ${admin.lastName}`,
+							phone: admin.phone,
+							contactId: contact.id,
+							status: "ACTIVE",
+							lastLogin: new Date().toISOString(),
+						});
+						user = userResponse.data;
+					}
+
+					// Create or update user-company access
+					const existingAccess = await client.models.UserCompanyAccess.list({
+						filter: {
+							and: [{ userId: { eq: user.id } }, { companyId: { eq: company.id } }],
+						},
 					});
-					user = userResponse.data;
-				}
 
-				// Create or update user-company access
-				const existingAccess = await client.models.UserCompanyAccess.list({
-					filter: {
-						and: [{ userId: { eq: user.id } }, { companyId: { eq: company.id } }],
-					},
-				});
+					if (!existingAccess.data?.length) {
+						await client.models.UserCompanyAccess.create({
+							userId: user.id,
+							companyId: company.id,
+							access: admin.accessLevel,
+							status: "ACTIVE",
+						});
+					}
 
-				if (!existingAccess.data?.length) {
-					await client.models.UserCompanyAccess.create({
-						userId: user.id,
-						companyId: company.id,
-						access: admin.accessLevel,
-						status: "ACTIVE",
+					// Create team member if not exists
+					const existingMember = await client.models.TeamMember.list({
+						filter: {
+							and: [{ contactId: { eq: contact.id } }, { teamId: { eq: team.id } }],
+						},
 					});
-				}
 
-				//Add GovLynk Consultant to the company Access
-				if (!activeUserData) {
-					await client.models.UserCompanyAccess.create({
-						userId: activeUserData.UserId,
-						companyId: company.id,
-						access: "COMPANY_ADMIN",
-						status: "ACTIVE",
-					});
-				}
+					if (!existingMember.data?.length) {
+						await client.models.TeamMember.create({
+							contactId: contact.id,
+							teamId: team.id,
+							role: contact.role || "Other",
+						});
+					}
 
-				// Create team member if not exists
-				const existingMember = await client.models.TeamMember.list({
-					filter: {
-						and: [{ contactId: { eq: contact.id } }, { teamId: { eq: team.id } }],
-					},
-				});
+					return user;
+				})
+			);
+		}
 
-				if (!existingMember.data?.length) {
-					await client.models.TeamMember.create({
-						contactId: contact.id,
-						teamId: team.id,
-						role: contact.role || "Other",
-					});
-				}
+		// Add GovLynk Consultant to the company Access if activeUserData exists
+		if (activeUserData?.userId) {
+			await client.models.UserCompanyAccess.create({
+				userId: activeUserData.userId,
+				companyId: company.id,
+				access: "COMPANY_ADMIN",
+				status: "ACTIVE",
+			});
+		}
 
-				return user;
-			})
-		);
 		console.log("Created/Updated admin users:", adminUsers);
 
 		// 5. Create team members for remaining contacts
-		const remainingContacts = contacts.filter(
-			(contact) => !adminUsers.some((user) => user.email === contact.contactEmail || user.email === contact.email)
-		);
+		const remainingContacts = contacts.filter((contact) => {
+			return !adminUsers.some((user) => user?.email === contact.contactEmail || user?.email === contact.email);
+		});
 
 		await Promise.all(
 			remainingContacts.map(async (contact) => {

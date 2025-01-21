@@ -5,11 +5,13 @@ import { useSetupWorkflowStore } from "../../stores/setupWorkflowStore";
 import { SetupReviewContent } from "./review/SetupReviewContent";
 import { SetupReviewHeader } from "./review/SetupReviewHeader";
 import { SetupReviewFooter } from "./review/SetupReviewFooter";
+import { useGlobalStore } from "../../stores/globalStore";
 import { setupCompany } from "../../utils/setupDbOperations";
 
 export function SetupReview() {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
+	const { activeUserData } = useGlobalStore();
 	const { companyData, contactsData, adminData, teamData, resetWorkflow } = useSetupWorkflowStore();
 	const navigate = useNavigate();
 
@@ -23,6 +25,7 @@ export function SetupReview() {
 				contactsData,
 				adminData,
 				teamData,
+				activeUserData,
 			});
 
 			resetWorkflow();

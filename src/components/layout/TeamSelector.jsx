@@ -15,9 +15,9 @@ export function TeamSelector() {
 		}
 	}, [activeCompanyId, fetchTeams]);
 
-	// Select first team if none selected
+	// Select first team if none selected and teams are available
 	useEffect(() => {
-		if (!loading && teams.length > 0 && !activeTeamId) {
+		if (!loading && teams.length > 0 && (!activeTeamId || !teams.find((t) => t.id === activeTeamId))) {
 			setActiveTeam(teams[0].id);
 		}
 	}, [loading, teams, activeTeamId, setActiveTeam]);

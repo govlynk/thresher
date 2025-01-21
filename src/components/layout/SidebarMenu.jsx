@@ -56,6 +56,8 @@ const hexToRgba = (hex, alpha) => {
 const MenuItems = ({ items, selected, setSelected, theme }) => {
 	const { activeUserData } = useGlobalStore();
 	const hasAccess = (requiredGroups) => {
+		console.log("***Required Groups", requiredGroups, activeUserData?.groups);
+		console.log("***Active User Data", activeUserData);
 		// Return true if no groups required
 		if (!requiredGroups?.length) return true;
 

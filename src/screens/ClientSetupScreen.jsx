@@ -7,10 +7,12 @@ import { AdminSetupStep } from "../components/clientSetup/AdminSetupStep";
 import { TeamSetupStep } from "../components/clientSetup/TeamSetupStep";
 import { SetupReview } from "../components/clientSetup/SetupReview";
 
-const steps = ["Company Search", "Contacts", "Admin Setup", "Team Setup", "Review"];
+const steps = ["Company Search", "Contacts", "Team Setup", "Review"];
+// const steps = ["Company Search", "Contacts", "Admin Setup", "Team Setup", "Review"];
 
 export default function ClientSetupScreen() {
-	const { activeStep, getCompanyData, getContactsData, getAdminData, getTeamData } = useSetupWorkflowStore();
+	const { activeStep, getCompanyData, getContactsData, getTeamData } = useSetupWorkflowStore();
+	// const { activeStep, getCompanyData, getContactsData, getAdminData, getTeamData } = useSetupWorkflowStore();
 
 	const renderStep = () => {
 		switch (activeStep) {
@@ -18,16 +20,16 @@ export default function ClientSetupScreen() {
 				return <CompanySearchStep />;
 			case 1:
 				return <ContactsStep initial={getCompanyData()} />;
+			// case 2:
+			// 	return <AdminSetupStep />;
 			case 2:
-				return <AdminSetupStep />;
-			case 3:
 				return <TeamSetupStep companyData={getCompanyData()} contactsData={getContactsData()} />;
-			case 4:
+			case 3:
 				return (
 					<SetupReview
 						companyData={getCompanyData()}
 						contactsData={getContactsData()}
-						adminData={getAdminData()}
+						// adminData={getAdminData()}
 						teamData={getTeamData()}
 					/>
 				);
