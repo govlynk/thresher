@@ -12,8 +12,10 @@ import {
 } from "@mui/material";
 import { useTeamStore } from "../../stores/teamStore";
 import { useUserCompanyStore } from "../../stores/userCompanyStore";
+import { useGlobalStore } from "../../stores/globalStore";
 
 export function TeamDialog({ open, onClose, team }) {
+	const { activeCompanyId } = useGlobalStore();
 	const { addTeam, updateTeam } = useTeamStore();
 	const { getActiveCompany } = useUserCompanyStore();
 	const [loading, setLoading] = useState(false);
@@ -48,13 +50,13 @@ export function TeamDialog({ open, onClose, team }) {
 			}
 
 			const activeCompany = getActiveCompany();
-			if (!activeCompany?.id) {
+			if (!activeCompanyId) {
 				throw new Error("No active company selected");
 			}
 
 			const teamData = {
 				...formData,
-				companyId: activeCompany.id,
+				companyId: activeCompanyId,
 			};
 
 			if (team) {
