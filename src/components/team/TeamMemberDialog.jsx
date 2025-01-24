@@ -1,30 +1,19 @@
 import React, { useState, useEffect } from "react";
 import {
-	Alert,
-	Box,
-	Button,
-	Checkbox,
 	Dialog,
 	DialogTitle,
 	DialogContent,
 	DialogActions,
+	TextField,
+	Button,
 	FormControl,
 	InputLabel,
 	Select,
 	MenuItem,
-	List,
-	ListItem,
-	ListItemText,
-	ListItemSecondaryAction,
-	Typography,
-	Chip,
-	TextField,
-	InputAdornment,
+	Grid,
+	Alert,
 	CircularProgress,
 } from "@mui/material";
-import { Search, UserPlus } from "lucide-react";
-import { useContactStore } from "../../stores/contactStore";
-import { useTeamMemberStore } from "../../stores/teamMemberStore";
 
 const ROLES = [
 	"Decision Maker",
@@ -40,87 +29,77 @@ const ROLES = [
 	"Other",
 ];
 
-export function TeamMemberDialog({ open, onClose, team }) {
-	const [selectedRole, setSelectedRole] = useState("");
-	const [searchTerm, setSearchTerm] = useState("");
-	const [selectedContactIds, setSelectedContactIds] = useState([]);
-	const { contacts, fetchContacts, loading: contactsLoading } = useContactStore();
-	const { addTeamMember, loading: addingMember } = useTeamMemberStore();
+export function TeamMemberDialog({ open, onClose, team, member, onUpdate }) {
+	const [formData, setFormData] = useState({
+		firstName: "",
+		lastName: "",
+		email: "",
+		phone: "",
+		role: "",
+		title: "",
+		department: "",
+	});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
-		if (team?.companyId) {
-			fetchContacts(team.companyId);
+		if (member) {
+			setFormData({
+				firstName: member.contact?.firstName || "",
+				lastName: member.contact?.lastName || "",
+				email: member.contact?.contactEmail || "",
+				phone: member.contact?.contactMobilePhone || "",
+				role: member.role || "",
+				title: member.contact?.title || "",
+				department: member.contact?.department || "",
+			});
+		} else {
+			setFormData({
+				firstName: "",
+				lastName: "",
+				email: "",
+				phone: "",
+				role: "",
+				title: "",
+				department: "",
+			});
 		}
-	}, [team?.companyId, fetchContacts]);
+	}, [member, open]);
 
-	// Reset state when dialog opens/closes
-	useEffect(() => {
-		setSelectedContactIds([]);
-		setSelectedRole("");
-		setSearchTerm("");
+	const handleChange = (e) => {
+		const { name, value } = e.target;
+		setFormData((prev) => ({
+			...prev,
+			[name]: value,
+		}));
 		setError(null);
-	}, [open]);
-
-	const filteredContacts = contacts.filter((contact) => {
-		const searchStr = searchTerm.toLowerCase();
-		const isMatch =
-			contact.firstName.toLowerCase().includes(searchStr) ||
-			contact.lastName.toLowerCase().includes(searchStr) ||
-			contact.contactEmail?.toLowerCase().includes(searchStr);
-
-		// Safely check if contact is already a team member
-		const isNotMember = !(
-			Array.isArray(team?.members) && team.members.some((member) => member.contactId === contact.id)
-		);
-		return isMatch && isNotMember;
-	});
-
-	const handleToggleContact = (contactId) => {
-		setSelectedContactIds((prev) =>
-			prev.includes(contactId) ? prev.filter((id) => id !== contactId) : [...prev, contactId]
-		);
 	};
 
-	const handleSave = async () => {
-		console.log("TeamMemberDialog: Starting save with:", {
-			selectedRole,
-			selectedContactIds,
-			team,
-		});
+	const validateForm = () => {
+		if (!formData.firstName?.trim()) return "First name is required";
+		if (!formData.lastName?.trim()) return "Last name is required";
+		if (!formData.email?.trim()) return "Email is required";
+		if (!formData.role?.trim()) return "Role is required";
+		return null;
+	};
 
-		if (!selectedRole) {
-			setError("Please select a role");
-			return;
-		}
-
-		if (selectedContactIds.length === 0) {
-			setError("Please select at least one contact");
-			return;
-		}
-
-		if (!team?.id) {
-			setError("No team selected");
+	const handleSubmit = async () => {
+		const validationError = validateForm();
+		if (validationError) {
+			setError(validationError);
 			return;
 		}
 
 		setLoading(true);
 		try {
-			for (const contactId of selectedContactIds) {
-				console.log("TeamMemberDialog: Adding member:", { contactId, role: selectedRole });
-				await addTeamMember({
-					teamId: team.id,
-					contactId,
-					role: selectedRole,
-				});
+			if (member) {
+				await onUpdate("updateMember", { id: member.id, ...formData });
+			} else {
+				await onUpdate("addMember", formData);
 			}
-
-			console.log("TeamMemberDialog: Successfully added all members");
 			onClose();
 		} catch (err) {
-			console.error("Error adding team members:", err);
-			setError(err.message || "Failed to add team members");
+			setError(err.message || "Failed to save team member");
 		} finally {
 			setLoading(false);
 		}
@@ -128,102 +107,108 @@ export function TeamMemberDialog({ open, onClose, team }) {
 
 	return (
 		<Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-			<DialogTitle sx={{ pb: 0 }}>
-				<Typography variant='h5' component='div'>
-					{`Add Members to ${team?.name || "Team"}`}
-				</Typography>
-				<Typography variant='body2' color='text.secondary'>
-					Select contacts to add to the team
-				</Typography>
-			</DialogTitle>
+			<DialogTitle>{member ? "Edit Team Member" : "Add New Team Member"}</DialogTitle>
 			<DialogContent>
-				<Box sx={{ mb: 3 }}>
-					{error && (
-						<Alert severity='error' sx={{ mb: 2 }}>
-							{error}
-						</Alert>
-					)}
+				{error && (
+					<Alert severity='error' sx={{ mb: 2 }}>
+						{error}
+					</Alert>
+				)}
 
-					<FormControl fullWidth sx={{ mb: 2 }}>
-						<InputLabel>Role</InputLabel>
-						<Select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} label='Role'>
-							{ROLES.map((role) => (
-								<MenuItem key={role} value={role}>
-									{role}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl>
+				<Grid container spacing={2} sx={{ mt: 1 }}>
+					<Grid item xs={12} sm={6}>
+						<TextField
+							fullWidth
+							label='First Name'
+							name='firstName'
+							value={formData.firstName}
+							onChange={handleChange}
+							required
+							disabled={loading}
+						/>
+					</Grid>
+					<Grid item xs={12} sm={6}>
+						<TextField
+							fullWidth
+							label='Last Name'
+							name='lastName'
+							value={formData.lastName}
+							onChange={handleChange}
+							required
+							disabled={loading}
+						/>
+					</Grid>
 
-					<TextField
-						fullWidth
-						placeholder='Search contacts...'
-						value={searchTerm}
-						onChange={(e) => setSearchTerm(e.target.value)}
-						InputProps={{
-							startAdornment: (
-								<InputAdornment position='start'>
-									<Search size={20} />
-								</InputAdornment>
-							),
-						}}
-						sx={{ mb: 2 }}
-					/>
+					<Grid item xs={12} sm={6}>
+						<TextField
+							fullWidth
+							label='Email'
+							name='email'
+							type='email'
+							value={formData.email}
+							onChange={handleChange}
+							required
+							disabled={loading}
+						/>
+					</Grid>
+					<Grid item xs={12} sm={6}>
+						<TextField
+							fullWidth
+							label='Phone'
+							name='phone'
+							value={formData.phone}
+							onChange={handleChange}
+							disabled={loading}
+						/>
+					</Grid>
 
-					{contactsLoading ? (
-						<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-							<CircularProgress />
-						</Box>
-					) : (
-						<List sx={{ maxHeight: 400, overflow: "auto" }}>
-							{filteredContacts.length > 0 ? (
-								filteredContacts.map((contact) => (
-									<ListItem
-										key={contact.id}
-										sx={{
-											borderRadius: 1,
-											mb: 1,
-											"&:hover": {
-												bgcolor: "action.hover",
-											},
-										}}
-									>
-										<Checkbox
-											checked={selectedContactIds.includes(contact.id)}
-											onChange={() => handleToggleContact(contact.id)}
-										/>
-										<ListItemText
-											primary={`${contact.firstName} ${contact.lastName}`}
-											secondary={contact.contactEmail || contact.contactMobilePhone || "No contact info"}
-										/>
-										<ListItemSecondaryAction>
-											<Chip
-												label={contact.title || "No title"}
-												size='small'
-												variant='outlined'
-												sx={{ mr: 1 }}
-											/>
-										</ListItemSecondaryAction>
-									</ListItem>
-								))
-							) : (
-								<Typography color='text.secondary' align='center'>
-									No contacts available to add
-								</Typography>
-							)}
-						</List>
-					)}
-				</Box>
+					<Grid item xs={12} sm={6}>
+						<FormControl fullWidth required disabled={loading}>
+							<InputLabel>Role</InputLabel>
+							<Select name='role' value={formData.role} onChange={handleChange} label='Role'>
+								{ROLES.map((role) => (
+									<MenuItem key={role} value={role}>
+										{role}
+									</MenuItem>
+								))}
+							</Select>
+						</FormControl>
+					</Grid>
+
+					<Grid item xs={12} sm={6}>
+						<TextField
+							fullWidth
+							label='Title'
+							name='title'
+							value={formData.title}
+							onChange={handleChange}
+							disabled={loading}
+						/>
+					</Grid>
+
+					<Grid item xs={12}>
+						<TextField
+							fullWidth
+							label='Department'
+							name='department'
+							value={formData.department}
+							onChange={handleChange}
+							disabled={loading}
+						/>
+					</Grid>
+				</Grid>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={onClose}>Cancel</Button>
+				<Button onClick={onClose} disabled={loading}>
+					Cancel
+				</Button>
 				<Button
-					onClick={handleSave}
+					onClick={handleSubmit}
 					variant='contained'
-					disabled={loading || selectedContactIds.length === 0}
-					startIcon={loading ? <CircularProgress size={20} /> : <UserPlus size={20} />}
+					disabled={loading}
+					startIcon={loading && <CircularProgress size={20} />}
 				>
-					Add Selected Members
+					{loading ? "Saving..." : member ? "Save Changes" : "Add Member"}
 				</Button>
 			</DialogActions>
 		</Dialog>

@@ -1,8 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Box,
 	Button,
 	Card,
+	CardActions,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
 	CardContent,
 	CardHeader,
 	Collapse,
@@ -11,24 +16,33 @@ import {
 	Chip,
 	Alert,
 	CircularProgress,
-	List,
 	TextField,
 	Divider,
+	List,
 } from "@mui/material";
-import { Edit, Trash2, UserPlus, Filter, Search, ChevronDown, ChevronUp, Users } from "lucide-react";
+import { Edit, Trash2, UserPlus, Filter, Search, ChevronDown, ChevronUp, Users, Info } from "lucide-react";
 import { TeamDialog } from "./TeamDialog";
 import { TeamMemberDialog } from "./TeamMemberDialog";
+import { TeamInfoSidebar } from "./TeamInfoSidebar";
+import { useTeamMemberStore } from "../../stores/teamMemberStore";
 import { useTeamStore } from "../../stores/teamStore";
 import { useGlobalStore } from "../../stores/globalStore";
 
 export function TeamList() {
-	const [searchTerm, setSearchTerm] = React.useState("");
-	const [teamDialogOpen, setTeamDialogOpen] = React.useState(false);
-	const [memberDialogOpen, setMemberDialogOpen] = React.useState(false);
-	const [selectedTeam, setSelectedTeam] = React.useState(null);
-	const [expandedTeamId, setExpandedTeamId] = React.useState(null);
+	const [searchTerm, setSearchTerm] = useState("");
+	const [teamDialogOpen, setTeamDialogOpen] = useState(false);
+	const [memberDialogOpen, setMemberDialogOpen] = useState(false);
+	const [selectedTeam, setSelectedTeam] = useState(null);
+	const [expandedTeamId, setExpandedTeamId] = useState(null);
+	const [memberToDelete, setMemberToDelete] = useState(null);
+	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+	const [infoSidebarOpen, setInfoSidebarOpen] = useState(false);
+	const [selectedTeamForInfo, setSelectedTeamForInfo] = useState(null);
+	const [editMemberDialogOpen, setEditMemberDialogOpen] = useState(false);
+	const [selectedMember, setSelectedMember] = useState(null);
 
 	const { teams, removeTeam, loading, error, fetchTeams } = useTeamStore();
+	const { removeTeamMember, updateTeamMember } = useTeamMemberStore();
 	const { activeCompanyId } = useGlobalStore.getState();
 
 	useEffect(() => {
@@ -68,12 +82,56 @@ export function TeamList() {
 		setExpandedTeamId(expandedTeamId === teamId ? null : teamId);
 	};
 
+	const handleViewTeamInfo = (team) => {
+		setSelectedTeamForInfo(team);
+		setInfoSidebarOpen(true);
+	};
+
+	const handleDeleteMember = async (member) => {
+		setMemberToDelete(member);
+		setDeleteConfirmOpen(true);
+	};
+
+	const handleConfirmDeleteMember = async () => {
+		if (!memberToDelete) return;
+
+		try {
+			await removeTeamMember(memberToDelete.id);
+			await fetchTeams(activeCompanyId);
+			setDeleteConfirmOpen(false);
+			setMemberToDelete(null);
+		} catch (err) {
+			console.error("Error deleting team member:", err);
+		}
+	};
+
+	const handleEditMember = (member) => {
+		setSelectedMember(member);
+		setEditMemberDialogOpen(true);
+	};
+
+	const handleUpdateMember = async (action, data) => {
+		try {
+			await updateTeamMember(selectedMember.id, {
+				role: data.role,
+			});
+			await fetchTeams(activeCompanyId);
+			setEditMemberDialogOpen(false);
+			setSelectedMember(null);
+		} catch (err) {
+			console.error("Error updating team member:", err);
+			throw err;
+		}
+	};
+
 	const handleDialogClose = () => {
 		setTeamDialogOpen(false);
 		setMemberDialogOpen(false);
+		setEditMemberDialogOpen(false);
 		setSelectedTeam(null);
-		if (activeCompany?.id) {
-			fetchTeams(activeCompany.id);
+		setSelectedMember(null);
+		if (activeCompanyId) {
+			fetchTeams(activeCompanyId);
 		}
 	};
 
@@ -141,6 +199,7 @@ export function TeamList() {
 										<IconButton onClick={() => handleAddMembers(team)} size='small' title='Add Members'>
 											<UserPlus size={18} />
 										</IconButton>
+
 										<IconButton onClick={() => handleEditTeam(team)} size='small' title='Edit Team'>
 											<Edit size={18} />
 										</IconButton>
@@ -151,6 +210,9 @@ export function TeamList() {
 											title='Delete Team'
 										>
 											<Trash2 size={18} />
+										</IconButton>
+										<IconButton onClick={() => handleViewTeamInfo(team)} size='small' title='Team Info'>
+											<Info size={18} />
 										</IconButton>
 									</Box>
 								}
@@ -185,7 +247,26 @@ export function TeamList() {
 								</Box>
 
 								<Collapse in={expandedTeamId === team.id}>
-									<List sx={{ mt: 1 }}>
+									<List
+										sx={{
+											mt: 1,
+											maxHeight: team.members?.length > 4 ? "300px" : "auto",
+											overflowY: team.members?.length > 4 ? "auto" : "visible",
+											"&::-webkit-scrollbar": {
+												width: "8px",
+											},
+											"&::-webkit-scrollbar-track": {
+												background: "transparent",
+											},
+											"&::-webkit-scrollbar-thumb": {
+												background: (theme) => (theme.palette.mode === "dark" ? "#555" : "#ccc"),
+												borderRadius: "4px",
+											},
+											"&::-webkit-scrollbar-thumb:hover": {
+												background: (theme) => (theme.palette.mode === "dark" ? "#666" : "#999"),
+											},
+										}}
+									>
 										{Array.isArray(team.members) && team.members.length > 0 ? (
 											team.members.map((member) => (
 												<Box
@@ -209,7 +290,29 @@ export function TeamList() {
 															{member.contact?.contactEmail}
 														</Typography>
 													</Box>
-													<Chip label={member.role} size='small' variant='outlined' color='primary' />
+													<Box
+														sx={{
+															display: "flex",
+															alignItems: "center",
+															gap: 1,
+															position: "sticky",
+															right: 0,
+															bgcolor: "inherit",
+														}}
+													>
+														<Chip label={member.role} size='small' variant='outlined' color='primary' />
+														<IconButton size='small' onClick={() => handleEditMember(member)}>
+															<Edit size={16} />
+														</IconButton>
+														<IconButton
+															title='Remove Member'
+															size='small'
+															onClick={() => handleDeleteMember(member)}
+															color='error'
+														>
+															<Trash2 size={16} />
+														</IconButton>
+													</Box>
 												</Box>
 											))
 										) : (
@@ -230,8 +333,40 @@ export function TeamList() {
 			</Box>
 
 			<TeamDialog open={teamDialogOpen} onClose={handleDialogClose} team={selectedTeam} />
-
 			<TeamMemberDialog open={memberDialogOpen} onClose={handleDialogClose} team={selectedTeam} />
+
+			<TeamMemberDialog
+				open={editMemberDialogOpen}
+				onClose={handleDialogClose}
+				team={selectedTeam}
+				member={selectedMember}
+				onUpdate={handleUpdateMember}
+			/>
+
+			<TeamInfoSidebar
+				open={infoSidebarOpen}
+				onClose={() => {
+					setInfoSidebarOpen(false);
+					setSelectedTeamForInfo(null);
+				}}
+				team={selectedTeamForInfo}
+			/>
+
+			<Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+				<DialogTitle>Confirm Delete</DialogTitle>
+				<DialogContent>
+					<Typography>
+						Are you sure you want to remove {memberToDelete?.contact?.firstName}{" "}
+						{memberToDelete?.contact?.lastName} from the team?
+					</Typography>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+					<Button onClick={handleConfirmDeleteMember} color='error' variant='contained'>
+						Delete
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</Box>
 	);
 }
