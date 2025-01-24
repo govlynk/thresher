@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Card, CardHeader, CardContent, IconButton, Typography, Box, Chip, Divider } from "@mui/material";
+import {
+	Card,
+	CardHeader,
+	CardContent,
+	IconButton,
+	Typography,
+	Box,
+	Chip,
+	Divider,
+} from "@mui/material";
 import { Edit, Trash2, UserPlus, Info, Users } from "lucide-react";
 import { TeamMemberList } from "./TeamMemberList";
 import { TeamMemberDialog } from "./TeamMemberDialog";
@@ -48,7 +57,7 @@ export function TeamCard({ team, onEdit, onDelete }) {
 				action,
 				data,
 				error: err.message,
-				stack: err.stack,
+				stack: err.stack
 			});
 			throw err;
 		}
@@ -59,22 +68,22 @@ export function TeamCard({ team, onEdit, onDelete }) {
 			<CardHeader
 				title={team.name}
 				subheader={
-					<Box component='div' color='text.secondary' sx={{ typography: "body2" }}>
+					<Box component="div" color="text.secondary" sx={{ typography: "body2" }}>
 						Created {new Date(team.createdAt).toLocaleDateString()}
 					</Box>
 				}
 				action={
 					<Box sx={{ display: "flex", gap: 1 }}>
-						<IconButton onClick={() => setMemberDialogOpen(true)} size='small' title='Add Members'>
+						<IconButton onClick={() => setMemberDialogOpen(true)} size="small" title="Add Members">
 							<UserPlus size={18} />
 						</IconButton>
-						<IconButton onClick={() => setInfoSidebarOpen(true)} size='small' title='Team Info'>
+						<IconButton onClick={() => setInfoSidebarOpen(true)} size="small" title="Team Info">
 							<Info size={18} />
 						</IconButton>
-						<IconButton onClick={() => onEdit(team)} size='small' title='Edit Team'>
+						<IconButton onClick={() => onEdit(team)} size="small" title="Edit Team">
 							<Edit size={18} />
 						</IconButton>
-						<IconButton onClick={() => onDelete(team.id)} size='small' color='error' title='Delete Team'>
+						<IconButton onClick={() => onDelete(team.id)} size="small" color="error" title="Delete Team">
 							<Trash2 size={18} />
 						</IconButton>
 					</Box>
@@ -82,18 +91,22 @@ export function TeamCard({ team, onEdit, onDelete }) {
 			/>
 			<Divider />
 			<CardContent>
-				<Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+				<Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
 					{team.description || "No description"}
 				</Typography>
 
 				<Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
 					<Users size={16} />
-					<Typography variant='subtitle2'>
+					<Typography variant="subtitle2">
 						{Array.isArray(team.members) ? team.members.length : 0} Members
 					</Typography>
 				</Box>
 
-				<TeamMemberList team={team} onUpdate={handleMemberUpdate} onEditMember={setSelectedMember} />
+				<TeamMemberList
+					team={team}
+					onUpdate={handleMemberUpdate}
+					onEditMember={setSelectedMember}
+				/>
 			</CardContent>
 
 			<TeamMemberDialog
@@ -107,7 +120,11 @@ export function TeamCard({ team, onEdit, onDelete }) {
 				onUpdate={handleMemberUpdate}
 			/>
 
-			<TeamInfoSidebar open={infoSidebarOpen} onClose={() => setInfoSidebarOpen(false)} team={team} />
+			<TeamInfoSidebar
+				open={infoSidebarOpen}
+				onClose={() => setInfoSidebarOpen(false)}
+				team={team}
+			/>
 		</Card>
 	);
 }

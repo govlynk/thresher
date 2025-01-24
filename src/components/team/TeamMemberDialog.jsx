@@ -4,16 +4,25 @@ import {
 	DialogTitle,
 	DialogContent,
 	DialogActions,
-	TextField,
 	Button,
+	Box,
+	List, 
+	ListItemButton,
+	ListItemText, 
+	Checkbox,
+	Chip,
+	TextField,
+	InputAdornment,
+	CircularProgress,
+	Alert,
+	Typography,
 	FormControl,
-	InputLabel,
 	Select,
 	MenuItem,
-	Grid,
-	Alert,
-	CircularProgress,
 } from "@mui/material";
+import { Search, UserPlus } from "lucide-react";
+import { useContactStore } from "../../stores/contactStore";
+import { useTeamMemberStore } from "../../stores/teamMemberStore";
 
 const ROLES = [
 	"Decision Maker",
@@ -29,186 +38,205 @@ const ROLES = [
 	"Other",
 ];
 
-export function TeamMemberDialog({ open, onClose, team, member, onUpdate }) {
-	const [formData, setFormData] = useState({
-		firstName: "",
-		lastName: "",
-		email: "",
-		phone: "",
-		role: "",
-		title: "",
-		department: "",
-	});
-	const [loading, setLoading] = useState(false);
+export function TeamMemberDialog({ open, onClose, team }) {
+	const [searchTerm, setSearchTerm] = useState("");
+	const [selectedContacts, setSelectedContacts] = useState([]);
+	const { contacts, fetchContacts, loading: contactsLoading } = useContactStore();
+	const { addTeamMember, loading: addingMember } = useTeamMemberStore();
+	const [loading, setLoading] = useState(false); 
 	const [error, setError] = useState(null);
 
+	// Fetch contacts when dialog opens
 	useEffect(() => {
-		if (member) {
-			setFormData({
-				firstName: member.contact?.firstName || "",
-				lastName: member.contact?.lastName || "",
-				email: member.contact?.contactEmail || "",
-				phone: member.contact?.contactMobilePhone || "",
-				role: member.role || "",
-				title: member.contact?.title || "",
-				department: member.contact?.department || "",
-			});
-		} else {
-			setFormData({
-				firstName: "",
-				lastName: "",
-				email: "",
-				phone: "",
-				role: "",
-				title: "",
-				department: "",
-			});
+		if (open && team?.companyId) {
+			fetchContacts(team.companyId);
 		}
-	}, [member, open]);
+	}, [open, team?.companyId, fetchContacts]);
 
-	const handleChange = (e) => {
-		const { name, value } = e.target;
-		setFormData((prev) => ({
-			...prev,
-			[name]: value,
-		}));
-		setError(null);
+	// Reset state when dialog opens/closes
+	useEffect(() => {
+		if (open) {
+			setSelectedContacts([]);
+			setSearchTerm("");
+			setError(null);
+		}
+	}, [open]);
+
+	// Filter contacts based on search and existing team members
+	const filteredContacts = contacts.filter((contact) => {
+		const searchStr = searchTerm.toLowerCase();
+		const isMatch =
+			contact.firstName.toLowerCase().includes(searchStr) ||
+			contact.lastName.toLowerCase().includes(searchStr) ||
+			contact.contactEmail?.toLowerCase().includes(searchStr);
+
+		// Exclude existing team members
+		const isNotMember =
+			!(Array.isArray(team?.members) && team.members.some((m) => m.contactId === contact.id));
+
+		return isMatch && isNotMember;
+	});
+
+	const handleToggleContact = (contact) => {
+		const exists = selectedContacts.some(c => c.id === contact.id);
+		if (exists) {
+			setSelectedContacts(prev => prev.filter(c => c.id !== contact.id));
+		} else {
+			setSelectedContacts(prev => [...prev, { id: contact.id, role: ROLES[0] }]);
+		}
 	};
 
-	const validateForm = () => {
-		if (!formData.firstName?.trim()) return "First name is required";
-		if (!formData.lastName?.trim()) return "Last name is required";
-		if (!formData.email?.trim()) return "Email is required";
-		if (!formData.role?.trim()) return "Role is required";
-		return null;
+	const handleRoleChange = (contactId, newRole) => {
+		setSelectedContacts(prev => prev.map(contact => 
+			contact.id === contactId ? { ...contact, role: newRole } : contact
+		));
 	};
 
-	const handleSubmit = async () => {
-		const validationError = validateForm();
-		if (validationError) {
-			setError(validationError);
+	const handleSave = async () => {
+		if (selectedContacts.length === 0) {
+			setError("Please select at least one contact");
+			return;
+		}
+
+		if (!team?.id) {
+			setError("No team selected");
 			return;
 		}
 
 		setLoading(true);
 		try {
-			if (member) {
-				await onUpdate("updateMember", { id: member.id, ...formData });
-			} else {
-				await onUpdate("addMember", formData);
+			for (const contact of selectedContacts) {
+				if (!contact.role) {
+					throw new Error(`Please select a role for all team members`);
+				}
+
+				await addTeamMember({
+					teamId: team.id,
+					contactId: contact.id,
+					role: contact.role,
+				});
 			}
+
 			onClose();
 		} catch (err) {
-			setError(err.message || "Failed to save team member");
+			console.error("Error saving team member(s):", err);
+			setError(err.message || "Failed to save team member(s)");
 		} finally {
 			setLoading(false);
 		}
 	};
 
 	return (
-		<Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-			<DialogTitle>{member ? "Edit Team Member" : "Add New Team Member"}</DialogTitle>
+		<Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+			<DialogTitle>
+				<Typography variant="h6">Add Team Members</Typography>
+				<Typography variant="subtitle2" color="text.secondary">
+					Select contacts to add to the team
+				</Typography>
+			</DialogTitle>
+
 			<DialogContent>
-				{error && (
-					<Alert severity='error' sx={{ mb: 2 }}>
-						{error}
-					</Alert>
-				)}
+				<Box sx={{ mb: 3 }}>
+					{error && (
+						<Alert severity='error' sx={{ mb: 2 }}>
+							{error}
+						</Alert>
+					)}
 
-				<Grid container spacing={2} sx={{ mt: 1 }}>
-					<Grid item xs={12} sm={6}>
-						<TextField
-							fullWidth
-							label='First Name'
-							name='firstName'
-							value={formData.firstName}
-							onChange={handleChange}
-							required
-							disabled={loading}
-						/>
-					</Grid>
-					<Grid item xs={12} sm={6}>
-						<TextField
-							fullWidth
-							label='Last Name'
-							name='lastName'
-							value={formData.lastName}
-							onChange={handleChange}
-							required
-							disabled={loading}
-						/>
-					</Grid>
+					<TextField
+						fullWidth
+						placeholder='Search contacts...'
+						value={searchTerm}
+						onChange={(e) => setSearchTerm(e.target.value)}
+						InputProps={{
+							startAdornment: (
+								<InputAdornment position="start">
+									<Search size={20} />
+								</InputAdornment>
+							),
+						}}
+						sx={{ mb: 2 }}
+					/>
 
-					<Grid item xs={12} sm={6}>
-						<TextField
-							fullWidth
-							label='Email'
-							name='email'
-							type='email'
-							value={formData.email}
-							onChange={handleChange}
-							required
-							disabled={loading}
-						/>
-					</Grid>
-					<Grid item xs={12} sm={6}>
-						<TextField
-							fullWidth
-							label='Phone'
-							name='phone'
-							value={formData.phone}
-							onChange={handleChange}
-							disabled={loading}
-						/>
-					</Grid>
-
-					<Grid item xs={12} sm={6}>
-						<FormControl fullWidth required disabled={loading}>
-							<InputLabel>Role</InputLabel>
-							<Select name='role' value={formData.role} onChange={handleChange} label='Role'>
-								{ROLES.map((role) => (
-									<MenuItem key={role} value={role}>
-										{role}
-									</MenuItem>
-								))}
-							</Select>
-						</FormControl>
-					</Grid>
-
-					<Grid item xs={12} sm={6}>
-						<TextField
-							fullWidth
-							label='Title'
-							name='title'
-							value={formData.title}
-							onChange={handleChange}
-							disabled={loading}
-						/>
-					</Grid>
-
-					<Grid item xs={12}>
-						<TextField
-							fullWidth
-							label='Department'
-							name='department'
-							value={formData.department}
-							onChange={handleChange}
-							disabled={loading}
-						/>
-					</Grid>
-				</Grid>
+					{contactsLoading ? (
+						<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+							<CircularProgress />
+						</Box>
+					) : (
+						<List sx={{ maxHeight: 400, overflow: "auto" }}>
+							{filteredContacts.length > 0 ? (
+								filteredContacts.map((contact) => (
+									<ListItemButton
+										key={contact.id}
+										onClick={() => handleToggleContact(contact)}
+										selected={selectedContacts.some(c => c.id === contact.id)}
+										sx={{
+											borderRadius: 1,
+											mb: 1,
+											"&:hover": {
+												bgcolor: "action.hover",
+											},
+										}}
+									>
+										<Box sx={{ width: '100%' }}>
+											<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+												<Box sx={{ display: 'flex', alignItems: 'center' }}>
+													<Checkbox
+														checked={selectedContacts.some(c => c.id === contact.id)}
+														onChange={() => handleToggleContact(contact)}
+														onClick={(e) => e.stopPropagation()}
+													/>
+													<ListItemText
+														primary={`${contact.firstName} ${contact.lastName}`}
+														secondary={contact.contactEmail || contact.contactMobilePhone || "No contact info"}
+													/>
+												</Box>
+												<Chip
+													label={contact.title || "No title"}
+													size='small'
+													variant='outlined'
+												/>
+											</Box>
+											
+											{selectedContacts.some(c => c.id === contact.id) && (
+												<Box sx={{ pl: 6 }}>
+													<FormControl fullWidth size="small">
+														<Select
+															value={selectedContacts.find(c => c.id === contact.id)?.role || ""}
+															onChange={(e) => handleRoleChange(contact.id, e.target.value)}
+															onClick={(e) => e.stopPropagation()}
+														>
+															{ROLES.map((role) => (
+																<MenuItem key={role} value={role}>
+																	{role}
+																</MenuItem>
+															))}
+														</Select>
+													</FormControl>
+												</Box>
+											)}
+										</Box>
+									</ListItemButton>
+								))
+							) : (
+								<Typography color='text.secondary' align='center'>
+									No contacts available to add
+								</Typography>
+							)}
+						</List>
+					)}
+				</Box>
 			</DialogContent>
+
 			<DialogActions>
-				<Button onClick={onClose} disabled={loading}>
-					Cancel
-				</Button>
+				<Button onClick={onClose}>Cancel</Button>
 				<Button
-					onClick={handleSubmit}
+					onClick={handleSave}
 					variant='contained'
-					disabled={loading}
-					startIcon={loading && <CircularProgress size={20} />}
+					disabled={loading || selectedContacts.length === 0}
+					startIcon={loading ? <CircularProgress size={20} /> : <UserPlus size={20} />}
 				>
-					{loading ? "Saving..." : member ? "Save Changes" : "Add Member"}
+					{loading ? "Saving..." : `Add ${selectedContacts.length} Member${selectedContacts.length !== 1 ? 's' : ''}`}
 				</Button>
 			</DialogActions>
 		</Dialog>

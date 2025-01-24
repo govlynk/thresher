@@ -19,6 +19,9 @@ import {
 	TextField,
 	Divider,
 	List,
+	FormControl,
+	Select,
+	MenuItem,
 } from "@mui/material";
 import { Edit, Trash2, UserPlus, Filter, Search, ChevronDown, ChevronUp, Users, Info } from "lucide-react";
 import { TeamDialog } from "./TeamDialog";
@@ -27,6 +30,20 @@ import { TeamInfoSidebar } from "./TeamInfoSidebar";
 import { useTeamMemberStore } from "../../stores/teamMemberStore";
 import { useTeamStore } from "../../stores/teamStore";
 import { useGlobalStore } from "../../stores/globalStore";
+
+const ROLES = [
+	"Decision Maker",
+	"Business Development",
+	"Sales",
+	"Marketing",
+	"Finance",
+	"Engineering",
+	"Contracts",
+	"Consultant",
+	"Negotiator",
+	"SME",
+	"Other",
+];
 
 export function TeamList() {
 	const [searchTerm, setSearchTerm] = useState("");
@@ -110,14 +127,12 @@ export function TeamList() {
 		setEditMemberDialogOpen(true);
 	};
 
-	const handleUpdateMember = async (action, data) => {
+	const handleUpdateMember = async (memberId, role) => {
 		try {
-			await updateTeamMember(selectedMember.id, {
-				role: data.role,
+			await updateTeamMember(memberId, {
+				role: role,
 			});
 			await fetchTeams(activeCompanyId);
-			setEditMemberDialogOpen(false);
-			setSelectedMember(null);
 		} catch (err) {
 			console.error("Error updating team member:", err);
 			throw err;
@@ -152,18 +167,25 @@ export function TeamList() {
 	}
 
 	return (
-		<Box>
+		<Box
+			sx={{
+				height: "100%",
+				display: "flex",
+				flexDirection: "column",
+				overflow: "hidden",
+			}}
+		>
 			{error && (
 				<Alert severity='error' sx={{ mb: 3 }}>
 					{error}
 				</Alert>
 			)}
 
-			<Typography variant='h4' component='h1' sx={{ mb: 4, fontWeight: "bold" }}>
+			<Typography variant='h4' component='div' sx={{ mb: 2, fontWeight: "bold" }}>
 				Team Management
 			</Typography>
 
-			<Box sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+			<Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
 				<Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
 					<TextField
 						size='small'
@@ -183,10 +205,42 @@ export function TeamList() {
 				</Button>
 			</Box>
 
-			<Box sx={{ display: "grid", gap: 3, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
+			<Box
+				sx={{
+					display: "grid",
+					gap: 3,
+					gridTemplateColumns: "repeat(auto-fill, minmax(450px, 1fr))",
+					overflow: "auto",
+					flex: 1,
+					p: 1,
+					"&::-webkit-scrollbar": {
+						width: "8px",
+						height: "8px",
+					},
+					"&::-webkit-scrollbar-track": {
+						background: "transparent",
+					},
+					"&::-webkit-scrollbar-thumb": {
+						background: (theme) => (theme.palette.mode === "dark" ? "#555" : "#ccc"),
+						borderRadius: "4px",
+					},
+					"&::-webkit-scrollbar-thumb:hover": {
+						background: (theme) => (theme.palette.mode === "dark" ? "#666" : "#999"),
+					},
+				}}
+			>
 				{filteredTeams.length > 0 ? (
 					filteredTeams.map((team) => (
-						<Card key={team.id} sx={{ height: "100%" }}>
+						<Card
+							key={team.id}
+							sx={{
+								height: "fit-content",
+								minHeight: 200,
+								minWidth: 450,
+								display: "flex",
+								flexDirection: "column",
+							}}
+						>
 							<CardHeader
 								title={team.name}
 								subheader={
@@ -228,7 +282,7 @@ export function TeamList() {
 										display: "flex",
 										justifyContent: "space-between",
 										alignItems: "center",
-										mb: 1,
+										mb: 2,
 									}}
 								>
 									<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -250,8 +304,10 @@ export function TeamList() {
 									<List
 										sx={{
 											mt: 1,
-											maxHeight: team.members?.length > 4 ? "300px" : "auto",
-											overflowY: team.members?.length > 4 ? "auto" : "visible",
+											maxHeight: "320px",
+											height: team.members?.length > 4 ? "320px" : "auto",
+											overflowY: team.members?.length > 4 ? "auto" : "hidden",
+											overflowX: "hidden",
 											"&::-webkit-scrollbar": {
 												width: "8px",
 											},
@@ -264,6 +320,9 @@ export function TeamList() {
 											},
 											"&::-webkit-scrollbar-thumb:hover": {
 												background: (theme) => (theme.palette.mode === "dark" ? "#666" : "#999"),
+											},
+											"& > .MuiBox-root": {
+												height: "80px",
 											},
 										}}
 									>
@@ -283,10 +342,21 @@ export function TeamList() {
 													}}
 												>
 													<Box>
-														<Typography variant='body2'>
+														<Typography
+															variant='body2'
+															sx={{
+																fontWeight: 500,
+																fontSize: "0.9rem",
+																color: "text.primary",
+															}}
+														>
 															{member.contact?.firstName} {member.contact?.lastName}
 														</Typography>
-														<Typography variant='caption' color='text.secondary'>
+														<Typography
+															variant='caption'
+															color='text.secondary'
+															sx={{ fontSize: "0.8rem" }}
+														>
 															{member.contact?.contactEmail}
 														</Typography>
 													</Box>
@@ -294,14 +364,47 @@ export function TeamList() {
 														sx={{
 															display: "flex",
 															alignItems: "center",
+															justifyContent: "space-between",
 															gap: 1,
-															position: "sticky",
-															right: 0,
-															bgcolor: "inherit",
 														}}
 													>
-														<Chip label={member.role} size='small' variant='outlined' color='primary' />
-														<IconButton size='small' onClick={() => handleEditMember(member)}>
+														<FormControl size='small' sx={{ minWidth: 120 }}>
+															<Select
+																value={member.role}
+																onChange={(e) => handleUpdateMember(member.id, e.target.value)}
+																variant='outlined'
+																sx={{
+																	"& .MuiOutlinedInput-notchedOutline": {
+																		borderColor: "divider",
+																	},
+																	"&:hover .MuiOutlinedInput-notchedOutline": {
+																		borderColor: "primary.main",
+																	},
+																	height: "30px",
+																	"& .MuiSelect-select": {
+																		py: "2px",
+																		px: 1.5,
+																		fontSize: "0.8125rem",
+																		lineHeight: "1.5",
+																		width: "100%",
+																	},
+																}}
+															>
+																{ROLES.map((role) => (
+																	<MenuItem key={role} value={role}>
+																		<Typography variant='body2' sx={{ fontSize: "0.8125rem" }}>
+																			{role}
+																		</Typography>
+																	</MenuItem>
+																))}
+															</Select>
+														</FormControl>
+														<IconButton
+															title='Edit Member'
+															size='small'
+															onClick={() => handleEditMember(member)}
+															color='primary'
+														>
 															<Edit size={16} />
 														</IconButton>
 														<IconButton
@@ -333,13 +436,10 @@ export function TeamList() {
 			</Box>
 
 			<TeamDialog open={teamDialogOpen} onClose={handleDialogClose} team={selectedTeam} />
-			<TeamMemberDialog open={memberDialogOpen} onClose={handleDialogClose} team={selectedTeam} />
-
 			<TeamMemberDialog
-				open={editMemberDialogOpen}
+				open={memberDialogOpen}
 				onClose={handleDialogClose}
 				team={selectedTeam}
-				member={selectedMember}
 				onUpdate={handleUpdateMember}
 			/>
 
