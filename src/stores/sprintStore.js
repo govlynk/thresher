@@ -1,31 +1,111 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
+import { format, startOfWeek, endOfWeek, addWeeks, isWithinInterval, startOfYear, endOfYear } from "date-fns";
 import { useGlobalStore } from "./globalStore";
+import { SPRINT_CONFIG, TASK_STATUS } from "../config/taskConfig";
 
 const client = generateClient();
+
+const generateSprintName = (startDate, index) => {
+	return `Sprint ${index + 1} (${format(new Date(startDate), "MMM d, yyyy")})`;
+};
+
+const getFirstMondayOfYear = () => {
+	const year = SPRINT_CONFIG.year;
+	const firstDay = startOfYear(new Date(year, 0, 1));
+	return startOfWeek(firstDay, { weekStartsOn: 1 });
+};
+
+const getLastSundayOfYear = () => {
+	const year = SPRINT_CONFIG.year;
+	const lastDay = endOfYear(new Date(year, 11, 31));
+	return endOfWeek(lastDay, { weekStartsOn: 1 });
+};
 
 export const useSprintStore = create((set, get) => ({
 	sprints: [],
 	activeSprint: null,
 	loading: false,
 	error: null,
+	sprintDuration: SPRINT_CONFIG.defaultDuration, // Duration in weeks
 
 	fetchSprints: async (teamId) => {
 		if (!teamId) {
-			console.warn("No team ID provided to fetchSprints");
+			// Reset sprints state when no team is selected
+			set({
+				sprints: [],
+				activeSprint: null,
+				loading: false,
+				error: null,
+			});
 			return;
 		}
 
 		set({ loading: true });
 		try {
-			console.log("Fetching sprints for team:", teamId);
 			const response = await client.models.Sprint.list({
 				filter: { teamId: { eq: teamId } },
 			});
 
-			console.log("Fetched sprints:", response.data);
+			// Sort sprints by name numerically
+			const sortedSprints = (response.data || []).sort((a, b) => {
+				const aNum = parseInt(a.name.match(/Sprint (\d+)/)?.[1] || "0");
+				const bNum = parseInt(b.name.match(/Sprint (\d+)/)?.[1] || "0");
+				return aNum - bNum;
+			});
+
+			// Find active sprint
+			const now = new Date();
+			let activeSprintData = sortedSprints.find((sprint) => {
+				const startDate = new Date(sprint.startDate);
+				const endDate = new Date(sprint.endDate);
+				return now >= startDate && now <= endDate;
+			});
+
+			// If no active sprint found, find the next upcoming sprint
+			if (!activeSprintData && sortedSprints.length > 0) {
+				activeSprintData = sortedSprints.find((sprint) => {
+					const startDate = new Date(sprint.startDate);
+					return startDate > now;
+				});
+
+				// If no upcoming sprint, use the last sprint
+				if (!activeSprintData) {
+					activeSprintData = sortedSprints[sortedSprints.length - 1];
+				}
+			}
+
+			// Update sprint statuses based on dates
+			const updatedSprints = sortedSprints.map((sprint) => {
+				const startDate = new Date(sprint.startDate);
+				const endDate = new Date(sprint.endDate);
+				let status;
+
+				if (now < startDate) {
+					status = "planning";
+				} else if (now > endDate) {
+					status = "completed";
+				} else {
+					status = "active";
+				}
+
+				// Only update if status has changed
+				if (sprint.status !== status) {
+					client.models.Sprint.update({
+						id: sprint.id,
+						status,
+					}).catch((err) => console.error("Error updating sprint status:", err));
+				}
+
+				return {
+					...sprint,
+					status,
+				};
+			});
+
 			set({
-				sprints: response.data || [],
+				sprints: updatedSprints,
+				activeSprint: activeSprintData || null,
 				loading: false,
 				error: null,
 			});
@@ -38,12 +118,81 @@ export const useSprintStore = create((set, get) => ({
 		}
 	},
 
+	generateSprints: async (teamId) => {
+		if (!teamId) {
+			throw new Error("Team ID is required to generate sprints");
+		}
+
+		set({ loading: true });
+		try {
+			const sprintDurationWeeks = get().sprintDuration;
+			const startDate = getFirstMondayOfYear();
+			const endDate = getLastSundayOfYear();
+
+			const newSprints = [];
+			let currentDate = new Date(startDate);
+			let index = 0;
+
+			while (isWithinInterval(currentDate, { start: startDate, end: endDate })) {
+				const sprintStart = new Date(currentDate);
+				const sprintEnd = endOfWeek(addWeeks(sprintStart, sprintDurationWeeks - 1), { weekStartsOn: 1 });
+
+				// Break if sprint would extend beyond the year
+				if (sprintEnd.getFullYear() > SPRINT_CONFIG.year) {
+					break;
+				}
+
+				const sprintData = {
+					name: generateSprintName(sprintStart, index),
+					goal: `Sprint ${index + 1} Goals`,
+					startDate: sprintStart.toISOString(),
+					endDate: sprintEnd.toISOString(),
+					status: "planning", // Status will be updated based on dates in fetchSprints
+					position: index,
+					teamId: teamId,
+				};
+
+				// Create sprint in database
+				const response = await client.models.Sprint.create(sprintData);
+				newSprints.push(response.data);
+
+				// Move to next sprint period
+				currentDate = addWeeks(currentDate, sprintDurationWeeks);
+				index++;
+			}
+
+			// Sort new sprints before adding them
+			const sortedNewSprints = newSprints.sort((a, b) => {
+				const aNum = parseInt(a.name.match(/Sprint (\d+)/)?.[1] || "0");
+				const bNum = parseInt(b.name.match(/Sprint (\d+)/)?.[1] || "0");
+				return aNum - bNum;
+			});
+
+			// Update store state with new sprints
+			set((state) => ({
+				sprints: [...state.sprints, ...sortedNewSprints],
+				activeSprint: sortedNewSprints[0], // Set first sprint as active
+				loading: false,
+				error: null,
+			}));
+
+			return newSprints;
+		} catch (err) {
+			console.error("Error generating sprints:", err);
+			set({
+				error: err.message || "Failed to generate sprints",
+				loading: false,
+			});
+			throw err;
+		}
+	},
+
 	createSprint: async (sprintData) => {
 		set({ loading: true });
 		try {
 			const { activeTeamId } = useGlobalStore.getState();
 			if (!activeTeamId) {
-				throw new Error("No active team selected");
+				throw new Error("Please select a specific team");
 			}
 
 			// Ensure dates are in ISO string format
@@ -172,7 +321,7 @@ export const useSprintStore = create((set, get) => ({
 			// Move incomplete tasks to backlog
 			const tasks = await client.models.Todo.list({
 				filter: {
-					and: [{ sprintId: { eq: sprintId } }, { status: { ne: "DONE" } }],
+					and: [{ sprintId: { eq: sprintId } }, { status: { ne: TASK_STATUS.DONE } }],
 				},
 			});
 
@@ -181,7 +330,7 @@ export const useSprintStore = create((set, get) => ({
 					client.models.Todo.update({
 						id: task.id,
 						sprintId: null,
-						status: "TODO",
+						status: TASK_STATUS.TODO,
 					})
 				)
 			);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { AppBar, Toolbar, Typography, Button, IconButton, Box, Chip, useTheme, Tooltip } from "@mui/material";
 import { Plus, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
@@ -8,11 +8,29 @@ import { useTeamStore } from "../../stores/teamStore";
 
 export function TodoHeader({ onAddClick, onSprintClick, onClose }) {
 	const theme = useTheme();
-	const { sprints, activeSprint, setActiveSprint } = useSprintStore();
+	const { sprints, activeSprint, setActiveSprint, generateSprints } = useSprintStore();
 	const { activeTeamId } = useGlobalStore();
 	const { teams } = useTeamStore();
 	const currentTeam = teams.find((team) => team.id === activeTeamId);
 	const currentSprintIndex = activeSprint ? sprints.findIndex((s) => s.id === activeSprint.id) : -1;
+
+	useEffect(() => {
+		const initializeSprints = async () => {
+			if (!activeTeamId) {
+				return;
+			}
+
+			if (!sprints || sprints.length === 0) {
+				try {
+					await generateSprints(activeTeamId);
+				} catch (err) {
+					console.error("Error generating sprints:", err);
+				}
+			}
+		};
+
+		initializeSprints();
+	}, [activeTeamId, sprints?.length, generateSprints]);
 
 	const getDaysRemaining = () => {
 		if (!activeSprint) return 0;
@@ -116,7 +134,17 @@ export function TodoHeader({ onAddClick, onSprintClick, onClose }) {
 								<Chip
 									size='small'
 									label={activeSprint.status}
-									sx={{ minWidth: 80, textTransform: "capitalize" }}
+									sx={{
+										minWidth: 80,
+										textTransform: "capitalize",
+										bgcolor:
+											activeSprint.status === "active"
+												? "success.main"
+												: activeSprint.status === "completed"
+												? "default"
+												: "warning.main",
+										color: "white",
+									}}
 									color={
 										activeSprint.status === "active"
 											? "success"
@@ -135,7 +163,9 @@ export function TodoHeader({ onAddClick, onSprintClick, onClose }) {
 										}}
 									>
 										<Calendar size={14} />
-										<Typography variant='caption'>{getDaysRemaining()} days left</Typography>
+										<Typography variant='caption' sx={{ fontWeight: 500 }}>
+											{getDaysRemaining()} days left
+										</Typography>
 									</Box>
 								)}
 							</Box>
@@ -164,7 +194,12 @@ export function TodoHeader({ onAddClick, onSprintClick, onClose }) {
 						order: { xs: 2, sm: 3 },
 						px: 2,
 						minWidth: 120,
+						bgcolor: theme.palette.mode === "dark" ? "primary.dark" : "primary.main",
+						"&:hover": {
+							bgcolor: theme.palette.mode === "dark" ? "primary.main" : "primary.dark",
+						},
 					}}
+					disabled={!activeTeamId}
 				>
 					Add Task
 				</Button>
