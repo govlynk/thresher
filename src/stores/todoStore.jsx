@@ -1,26 +1,37 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
-import { useTeamTodoStore } from "./teamTodoStore";
 import { useGlobalStore } from "./globalStore";
+import { useTeamTodoStore } from "./teamTodoStore";
 
 const client = generateClient({
 	authMode: "userPool",
 });
 
 export const useTodoStore = create((set, get) => ({
+	// State
 	todos: [],
+	activeId: null,
 	loading: false,
 	error: null,
 	subscription: null,
+	columnLimits: {
+		TODO: 10,
+		DOING: 5,
+		DONE: Infinity,
+	},
 
+	// Basic Setters
+	setActiveId: (id) => set({ activeId: id }),
+	setColumnLimit: (status, limit) =>
+		set((state) => ({
+			columnLimits: { ...state.columnLimits, [status]: limit },
+		})),
+
+	// Todo Management
 	fetchTodos: async () => {
 		const { activeCompanyId, activeTeamId } = useGlobalStore.getState();
 		if (!activeCompanyId) {
-			set({
-				todos: [],
-				loading: false,
-				error: "No active company selected",
-			});
+			set({ todos: [], loading: false, error: "No active company selected" });
 			return;
 		}
 
@@ -33,12 +44,11 @@ export const useTodoStore = create((set, get) => ({
 		set({ loading: true });
 		try {
 			// Build filter based on active team selection
-			const filter = activeTeamId && activeTeamId !== "all" 
-				? { teamId: { eq: activeTeamId } }
-				: undefined;
+			const filter = activeTeamId && activeTeamId !== "all" ? { teamId: { eq: activeTeamId } } : undefined;
 
 			const subscription = client.models.Todo.observeQuery({
 				filter,
+				sort: (s) => s.position("ASCENDING"),
 			}).subscribe({
 				next: ({ items }) => {
 					set({
@@ -80,13 +90,14 @@ export const useTodoStore = create((set, get) => ({
 				description: todoData.description.trim(),
 				status: todoData.status || "TODO",
 				priority: todoData.priority || "MEDIUM",
+				position: todoData.position || 1,
 				dueDate: todoData.dueDate,
 				estimatedEffort: todoData.estimatedEffort || 0,
 				actualEffort: todoData.actualEffort || 0,
 				tags: todoData.tags || [],
-				position: todoData.position || 0,
 				assigneeId: todoData.assigneeId,
 				teamId: todoData.teamId,
+				sprintId: todoData.sprintId || null,
 			});
 
 			set({ loading: false, error: null });
@@ -114,37 +125,69 @@ export const useTodoStore = create((set, get) => ({
 		}
 	},
 
-	updateTodos: async (newTodos) => {
+	moveTodo: async (todoId, newStatus, newPosition) => {
+		set((state) => {
+			const todo = state.todos.find((t) => t.id === todoId);
+			if (!todo) return state;
+
+			const statusTodos = state.todos
+				.filter((t) => t.status === newStatus && t.sprintId === todo.sprintId)
+				.sort((a, b) => a.position - b.position);
+
+			const updatedPositions = statusTodos.map((t, index) => ({
+				...t,
+				position: index >= newPosition ? index + 1 : index,
+			}));
+
+			const updatedTodos = state.todos
+				.filter((t) => t.id !== todoId && (t.status !== newStatus || t.sprintId !== todo.sprintId))
+				.concat(updatedPositions);
+
+			return {
+				todos: [...updatedTodos, { ...todo, status: newStatus, position: newPosition }],
+			};
+		});
+
 		try {
-			for (let i = 0; i < newTodos.length; i++) {
-				const todo = newTodos[i];
-				await client.models.Todo.update({
-					id: todo.id,
-					position: i + 1,
-					status: todo.status,
-				});
-			}
-			set({ error: null });
+			await client.models.Todo.update({
+				id: todoId,
+				status: newStatus,
+				position: newPosition,
+			});
 		} catch (err) {
-			console.error("Error updating todos:", err);
-			set({ error: "Failed to update todos" });
-			throw err;
+			console.error("Error moving todo:", err);
+			// Refresh todos to ensure UI matches backend state
+			get().fetchTodos();
 		}
 	},
 
 	removeTodo: async (id) => {
+		set({ loading: true, error: null });
 		try {
-			await client.models.Todo.delete({
-				id,
-			});
-			set({ error: null });
+			// Remove todo from local state first for immediate UI update
+			set((state) => ({
+				todos: state.todos.filter((todo) => todo.id !== id),
+			}));
+
+			// Then delete from database
+			await client.models.Todo.delete({ id });
+			set({ loading: false, error: null });
 		} catch (err) {
 			console.error("Error removing todo:", err);
-			set({ error: "Failed to remove todo" });
+			set({ error: "Failed to remove todo", loading: false });
+			// Refresh todos if delete failed
+			const { activeCompanyId, activeTeamId } = useGlobalStore.getState();
+			if (activeCompanyId) {
+				const filter = activeTeamId && activeTeamId !== "all" ? { teamId: { eq: activeTeamId } } : undefined;
+
+				const response = await client.models.Todo.list({ filter });
+				set({ todos: response.data || [] });
+			}
 			throw err;
 		}
 	},
 
+	// Cleanup
 	cleanup: () => {
 		const { subscription } = get();
 		if (subscription) {

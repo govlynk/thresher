@@ -1,127 +1,174 @@
-import React, { useState, useEffect } from "react";
-import { Box, Button, Typography, IconButton, Tooltip, Chip, Paper } from "@mui/material";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
-import { useSprintStore } from "../../stores/sprintStore";
+import React from "react";
+import { AppBar, Toolbar, Typography, Button, IconButton, Box, Chip, useTheme, Tooltip } from "@mui/material";
+import { Plus, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { format, differenceInDays } from "date-fns";
 import { useGlobalStore } from "../../stores/globalStore";
-import { format } from "date-fns";
+import { useSprintStore } from "../../stores/sprintStore";
+import { useTeamStore } from "../../stores/teamStore";
 
-const STATUS_COLORS = {
-	PLANNING: "default",
-	ACTIVE: "success",
-	COMPLETED: "secondary",
-};
+export function TodoHeader({ onAddClick, onSprintClick, onClose }) {
+	const theme = useTheme();
+	const { sprints, activeSprint, setActiveSprint } = useSprintStore();
+	const { activeTeamId } = useGlobalStore();
+	const { teams } = useTeamStore();
+	const currentTeam = teams.find((team) => team.id === activeTeamId);
+	const currentSprintIndex = activeSprint ? sprints.findIndex((s) => s.id === activeSprint.id) : -1;
 
-export function TodoHeader({ onAddClick }) {
-	const [selectedSprintId, setSelectedSprintId] = useState(null);
-	const { sprints, loading, fetchSprints } = useSprintStore();
-	const { activeCompanyId, activeTeamId } = useGlobalStore();
-	const [selectedIndex, setSelectedIndex] = useState(null);
-
-	// Fetch sprints when team changes
-	useEffect(() => {
-		if (activeTeamId) {
-			fetchSprints(activeTeamId);
-		}
-	}, [activeTeamId, fetchSprints]);
-
-	// Sort sprints by start date
-	const sortedSprints = [...sprints].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-
-	// Find active sprint on initial load
-	useEffect(() => {
-		if (sortedSprints.length > 0 && selectedIndex === null) {
-			const today = new Date();
-			const activeSprint = sortedSprints.find(
-				(sprint) => new Date(sprint.startDate) <= today && new Date(sprint.endDate) >= today
-			);
-			const activeIndex = activeSprint ? sortedSprints.indexOf(activeSprint) : 0;
-			setSelectedIndex(activeIndex);
-		}
-	}, [sortedSprints, selectedIndex]);
+	const getDaysRemaining = () => {
+		if (!activeSprint) return 0;
+		const endDate = new Date(activeSprint.endDate);
+		const today = new Date();
+		return Math.max(0, differenceInDays(endDate, today));
+	};
 
 	const handlePreviousSprint = () => {
-		setSelectedIndex((prev) => Math.max(0, prev - 1));
+		if (currentSprintIndex > 0 && sprints.length > 0) {
+			setActiveSprint(sprints[currentSprintIndex - 1].id);
+		}
 	};
 
 	const handleNextSprint = () => {
-		setSelectedIndex((prev) => Math.min(sortedSprints.length - 1, prev + 1));
+		if (currentSprintIndex < sprints.length - 1 && sprints.length > 0) {
+			setActiveSprint(sprints[currentSprintIndex + 1].id);
+		}
 	};
 
-	const currentSprint = sortedSprints[selectedIndex];
+	const handleSprintClick = () => {
+		if (activeSprint) {
+			onSprintClick?.();
+			onClose?.();
+		}
+	};
 
 	return (
-		<Box
+		<AppBar
+			position='static'
+			elevation={0}
 			sx={{
-				display: "flex",
-				justifyContent: "space-between",
-				alignItems: "center",
-				mb: 4,
-				flexWrap: "wrap",
-				gap: 2,
+				bgcolor: theme.palette.mode === "dark" ? "grey.900" : "grey.50",
+				borderBottom: 1,
+				borderColor: "divider",
+				color: "text.primary",
+				transition: "all 0.3s ease",
 			}}
 		>
-			<Typography variant='h4' sx={{ fontWeight: "bold" }}>
-				Tasks
-			</Typography>
-			<Paper
-				sx={{
-					display: "flex",
-					alignItems: "center",
-					gap: 2,
-					p: 1,
-					minWidth: 300,
-				}}
-			>
-				<Tooltip title={selectedIndex === 0 ? "No earlier sprints" : "Previous Sprint"}>
-					<span>
-						<IconButton onClick={handlePreviousSprint} disabled={selectedIndex === 0 || loading} size='small'>
-							<ChevronLeft size={20} />
-						</IconButton>
-					</span>
-				</Tooltip>
+			<Toolbar sx={{ gap: 2, flexWrap: "wrap" }}>
+				<Typography variant='h6' sx={{ flexGrow: { xs: 1, sm: 0 } }}>
+					Tasks
+				</Typography>
 
-				<Box sx={{ textAlign: "center", flex: 1 }}>
-					{loading ? (
-						<Typography variant='body1'>Loading sprints...</Typography>
-					) : !currentSprint ? (
-						<Typography variant='body1'>No sprints available</Typography>
-					) : (
-						<Box>
-							<Typography variant='subtitle1' sx={{ fontWeight: "medium" }}>
-								{currentSprint.name}
-							</Typography>
-							<Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, mt: 0.5 }}>
-								<Typography variant='caption' color='text.secondary'>
-									{format(new Date(currentSprint.startDate), "MMM d")} -{" "}
-									{format(new Date(currentSprint.endDate), "MMM d, yyyy")}
-								</Typography>
-								<Chip label={currentSprint.status} size='small' color={STATUS_COLORS[currentSprint.status]} />
+				<Box
+					sx={{
+						display: "flex",
+						justifyContent: "center",
+						alignItems: "center",
+						gap: 1,
+						flex: 1,
+						order: { xs: 3, sm: 2 },
+						my: { xs: 1, sm: 0 },
+						mx: "auto",
+						maxWidth: 400,
+					}}
+				>
+					<Tooltip title={currentSprintIndex <= 0 ? "No earlier sprints" : "Previous Sprint"}>
+						<span>
+							<IconButton
+								onClick={handlePreviousSprint}
+								disabled={!activeSprint || currentSprintIndex <= 0}
+								size='small'
+							>
+								<ChevronLeft />
+							</IconButton>
+						</span>
+					</Tooltip>
+
+					<Box
+						onClick={handleSprintClick}
+						sx={{
+							flex: 1,
+							minWidth: 200,
+							cursor: !activeTeamId ? "not-allowed" : activeSprint ? "pointer" : "default",
+							textAlign: "center",
+							"&:hover": {
+								"& .MuiTypography-root": {
+									color: activeSprint ? "primary.main" : "inherit",
+								},
+							},
+							px: 2,
+						}}
+					>
+						<Typography variant='subtitle1' sx={{ transition: "color 0.2s ease" }}>
+							{!activeTeamId
+								? "Select a team to view sprints"
+								: !currentTeam
+								? "Team not found"
+								: activeSprint?.name || "No active sprint"}
+						</Typography>
+						{activeSprint && (
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "space-between",
+									width: "100%",
+								}}
+							>
+								<Chip
+									size='small'
+									label={activeSprint.status}
+									sx={{ minWidth: 80, textTransform: "capitalize" }}
+									color={
+										activeSprint.status === "active"
+											? "success"
+											: activeSprint.status === "completed"
+											? "default"
+											: "warning"
+									}
+								/>
+								{activeSprint.status !== "completed" && (
+									<Box
+										sx={{
+											display: "flex",
+											alignItems: "center",
+											gap: 0.5,
+											ml: "auto",
+										}}
+									>
+										<Calendar size={14} />
+										<Typography variant='caption'>{getDaysRemaining()} days left</Typography>
+									</Box>
+								)}
 							</Box>
-						</Box>
-					)}
+						)}
+					</Box>
+
+					<Tooltip title={currentSprintIndex >= sprints.length - 1 ? "No later sprints" : "Next Sprint"}>
+						<span>
+							<IconButton
+								onClick={handleNextSprint}
+								disabled={!activeSprint || currentSprintIndex >= sprints.length - 1}
+								size='small'
+							>
+								<ChevronRight />
+							</IconButton>
+						</span>
+					</Tooltip>
 				</Box>
 
-				<Tooltip title={selectedIndex === sortedSprints.length - 1 ? "No later sprints" : "Next Sprint"}>
-					<span>
-						<IconButton
-							onClick={handleNextSprint}
-							disabled={selectedIndex === sortedSprints.length - 1 || loading}
-							size='small'
-						>
-							<ChevronRight size={20} />
-						</IconButton>
-					</span>
-				</Tooltip>
-			</Paper>
-			<Button
-				variant='contained'
-				startIcon={<Plus size={20} />}
-				onClick={onAddClick}
-				sx={{ px: 3 }}
-				disabled={!activeCompanyId}
-			>
-				Add Task
-			</Button>
-		</Box>
+				<Button
+					variant='contained'
+					size='small'
+					startIcon={<Plus size={16} />}
+					onClick={onAddClick}
+					sx={{
+						order: { xs: 2, sm: 3 },
+						px: 2,
+						minWidth: 120,
+					}}
+				>
+					Add Task
+				</Button>
+			</Toolbar>
+		</AppBar>
 	);
 }
