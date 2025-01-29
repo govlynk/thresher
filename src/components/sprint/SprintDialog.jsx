@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { addDays, isBefore } from "date-fns";
-import { SPRINT_CONFIG } from "../../config/sprintConfig";
+import { SPRINT_CONFIG } from "../../config/taskConfig";
 import { useSprintStore } from "../../stores/sprintStore";
 
 export function SprintDialog({ open, onClose, onSave, editSprint = null }) {
