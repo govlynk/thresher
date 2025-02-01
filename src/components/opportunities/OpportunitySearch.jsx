@@ -1,18 +1,20 @@
-import React from "react";
+import { useEffect, useMemo } from "react";
 import { Box, Typography, Alert, CircularProgress } from "@mui/material";
 import { useOpportunityQuery } from "../../utils/opportunityApi";
 import { useGlobalStore } from "../../stores/globalStore";
 import { useUserCompanyStore } from "../../stores/userCompanyStore";
 import { useOpportunityStore } from "../../stores/opportunityStore";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function OpportunitySearch() {
 	const { activeCompanyId } = useGlobalStore();
 	const { userCompanies } = useUserCompanyStore();
 	const { setOpportunities } = useOpportunityStore();
+	const queryClient = useQueryClient();
 	const activeCompany = userCompanies.find((c) => c.id === activeCompanyId);
 
 	// Construct search parameters
-	const searchParams = React.useMemo(() => {
+	const searchParams = useMemo(() => {
 		if (!activeCompany?.naicsCode?.length) {
 			return null;
 		}
@@ -40,12 +42,22 @@ export function OpportunitySearch() {
 
 	const { data, isLoading, error, dataUpdatedAt } = useOpportunityQuery(searchParams);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (data) {
 			setOpportunities(data);
 		}
 	}, [data, setOpportunities]);
 
+	// Prefetch next page of data
+	useEffect(() => {
+		if (data) {
+			const nextParams = { ...searchParams, page: (searchParams.page || 1) + 1 };
+			queryClient.prefetchQuery({
+				queryKey: ["opportunities", nextParams],
+				staleTime: 30 * 60 * 1000, // 30 minutes
+			});
+		}
+	}, [data, queryClient, searchParams]);
 	if (!activeCompanyId) {
 		return (
 			<Alert severity='warning' sx={{ mt: 2 }}>

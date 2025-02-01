@@ -2,6 +2,9 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { parseAgencyHierarchy } from "./formatters";
 
+const CACHE_TIME = 60 * 60 * 1000; // 1 hour
+const STALE_TIME = 30 * 60 * 1000; // 30 minutes
+
 const formatQueryParams = (params) => {
 	const queryParams = [];
 
@@ -121,16 +124,14 @@ export function useOpportunityQuery(searchParams) {
 		queryKey: ["opportunities", searchParams],
 		queryFn: async () => {
 			console.log("Query function executing with params:", searchParams);
-			if (!searchParams) {
-				console.log("No search params provided, returning empty array");
-				return [];
-			}
-			return getOpportunity(searchParams);
+			return searchParams ? getOpportunity(searchParams) : [];
 		},
-		staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-		cacheTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+		staleTime: STALE_TIME,
+		cacheTime: CACHE_TIME,
 		retry: 3,
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 		enabled: !!searchParams, // Only run query if searchParams exists
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
 	});
 }

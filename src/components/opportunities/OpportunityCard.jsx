@@ -20,6 +20,7 @@ import { OpportunityDetailsSidebar } from "./OpportunityDetailsSidebar";
 import { formatDate, formatCurrency } from "../../utils/formatters";
 import { useGlobalStore } from "../../stores/globalStore";
 import { useTeamStore } from "../../stores/teamStore";
+import { differenceInDays } from "date-fns";
 
 export function OpportunityCard({ opportunity, type = "new" }) {
 	const { saveOpportunity, rejectOpportunity, moveToSaved, loading, error } = useOpportunityStore();
@@ -29,6 +30,14 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 	const { activeCompanyId, activeTeamId } = useGlobalStore();
 	const { teams } = useTeamStore();
 	const [selectedTeamId, setSelectedTeamId] = useState(activeTeamId);
+
+	const getDeadlineColor = (deadline) => {
+		if (!deadline) return "text.primary";
+		const daysRemaining = differenceInDays(new Date(deadline), new Date());
+		if (daysRemaining < 30) return "error.main";
+		if (daysRemaining < 45) return "warning.main";
+		return "success.main";
+	};
 
 	const handleSave = async () => {
 		setLocalLoading(true);
@@ -83,7 +92,22 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 					<Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
 						<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 							<Building2 size={16} />
-							<Typography variant='body2'>{opportunity.department}</Typography>
+							<Box sx={{ display: "flex", flexDirection: "column" }}>
+								<Typography variant='body2' sx={{ fontWeight: 500 }}>
+									{opportunity.department}
+								</Typography>
+								{opportunity.agency && (
+									<Typography variant='caption' color='text.secondary'>
+										{opportunity.agency}
+									</Typography>
+								)}
+								{opportunity.office && (
+									<Typography variant='caption' color='text.secondary'>
+										{opportunity.office}
+										{opportunity.subOffice && ` - ${opportunity.subOffice}`}
+									</Typography>
+								)}
+							</Box>
 						</Box>
 
 						<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -94,7 +118,7 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 						{opportunity.responseDeadLine && (
 							<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 								<Calendar size={16} />
-								<Typography variant='body2' color='error'>
+								<Typography variant='body2' color={getDeadlineColor(opportunity.responseDeadLine)}>
 									Due: {formatDate(opportunity.responseDeadLine)}
 								</Typography>
 							</Box>

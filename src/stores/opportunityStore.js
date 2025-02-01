@@ -1,11 +1,14 @@
 import { create } from "zustand";
 import { generateClient } from "aws-amplify/data";
 import { useGlobalStore } from "./globalStore";
-import { getOpportunity } from "../utils/opportunityApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const client = generateClient({
 	authMode: "userPool",
 });
+
+const CACHE_TIME = 60 * 60 * 1000; // 1 hour
+const STALE_TIME = 30 * 60 * 1000; // 30 minutes
 
 export const useOpportunityStore = create((set, get) => ({
 	opportunities: [],
@@ -15,7 +18,9 @@ export const useOpportunityStore = create((set, get) => ({
 	loading: false,
 	error: null,
 	isInitialized: false,
-	subscription: null,
+	queryClient: null,
+
+	setQueryClient: (client) => set({ queryClient: client }),
 
 	initializeStore: async () => {
 		const { activeCompanyId } = useGlobalStore.getState();
@@ -66,47 +71,6 @@ export const useOpportunityStore = create((set, get) => ({
 
 	setOpportunities: (opportunities) => {
 		set({ opportunities });
-	},
-
-	// Fetch opportunities from SAM.gov
-	fetchOpportunities: async (params) => {
-		const { activeCompanyId } = useGlobalStore.getState();
-		if (!activeCompanyId) {
-			set({ error: "No active company selected", loading: false });
-			return;
-		}
-
-		if (!params || !Object.keys(params).length) {
-			set({
-				error: "Invalid search parameters",
-				loading: false,
-			});
-			return;
-		}
-
-		set({ loading: true, error: null });
-		try {
-			const response = await getOpportunity(params);
-			const currentState = get();
-
-			// Filter out previously saved and rejected opportunities
-			const savedIds = currentState.savedOpportunities.map((opp) => opp.opportunityId);
-			const rejectedIds = currentState.rejectedOpportunities.map((opp) => opp.opportunityId);
-			const filteredOpportunities = response.filter(
-				(opp) => !savedIds.includes(opp.noticeId) && !rejectedIds.includes(opp.noticeId)
-			);
-
-			set({
-				opportunities: filteredOpportunities,
-				lastRetrievedDate: new Date().toISOString(),
-				loading: false,
-			});
-
-			return filteredOpportunities;
-		} catch (err) {
-			console.error("Error fetching opportunities:", err);
-			set({ error: err.message || "Failed to fetch opportunities", loading: false });
-		}
 	},
 
 	// Fetch saved opportunities from database
@@ -459,59 +423,5 @@ export const useOpportunityStore = create((set, get) => ({
 			set({ error: err.message, loading: false });
 			throw err;
 		}
-	},
-
-	// Initialize real-time subscription
-	initializeSubscription: () => {
-		const { activeCompanyId, activeTeamId, activeUserId } = useGlobalStore.getState();
-
-		if (!activeCompanyId) return;
-
-		const currentSub = get().subscription;
-		if (currentSub) {
-			currentSub.unsubscribe();
-		}
-
-		const subscription = client.models.Opportunity.observeQuery({
-			filter: { companyId: { eq: activeCompanyId } },
-		}).subscribe({
-			next: async () => {
-				await get().fetchSavedOpportunities();
-				await get().fetchRejectedOpportunities();
-			},
-			error: (err) => {
-				console.error("Subscription error:", err);
-				set({ error: err.message });
-			},
-		});
-
-		set({ subscription });
-	},
-
-	resetStore: () => {
-		set({
-			opportunities: [],
-			savedOpportunities: [],
-			rejectedOpportunities: [],
-			lastRetrievedDate: null,
-			loading: false,
-			error: null,
-			isInitialized: false,
-		});
-	},
-
-	cleanup: () => {
-		const { subscription } = get();
-		if (subscription) {
-			subscription.unsubscribe();
-		}
-		set({
-			opportunities: [],
-			savedOpportunities: [],
-			rejectedOpportunities: [],
-			loading: false,
-			error: null,
-			subscription: null,
-		});
 	},
 }));
