@@ -200,6 +200,10 @@ export const useOpportunityStore = create((set, get) => ({
 			const opportunityData = {
 				status: "BACKLOG",
 				noticeId: opportunity.noticeId,
+				department: opportunity.department || "N/A",
+				agency: opportunity.agency || "N/A",
+				office: opportunity.office || "N/A",
+				subOffice: opportunity.subOffice || "N/A",
 				title: opportunity.title || "",
 				description: opportunity.description || "",
 
@@ -210,7 +214,6 @@ export const useOpportunityStore = create((set, get) => ({
 				subOffice: opportunity?.subOffice || "N/A",
 
 				solicitationNumber: opportunity.solicitationNumber || "",
-				fullParentPathName: opportunity.fullParentPathName || "",
 				postedDate: opportunity.postedDate ? new Date(opportunity.postedDate).toISOString() : null,
 				type: opportunity.type || "",
 				typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
@@ -300,10 +303,13 @@ export const useOpportunityStore = create((set, get) => ({
 			const opportunityData = {
 				status: "BACKLOG",
 				noticeId: opportunity.noticeId,
+				department: opportunity.department || "N/A",
+				agency: opportunity.agency || "N/A",
+				office: opportunity.office || "N/A",
+				subOffice: opportunity.subOffice || "N/A",
 				title: opportunity.title || "",
 				description: opportunity.description || "",
 				solicitationNumber: opportunity.solicitationNumber || "",
-				fullParentPathName: opportunity.fullParentPathName || "",
 				postedDate: opportunity.postedDate ? new Date(opportunity.postedDate).toISOString() : null,
 				type: opportunity.type || "",
 				typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
@@ -382,10 +388,13 @@ export const useOpportunityStore = create((set, get) => ({
 			const opportunityData = {
 				status: "REJECTED",
 				noticeId: opportunity.noticeId,
+				department: opportunity.department || "N/A",
+				agency: opportunity.agency || "N/A",
+				office: opportunity.office || "N/A",
+				subOffice: opportunity.subOffice || "N/A",
 				title: opportunity.title || "",
 				description: opportunity.description || "",
 				solicitationNumber: opportunity.solicitationNumber || "",
-				fullParentPathName: opportunity.fullParentPathName || "",
 				postedDate: opportunity.postedDate ? new Date(opportunity.postedDate).toISOString() : null,
 				type: opportunity.type || "",
 				typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",

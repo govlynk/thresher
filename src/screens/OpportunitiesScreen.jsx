@@ -54,6 +54,7 @@ export default function OpportunitiesScreen() {
 			queryClient.invalidateQueries(["savedOpportunities"]);
 			console.error("Error saving opportunity:", err);
 		} finally {
+			console.log("Save opportunity done", opportunities);
 			setLoading(false);
 		}
 	};

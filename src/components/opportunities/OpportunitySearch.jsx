@@ -34,7 +34,7 @@ export function OpportunitySearch() {
 			naicsCode: activeCompany.naicsCode.join(","),
 			postedFrom: formattedStartDate,
 			postedTo: formattedEndDate,
-			limit: "10",
+			limit: "100",
 		};
 	}, [activeCompany]);
 

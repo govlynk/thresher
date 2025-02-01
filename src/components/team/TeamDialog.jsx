@@ -12,11 +12,13 @@ import {
 } from "@mui/material";
 import { useTeamStore } from "../../stores/teamStore";
 import { useUserCompanyStore } from "../../stores/userCompanyStore";
+import { useSprintStore } from "../../stores/sprintStore";
 import { useGlobalStore } from "../../stores/globalStore";
 
 export function TeamDialog({ open, onClose, team }) {
 	const { activeCompanyId } = useGlobalStore();
 	const { addTeam, updateTeam } = useTeamStore();
+	const { generateSprints } = useSprintStore();
 	const { getActiveCompany } = useUserCompanyStore();
 	const [loading, setLoading] = useState(false);
 	const [formData, setFormData] = useState({
@@ -60,9 +62,21 @@ export function TeamDialog({ open, onClose, team }) {
 			};
 
 			if (team) {
-				await updateTeam(team.id, teamData);
+				const updatedTeam = await updateTeam(team.id, teamData);
+				return updatedTeam;
 			} else {
-				await addTeam(teamData);
+				// Create new team and generate sprints
+				const newTeam = await addTeam(teamData);
+
+				// Generate sprints for the new team
+				try {
+					await generateSprints(newTeam.id);
+				} catch (err) {
+					console.error("Error generating sprints:", err);
+					// Don't throw error here - team was still created successfully
+				}
+
+				return newTeam;
 			}
 			onClose();
 		} catch (err) {

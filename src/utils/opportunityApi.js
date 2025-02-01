@@ -27,16 +27,8 @@ const formatQueryParams = (params) => {
 const processOpportunityData = (opportunity) => {
 	if (!opportunity) return null;
 
-	const parsedAgency = parseAgencyHierarchy(opportunity.fullParentPathName);
-	const flattenedAgency = opportunity.fullParentPathName
-		? {
-				department: parsedAgency?.department || "N/A",
-				agency: parsedAgency?.agency || "N/A",
-				office: parsedAgency?.office || "N/A",
-				subOffice: parsedAgency?.subOffice || "N/A",
-		  }
-		: {};
-	console.log("parsedAgency", parsedAgency);
+	// Parse agency hierarchy
+	const { department, agency, office, subOffice } = parseAgencyHierarchy(opportunity.fullParentPathName) || {};
 
 	const flattenedOfficeAddress = opportunity.officeAddress
 		? {
@@ -58,7 +50,10 @@ const processOpportunityData = (opportunity) => {
 
 	return {
 		...opportunity,
-		...flattenedAgency,
+		department: department || "N/A",
+		agency: agency || "N/A",
+		office: office || "N/A",
+		subOffice: subOffice || "N/A",
 		...flattenedOfficeAddress,
 		pointOfContact: flattenedPointOfContact,
 	};
