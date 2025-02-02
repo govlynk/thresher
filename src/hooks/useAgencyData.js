@@ -8,6 +8,55 @@ const api = axios.create({
 	},
 });
 
+async function fetchAgencySpending() {
+	try {
+		const response = await axios.post("https://api.usaspending.gov/api/v2/references/toptier_agencies", {
+			sort: "obligated_amount",
+			order: "desc",
+		});
+
+		const results = response.data.results || [];
+		const total = results.reduce((sum, agency) => sum + agency.obligated_amount, 0);
+		console.log("Agency spending data:", results); // Debug log
+		console.log("Total agency spending:", total); // Debug log
+
+		// Sort agencies by amount and get top 10
+		const topAgencies = results.sort((a, b) => b.obligated_amount - a.obligated_amount).slice(0, 10);
+
+		console.log("Top agencies:", topAgencies); // Debug log
+		// Calculate "All Others" amount
+		const othersAmount = results
+			.sort((a, b) => b.obligated_amount - a.obligated_amount)
+			.slice(10)
+			.reduce((sum, agency) => sum + agency.obligated_amount, 0);
+
+		// Format final data
+		return {
+			results: [
+				...topAgencies.map((agency) => ({
+					name: agency.agency_name,
+					code: agency.toptier_code,
+					amount: agency.obligated_amount,
+					percentage: Number(((agency.obligated_amount / total) * 100).toFixed(1)),
+					sortIndex: agency.obligated_amount, // Add sort value
+				})),
+				{
+					name: "All Others",
+					code: "others",
+					amount: othersAmount,
+					percentage: Number(((othersAmount / total) * 100).toFixed(1)),
+					sortIndex: 0, // Ensure "All Others" appears last
+				},
+			],
+			total,
+			fiscalYear: 2025,
+		};
+	} catch (error) {
+		console.error("Error fetching agency spending:", error);
+		throw error;
+	}
+}
+
 async function fetchAgencyData(toptier_code, fiscalYear) {
 	if (!toptier_code) return null;
 
@@ -105,5 +154,14 @@ export function useAgencyData(toptier_code, fiscalYear) {
 		enabled: !!toptier_code,
 		staleTime: 5 * 60 * 1000, // 5 minutes
 		cacheTime: 30 * 60 * 1000, // 30 minutes
+	});
+}
+
+export function useAgencySpending() {
+	return useQuery({
+		queryKey: ["agencySpending"],
+		queryFn: fetchAgencySpending,
+		// staleTime: 5 * 60 * 1000, // 5 minutes
+		// cacheTime: 30 * 60 * 1000, // 30 minutes
 	});
 }
