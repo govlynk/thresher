@@ -19,22 +19,6 @@ import {
 	BarChart,
 } from "lucide-react";
 
-const agencyLinks = {
-	id: "agency",
-	title: "Agency",
-	icon: Building,
-	links: [
-		{
-			title: "Overview",
-			path: "/agency-overview",
-		},
-		{
-			title: "Research",
-			path: "/agency-analysis",
-		},
-	],
-};
-
 const profileLinks = {
 	id: "profile",
 	title: "Profile",
@@ -86,12 +70,16 @@ const marketIntelligenceLinks = {
 	icon: Briefcase,
 	links: [
 		{
-			title: "Spending Dashboard",
+			title: "Federal Spending",
 			path: "/spending-analysis",
 		},
 		{
-			title: "Spending Analysis by NAICS",
+			title: "Federal Spending by NAICS",
 			path: "/spending-analysis-naics",
+		},
+		{
+			title: "Agencies Spending",
+			path: "/agency-overview",
 		},
 		{
 			title: "Agency Analysis",
@@ -260,7 +248,6 @@ export const menuLinks = [
 		],
 	},
 
-	agencyLinks,
 	profileLinks,
 	strategyLinks,
 	marketIntelligenceLinks,
