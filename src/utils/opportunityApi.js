@@ -122,16 +122,29 @@ export async function getOpportunity(searchParams) {
 export function useOpportunityQuery(searchParams) {
 	return useQuery({
 		queryKey: ["opportunities", searchParams],
+		// Force a refetch by disabling caching temporarily
+		cacheTime: 0,
+		staleTime: 0,
 		queryFn: async () => {
 			console.log("Query function executing with params:", searchParams);
-			return searchParams ? getOpportunity(searchParams) : [];
+			if (!searchParams) {
+				console.log("No search params provided");
+				return [];
+			}
+			const data = await getOpportunity(searchParams);
+			console.log("Query function response:", data);
+			return data;
 		},
-		staleTime: STALE_TIME,
-		cacheTime: CACHE_TIME,
 		retry: 3,
 		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 		enabled: !!searchParams, // Only run query if searchParams exists
 		refetchOnWindowFocus: false,
-		refetchOnMount: false,
+		refetchOnMount: true,
+		onSuccess: (data) => {
+			console.log("Query successful, data:", data);
+		},
+		onError: (error) => {
+			console.error("Query error:", error);
+		},
 	});
 }

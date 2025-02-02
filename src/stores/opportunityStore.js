@@ -3,7 +3,7 @@ import { generateClient } from "aws-amplify/data";
 import { useGlobalStore } from "./globalStore";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-const client = generateClient({
+const amplifyClient = generateClient({
 	authMode: "userPool",
 });
 
@@ -14,6 +14,7 @@ export const useOpportunityStore = create((set, get) => ({
 	opportunities: [],
 	savedOpportunities: [],
 	rejectedOpportunities: [],
+	notes: {},
 	lastRetrievedDate: null,
 	loading: false,
 	error: null,
@@ -37,7 +38,7 @@ export const useOpportunityStore = create((set, get) => ({
 		set({ loading: true, error: null });
 		try {
 			// Fetch saved opportunities
-			const savedOpportunities = await client.models.Opportunity.list({
+			const savedOpportunities = await amplifyClient.models.Opportunity.list({
 				filter: {
 					companyId: { eq: activeCompanyId },
 					status: { eq: "BACKLOG" },
@@ -45,7 +46,7 @@ export const useOpportunityStore = create((set, get) => ({
 			});
 
 			// Fetch rejected opportunities
-			const rejectedOpportunities = await client.models.Opportunity.list({
+			const rejectedOpportunities = await amplifyClient.models.Opportunity.list({
 				filter: {
 					companyId: { eq: activeCompanyId },
 					status: { eq: "REJECTED" },
@@ -73,6 +74,18 @@ export const useOpportunityStore = create((set, get) => ({
 		set({ opportunities });
 	},
 
+	resetStore: () => {
+		set({
+			opportunities: [],
+			savedOpportunities: [],
+			rejectedOpportunities: [],
+			lastRetrievedDate: null,
+			loading: false,
+			error: null,
+			isInitialized: false,
+		});
+	},
+
 	// Fetch saved opportunities from database
 	fetchSavedOpportunities: async () => {
 		const { activeCompanyId } = useGlobalStore.getState();
@@ -80,7 +93,7 @@ export const useOpportunityStore = create((set, get) => ({
 
 		set({ loading: true });
 		try {
-			const response = await client.models.Opportunity.list({
+			const response = await amplifyClient.models.Opportunity.list({
 				filter: {
 					companyId: { eq: activeCompanyId },
 					status: { ne: "REJECTED" },
@@ -97,13 +110,18 @@ export const useOpportunityStore = create((set, get) => ({
 	fetchRejectedOpportunities: async () => {
 		const { activeCompanyId } = useGlobalStore.getState();
 		if (!activeCompanyId) return;
+		const thirtyDaysAgo = new Date();
+		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
 		set({ loading: true });
 		try {
-			const response = await client.models.Opportunity.list({
+			const response = await amplifyClient.models.Opportunity.list({
 				filter: {
-					companyId: { eq: activeCompanyId },
-					status: { eq: "REJECTED" },
+					and: [
+						{ companyId: { eq: activeCompanyId } },
+						{ status: { eq: "REJECTED" } },
+						{ updatedAt: { gt: thirtyDaysAgo.toISOString() } },
+					],
 				},
 			});
 			set({ rejectedOpportunities: response.data || [], loading: false });
@@ -117,7 +135,7 @@ export const useOpportunityStore = create((set, get) => ({
 	moveOpportunity: async (opportunityId, newStatus) => {
 		set({ loading: true, error: null });
 		try {
-			const response = await client.models.Opportunity.update({
+			const response = await amplifyClient.models.Opportunity.update({
 				id: opportunityId,
 				status: newStatus,
 			});
@@ -147,7 +165,7 @@ export const useOpportunityStore = create((set, get) => ({
 		set({ loading: true, error: null });
 		try {
 			// First, find and delete the rejected opportunity
-			const rejectedOpp = await client.models.Opportunity.list({
+			const rejectedOpp = await amplifyClient.models.Opportunity.list({
 				filter: {
 					opportunityId: { eq: opportunity.noticeId },
 					status: { eq: "REJECTED" },
@@ -155,7 +173,7 @@ export const useOpportunityStore = create((set, get) => ({
 			});
 
 			if (rejectedOpp?.data?.[0]) {
-				await client.models.Opportunity.delete({
+				await amplifyClient.models.Opportunity.delete({
 					id: rejectedOpp.data[0].id,
 				});
 			}
@@ -169,8 +187,7 @@ export const useOpportunityStore = create((set, get) => ({
 				office: opportunity.office || "N/A",
 				subOffice: opportunity.subOffice || "N/A",
 				title: opportunity.title || "",
-				description: opportunity.description || "",
-
+				description: opportunity.description || "No description available", // Now contains actual description text
 				// Agency hierarchy
 				department: opportunity?.department || "N/A",
 				agency: opportunity?.agency || "N/A",
@@ -221,7 +238,7 @@ export const useOpportunityStore = create((set, get) => ({
 				teamId: activeTeamId,
 			};
 
-			const response = await client.models.Opportunity.create(opportunityData);
+			const response = await amplifyClient.models.Opportunity.create(opportunityData);
 
 			if (!response?.data) {
 				throw new Error("Failed to move opportunity to saved");
@@ -264,15 +281,35 @@ export const useOpportunityStore = create((set, get) => ({
 		try {
 			console.log("OpportunityStore: Saving opportunity:", opportunity);
 
-			const opportunityData = {
+			// Check if opportunity already exists
+			const existingOpp = await amplifyClient.models.Opportunity.list({
+				filter: {
+					noticeId: { eq: opportunity.noticeId },
+					companyId: { eq: activeCompanyId },
+				},
+			});
+
+			if (existingOpp?.data?.[0]) {
+				// Update existing opportunity
+				const response = await amplifyClient.models.Opportunity.update({
+					id: existingOpp.data[0].id,
+					status: "BACKLOG",
+					updatedAt: new Date().toISOString(),
+				});
+				return response.data;
+			}
+
+			// Create new opportunity if it doesn't exist
+			const newOpportunityData = {
 				status: "BACKLOG",
 				noticeId: opportunity.noticeId,
+				updatedAt: new Date().toISOString(),
 				department: opportunity.department || "N/A",
 				agency: opportunity.agency || "N/A",
 				office: opportunity.office || "N/A",
 				subOffice: opportunity.subOffice || "N/A",
 				title: opportunity.title || "",
-				description: opportunity.description || "",
+				description: opportunity.description || "No description available", // Now contains actual description text
 				solicitationNumber: opportunity.solicitationNumber || "",
 				postedDate: opportunity.postedDate ? new Date(opportunity.postedDate).toISOString() : null,
 				type: opportunity.type || "",
@@ -317,7 +354,7 @@ export const useOpportunityStore = create((set, get) => ({
 				teamId: activeTeamId,
 			};
 
-			const response = await client.models.Opportunity.create(opportunityData);
+			const response = await amplifyClient.models.Opportunity.create(newOpportunityData);
 			console.log("Saved opportunity response:", response);
 
 			if (!response?.data) {
@@ -343,21 +380,40 @@ export const useOpportunityStore = create((set, get) => ({
 	rejectOpportunity: async (opportunity) => {
 		const { activeCompanyId, activeTeamId, activeUserId } = useGlobalStore.getState();
 
-		if (!activeCompanyId) {
-			throw new Error("No active company selected");
+		if (!activeCompanyId || !opportunity.noticeId) {
+			throw new Error("Missing required data");
 		}
 
 		set({ loading: true, error: null });
 		try {
-			const opportunityData = {
+			// Check if opportunity already exists
+			const existingOpp = await amplifyClient.models.Opportunity.list({
+				filter: {
+					and: [{ noticeId: { eq: opportunity.noticeId } }, { companyId: { eq: activeCompanyId } }],
+				},
+				limit: 1,
+			});
+
+			if (existingOpp?.data?.[0]) {
+				// Update existing opportunity
+				return await amplifyClient.models.Opportunity.update({
+					id: existingOpp.data[0].id,
+					status: "REJECTED",
+					updatedAt: new Date().toISOString(),
+				});
+			}
+
+			// Create new opportunity if it doesn't exist
+			const newOpportunityData = {
 				status: "REJECTED",
 				noticeId: opportunity.noticeId,
+				updatedAt: new Date().toISOString(),
 				department: opportunity.department || "N/A",
 				agency: opportunity.agency || "N/A",
 				office: opportunity.office || "N/A",
 				subOffice: opportunity.subOffice || "N/A",
 				title: opportunity.title || "",
-				description: opportunity.description || "",
+				description: opportunity.description || "No description available", // Now contains actual description text
 				solicitationNumber: opportunity.solicitationNumber || "",
 				postedDate: opportunity.postedDate ? new Date(opportunity.postedDate).toISOString() : null,
 				type: opportunity.type || "",
@@ -402,25 +458,40 @@ export const useOpportunityStore = create((set, get) => ({
 				teamId: activeTeamId,
 			};
 
-			const response = await client.models.Opportunity.create(opportunityData);
+			return await amplifyClient.models.Opportunity.create(newOpportunityData);
+		} catch (err) {
+			console.error("Error rejecting opportunity:", err);
+			throw new Error("Failed to reject opportunity");
+		} finally {
+			set({ loading: false });
+		}
+	},
 
-			console.log("Rejected opportunity response:", response);
-
-			if (!response?.data) {
-				throw new Error("Failed to reject opportunity");
-			}
+	// Notes management
+	updateNotes: async (opportunityId, notes) => {
+		set({ loading: true, error: null });
+		try {
+			const response = await amplifyClient.models.Opportunity.update({
+				id: opportunityId,
+				notes,
+				updatedAt: new Date().toISOString(),
+			});
 
 			set((state) => ({
-				rejectedOpportunities: [...state.rejectedOpportunities, response.data],
-				opportunities: state.opportunities.filter((opp) => opp.noticeId !== opportunity.noticeId),
+				savedOpportunities: state.savedOpportunities.map((opp) =>
+					opp.id === opportunityId ? { ...opp, notes } : opp
+				),
+				rejectedOpportunities: state.rejectedOpportunities.map((opp) =>
+					opp.id === opportunityId ? { ...opp, notes } : opp
+				),
 				loading: false,
 				error: null,
 			}));
 
 			return response.data;
 		} catch (err) {
-			console.error("Error rejecting opportunity:", err);
-			set({ error: err.message, loading: false });
+			console.error("Error updating notes:", err);
+			set({ error: err.message || "Failed to update notes", loading: false });
 			throw err;
 		}
 	},

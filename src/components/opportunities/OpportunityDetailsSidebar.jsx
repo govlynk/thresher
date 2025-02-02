@@ -1,9 +1,33 @@
-import React from "react";
-import { Box, Typography, Drawer, IconButton, Divider, Chip, Link } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Typography, Drawer, IconButton, Divider, Chip, Link, CircularProgress } from "@mui/material";
 import { CircleX, Building2, Calendar, MapPin, DollarSign, Mail, Phone, Tag, ExternalLink } from "lucide-react";
 import { formatDate, formatCurrency } from "../../utils/formatters";
+import { getNoticeDescription } from "../../utils/sam/samApi";
 
 export function OpportunityDetailsSidebar({ open, onClose, opportunity }) {
+	const [description, setDescription] = useState("");
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(null);
+
+	useEffect(() => {
+		if (open && opportunity?.description) {
+			setLoading(true);
+			setError(null);
+			getNoticeDescription(opportunity.description)
+				.then((desc) => {
+					setDescription(desc);
+				})
+				.catch((err) => {
+					console.error("Error fetching description:", err);
+					setError("Failed to load description");
+					setDescription("No description available");
+				})
+				.finally(() => {
+					setLoading(false);
+				});
+		}
+	}, [open, opportunity?.description]);
+
 	const renderSection = (title, content, icon) => (
 		<Box sx={{ mb: 3 }}>
 			<Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
@@ -35,6 +59,8 @@ export function OpportunityDetailsSidebar({ open, onClose, opportunity }) {
 			)}
 		</Box>
 	);
+
+	if (!opportunity) return null;
 
 	return (
 		<Drawer
@@ -167,9 +193,23 @@ export function OpportunityDetailsSidebar({ open, onClose, opportunity }) {
 							<Typography variant='subtitle2' color='text.secondary' component='div'>
 								Description
 							</Typography>
-							<Typography variant='body2' component='div' sx={{ mt: 1, whiteSpace: "pre-wrap" }}>
-								{opportunity.description}
-							</Typography>
+							{loading ? (
+								<Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+									<CircularProgress size={24} />
+								</Box>
+							) : error ? (
+								<Typography variant='body2' color='error' sx={{ mt: 1 }}>
+									{error}
+								</Typography>
+							) : (
+								<Box
+									sx={{ mt: 1 }}
+									dangerouslySetInnerHTML={{
+										__html: description,
+									}}
+									className='opportunity-description'
+								/>
+							)}
 						</Box>
 					)}
 

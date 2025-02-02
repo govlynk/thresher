@@ -25,3 +25,89 @@
 .rbc-today {
   background-color: rgba(25, 118, 210, 0.1);
 }
+
+/* Opportunity Description Styles */
+.opportunity-description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow-y: hidden;
+  color: inherit;
+  transition: max-height 0.3s ease-out;
+}
+
+.opportunity-description.expanded {
+  max-height: none;
+}
+
+/* Scrollbar styling */
+.opportunity-description::-webkit-scrollbar {
+  width: 6px;
+}
+
+.opportunity-description::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.opportunity-description::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  .opportunity-description::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.opportunity-description p {
+  margin-bottom: 1em;
+}
+
+.opportunity-description ul,
+.opportunity-description ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+.opportunity-description li {
+  margin-bottom: 0.5em;
+}
+
+.opportunity-description table {
+  border-collapse: collapse;
+  margin: 1em 0;
+  width: 100%;
+}
+
+.opportunity-description th,
+.opportunity-description td {
+  border: 1px solid rgba(224, 224, 224, 0.5);
+  padding: 0.5em;
+  text-align: left;
+}
+
+.opportunity-description th {
+  background-color: rgba(0, 0, 0, 0.04);
+  font-weight: 600;
+}
+
+.opportunity-description a {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.opportunity-description a:hover {
+  text-decoration: underline;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .opportunity-description th {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+  
+  .opportunity-description a {
+    color: #90caf9;
+  }
+}

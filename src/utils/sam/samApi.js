@@ -48,3 +48,27 @@ export async function getRepsAndCerts(uei) {
 		throw serializedError;
 	}
 }
+
+export async function getNoticeDescription(url) {
+	if (!import.meta.env.VITE_SAM_API_KEY) {
+		throw new Error("SAM API key is not configured");
+	}
+
+	const api_key = import.meta.env.VITE_SAM_API_KEY;
+
+	const apiUrl = `${url}&api_key=${api_key}`;
+	console.log("Fetching notice description:", apiUrl);
+
+	try {
+		const response = await axios.get(apiUrl);
+		console.log("Notice description response:", response.data);
+		if (response.status === 404) {
+			return "No description available";
+		}
+
+		return response.data.description || "No description available";
+	} catch (error) {
+		console.error("Error fetching notice description:", error);
+		throw error;
+	}
+}
