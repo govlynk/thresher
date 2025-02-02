@@ -91,6 +91,7 @@ export default function TopBar() {
 			position='sticky'
 			elevation={0}
 			sx={{
+				height: "64px",
 				bgcolor: "black",
 				borderBottom: "1px solid",
 				borderColor: "divider",

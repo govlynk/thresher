@@ -4,7 +4,7 @@ import { Award, DollarSign, BarChart3, TrendingUp } from "lucide-react";
 import { formatBillions } from "../../utils/formatters";
 
 export function AwardMetrics({ awardCounts, budgetaryResources = {} }) {
-	console.log("Raw budgetary resources:", budgetaryResources);
+	// console.log("Raw budgetary resources:", budgetaryResources);
 
 	const currentYearData = useMemo(() => {
 		if (!budgetaryResources?.agency_data_by_year?.length) {
@@ -46,7 +46,7 @@ export function AwardMetrics({ awardCounts, budgetaryResources = {} }) {
 		},
 	];
 
-	console.log("Metrics:", metrics);
+	// console.log("Metrics:", metrics);
 
 	return (
 		<Grid container spacing={3}>

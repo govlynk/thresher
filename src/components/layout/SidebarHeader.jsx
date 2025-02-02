@@ -9,6 +9,7 @@ const StyledSidebarHeader = styled.div`
 	display: flex;
 	align-items: center;
 	padding: 0 20px;
+	cursor: pointer;
 
 	> div {
 		width: 100%;
@@ -17,10 +18,10 @@ const StyledSidebarHeader = styled.div`
 `;
 
 const StyledLogo = styled.div`
-	width: 35px;
-	min-width: 35px;
-	height: 35px;
-	min-height: 35px;
+	width: ${(props) => (props.isCollapsed ? "40px" : "35px")};
+	min-width: ${(props) => (props.isCollapsed ? "40px" : "35px")};
+	height: ${(props) => (props.isCollapsed ? "40px" : "35px")};
+	min-height: ${(props) => (props.isCollapsed ? "40px" : "35px")};
 	margin: 10px;
 	display: flex;
 	align-items: center;
@@ -34,11 +35,11 @@ const StyledLogo = styled.div`
 const SidebarHeader = ({ isCollapsed, setIsCollapsed }) => {
 	return (
 		<StyledSidebarHeader onClick={() => setIsCollapsed(!isCollapsed)} icon={<Menu />}>
-			<div style={{ display: "flex", alignItems: "center" }}>
-				<StyledLogo>
+			<div style={{ display: "flex", alignItems: "center", justifyContent: isCollapsed ? "center" : "flex-start" }}>
+				<StyledLogo isCollapsed={isCollapsed}>
 					<Menu />
 				</StyledLogo>
-				<img src={logo} alt='Logo' style={{ width: "80%" }} />
+				{!isCollapsed && <img src={logo} alt='Logo' style={{ width: "80%" }} />}
 			</div>
 		</StyledSidebarHeader>
 	);

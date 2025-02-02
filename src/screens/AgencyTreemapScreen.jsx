@@ -12,11 +12,11 @@ export default function AgencyTreemapScreen() {
 	const treemapData = React.useMemo(() => {
 		if (!data?.results) return null;
 
-		// Sort children by amount descending
 		const children = data.results.map((agency) => ({
 			id: agency.code,
 			name: agency.name,
 			value: agency.amount,
+			code: agency.code,
 			formattedValue: formatCurrency(agency.amount),
 			percentage: agency.percentage,
 			sortIndex: agency.sortIndex || 0,

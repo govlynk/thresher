@@ -108,7 +108,6 @@ async function fetchAgencyData(toptier_code, fiscalYear) {
 			transformResponse: [
 				(data) => {
 					const parsed = JSON.parse(data);
-					console.log("Raw obligations data:", parsed); // Debug log
 					return parsed;
 				},
 			],

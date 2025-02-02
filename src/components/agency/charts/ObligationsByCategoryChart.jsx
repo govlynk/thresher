@@ -5,7 +5,7 @@ import { formatBillions } from "../../../utils/formatters";
 
 export function ObligationsByCategoryChart({ data = [] }) {
 	const theme = useTheme();
-	console.log("Obligations data:", data); // Debug log
+	// console.log("Obligations data:", data); // Debug log
 
 	if (!data?.length) {
 		return (

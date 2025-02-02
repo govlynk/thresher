@@ -1,12 +1,28 @@
-import React from "react";
 import { ResponsiveTreeMap } from "@nivo/treemap";
-import { Box, useTheme } from "@mui/material";
-import { formatCurrency } from "../../../utils/formatters";
+import { Box, Typography, useTheme } from "@mui/material";
+import { useCallback } from "react";
+import { formatBillions } from "../../../utils/formatters";
+import { useNavigate } from "react-router-dom";
 
-export function AgencyTreemap({ data }) {
+export function AgencyTreemap({ data = [] }) {
 	const theme = useTheme();
+	const navigate = useNavigate();
 
-	if (!data) return null;
+	const handleNodeClick = useCallback(
+		(node) => {
+			console.log("Node clicked:", node);
+			if (node.data?.id !== "others") {
+				// Navigate to agency analysis with the toptier code
+				navigate("/agency-analysis", {
+					state: {
+						toptier_code: node.data?.code,
+						agency_name: node.data?.name,
+					},
+				});
+			}
+		},
+		[navigate]
+	);
 
 	const getNodeColor = (node) => {
 		// Special color for "All Others"
@@ -32,6 +48,8 @@ export function AgencyTreemap({ data }) {
 		return colors[index % colors.length];
 	};
 
+	if (!data) return null;
+
 	return (
 		<Box sx={{ height: "100%", width: "100%" }}>
 			<ResponsiveTreeMap
@@ -39,7 +57,7 @@ export function AgencyTreemap({ data }) {
 				data={data}
 				identity='name'
 				value='value'
-				valueFormat={formatCurrency}
+				valueFormat={formatBillions}
 				leavesOnly={true}
 				innerPadding={3}
 				outerPadding={3}
@@ -63,7 +81,8 @@ export function AgencyTreemap({ data }) {
 				colors={getNodeColor}
 				animate={true}
 				motionConfig='gentle'
-				enableParentLabel={true}
+				onClick={(node) => handleNodeClick(node)}
+				isInteractive={true}
 				theme={{
 					fontSize: 12,
 					labels: {
@@ -89,6 +108,9 @@ export function AgencyTreemap({ data }) {
 						<Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
 							<Box>Amount: {node.data.formattedValue}</Box>
 							<Box>Percentage: {(node.data.percentage || 0).toFixed(1)}%</Box>
+							{node.data.code && node.data.code !== "others" && (
+								<Box sx={{ color: "text.secondary", fontSize: "0.8em", mt: 0.5 }}>Click to view details</Box>
+							)}
 						</Box>
 					</Box>
 				)}

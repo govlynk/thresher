@@ -96,8 +96,7 @@ const MenuItems = ({ items, selected, setSelected, theme }) => {
 	);
 };
 
-const SidebarMenu = () => {
-	const [isCollapsed, setIsCollapsed] = useState(false);
+const SidebarMenu = ({ isCollapsed, onToggleCollapse }) => {
 	const [selected, setSelected] = useState("Dashboard");
 	const [theme, setTheme] = useState("light");
 
@@ -135,15 +134,18 @@ const SidebarMenu = () => {
 	return (
 		<Sidebar
 			collapsed={isCollapsed}
+			width='250px'
 			backgroundColor={hexToRgba(themes[theme].sidebar.backgroundColor, 1)}
 			rootStyles={{
 				color: themes[theme].sidebar.color,
+				height: "100%",
+				overflow: "auto",
 			}}
 		>
 			<div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "black" }}>
 				<SidebarHeader
 					isCollapsed={isCollapsed}
-					setIsCollapsed={setIsCollapsed}
+					setIsCollapsed={onToggleCollapse}
 					style={{ marginBottom: "24px", marginTop: "16px" }}
 				/>
 
