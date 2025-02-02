@@ -80,6 +80,7 @@ const schema = a.schema({
 			sbaCertificationExitDate: a.datetime().array(),
 			companyLogo: a.url(),
 			documentFolder: a.url(),
+			agencies: a.hasMany("TargetAgency", "companyId"),
 			opportunities: a.hasMany("Opportunity", "companyId"),
 			capabilities: a.hasMany("CapabilityStatement", "companyId"),
 			performances: a.hasMany("PastPerformance", "companyId"),
@@ -166,6 +167,28 @@ const schema = a.schema({
 			access: a.enum(["COMPANY_ADMIN", "COMPANY_USER", "GOVLYNK_ADMIN", "GOVLYNK_USER"]),
 			status: a.enum(["ACTIVE", "INACTIVE"]),
 			user: a.belongsTo("User", "userId"),
+			company: a.belongsTo("Company", "companyId"),
+		})
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
+
+	TargetAgency: a
+		.model({
+			agencyId: a.string().required(),
+			toptier_code: a.string().required(),
+			name: a.string(),
+			mission: a.string(),
+			about: a.string(),
+			abbreviation: a.string(),
+			congressional_justification_url: a.url(),
+			subtier_agency_count: a.integer(),
+			icon_filename: a.url(),
+			website: a.string(),
+			companyId: a.string().required(),
+			lastModified: a.datetime(),
 			company: a.belongsTo("Company", "companyId"),
 		})
 		.authorization((allow) => [

@@ -13,41 +13,20 @@ const LoadingScreen = () => (
 );
 
 // Lazy loaded components
-const CalendarScreen = lazy(() => import("../../screens/CalendarScreen"));
-const SprintScreen = lazy(() => import("../../screens/SprintScreen")); // Add Sprint Screen
+const AgencyAnalysisScreen = lazy(() => import("../../screens/AgencyAnalysisScreen"));
 const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
 //Profile
-
-const SAMRegistrationScreen = lazy(() => import("../../screens/SAMRegistrationScreen"));
 const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));
-
-//Strategic Positioning
-const SwotScreen = lazy(() => import("../../screens/SwotScreen"));
-const StrategicPositioningScreen = lazy(() => import("../../screens/StrategicPositioningScreen"));
-const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssessmentScreen"));
-
-//Sales
-const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen"));
-const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
-
-//Market Positioning
-const SpendingAnalysisScreen = lazy(() => import("../../screens/SpendingAnalysisScreen"));
-const PastPerformanceScreen = lazy(() => import("../../screens/PastPerformanceScreen"));
-const CertificationScreen = lazy(() => import("../../screens/CertificationScreen"));
-
-//Regulation
-const RegulationManagement = lazy(() => import("../../screens/RegulationManagement"));
 
 //Admin
 const ClientSetupScreen = lazy(() => import("../../screens/ClientSetupScreen"));
 const UserScreen = lazy(() => import("../../screens/UserScreen"));
 const CompanyScreen = lazy(() => import("../../screens/CompanyScreen"));
 const TeamScreen = lazy(() => import("../../screens/TeamScreen"));
+
 const UserCompanyAccessScreen = lazy(() => import("../../screens/UserCompanyAccessScreen"));
 const ContactsScreen = lazy(() => import("../../screens/ContactsScreen"));
 const ContactAdminScreen = lazy(() => import("../../screens/ContactAdminScreen"));
-//Development
-const TestScreen = lazy(() => import("../../screens/TestScreen"));
 
 const ProtectedRoute = ({ children, requiredGroups }) => {
 	const { activeUserData } = useGlobalStore();
@@ -81,82 +60,13 @@ const AppRouter = ({ signOut }) => {
 						</Suspense>
 					}
 				/>
+				
+				{/* Agency */}
 				<Route
-					path='sprints'
+					path="agency-analysis"
 					element={
 						<Suspense fallback={<LoadingScreen />}>
-							<SprintScreen />
-						</Suspense>
-					}
-				/>
-
-				{/* Market Positioning */}
-				<Route
-					path='strategy'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<StrategicPositioningScreen />
-						</Suspense>
-					}
-				/>
-				<Route
-					path='swot'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<SwotScreen />
-						</Suspense>
-					}
-				/>
-
-				<Route
-					path='experience'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<PastPerformanceScreen />
-						</Suspense>
-					}
-				/>
-				<Route
-					path='certification'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<CertificationScreen />
-						</Suspense>
-					}
-				/>
-
-				{/* Market Intelligence */}
-				<Route
-					path='spending-analysis'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<SpendingAnalysisScreen />
-						</Suspense>
-					}
-				/>
-
-				{/* Sales */}
-				<Route
-					path='opportunities'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<OpportunitiesScreen />
-						</Suspense>
-					}
-				/>
-				<Route
-					path='pipeline'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<PipelineScreen />
-						</Suspense>
-					}
-				/>
-				<Route
-					path='calendar'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<CalendarScreen />
+							<AgencyAnalysisScreen />
 						</Suspense>
 					}
 				/>
@@ -249,43 +159,6 @@ const AppRouter = ({ signOut }) => {
 								<UserScreen />
 							</Suspense>
 						</ProtectedRoute>
-					}
-				/>
-				{/* Development */}
-				<Route
-					path='test'
-					element={
-						<ProtectedRoute requiredGroups={["GOVLYNK_ADMIN", "COMPANY_ADMIN"]}>
-							<Suspense fallback={<LoadingScreen />}>
-								<TestScreen />
-							</Suspense>
-						</ProtectedRoute>
-					}
-				/>
-
-				{/* Profile */}
-				<Route
-					path='sam'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<SAMRegistrationScreen />
-						</Suspense>
-					}
-				/>
-				<Route
-					path='maturity'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<MaturityAssessmentScreen />
-						</Suspense>
-					}
-				/>
-				<Route
-					path='far'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<RegulationManagement />
-						</Suspense>
 					}
 				/>
 

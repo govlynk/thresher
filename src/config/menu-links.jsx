@@ -1,6 +1,7 @@
 import {
 	Home,
 	Users,
+	Building,
 	Contact2,
 	Receipt,
 	User,
@@ -17,6 +18,18 @@ import {
 	ChartLine,
 	BarChart,
 } from "lucide-react";
+
+const agencyLinks = {
+	id: "agency",
+	title: "Agency",
+	icon: Building,
+	links: [
+		{
+			title: "Research",
+			path: "/agency-analysis",
+		},
+	],
+};
 
 const profileLinks = {
 	id: "profile",
@@ -243,6 +256,7 @@ export const menuLinks = [
 		],
 	},
 
+	agencyLinks,
 	profileLinks,
 	strategyLinks,
 	marketIntelligenceLinks,
