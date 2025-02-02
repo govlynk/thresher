@@ -14,6 +14,8 @@ const LoadingScreen = () => (
 
 // Lazy loaded components
 const AgencyAnalysisScreen = lazy(() => import("../../screens/AgencyAnalysisScreen"));
+const AgencyTreemapScreen = lazy(() => import("../../screens/AgencyTreemapScreen"));
+
 const TodoScreen = lazy(() => import("../../screens/TodoScreen"));
 //Profile
 const FileBrowserScreen = lazy(() => import("../../screens/FileBrowserScreen"));
@@ -60,10 +62,19 @@ const AppRouter = ({ signOut }) => {
 						</Suspense>
 					}
 				/>
-				
+
 				{/* Agency */}
 				<Route
-					path="agency-analysis"
+					path='agency-overview'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<AgencyTreemapScreen />
+						</Suspense>
+					}
+				/>
+
+				<Route
+					path='agency-analysis'
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<AgencyAnalysisScreen />

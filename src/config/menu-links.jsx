@@ -25,6 +25,10 @@ const agencyLinks = {
 	icon: Building,
 	links: [
 		{
+			title: "Overview",
+			path: "/agency-overview",
+		},
+		{
 			title: "Research",
 			path: "/agency-analysis",
 		},

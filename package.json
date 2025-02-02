@@ -25,6 +25,7 @@
 		"@nivo/line": "^0.84.0",
 		"@nivo/pie": "^0.84.0",
 		"@nivo/radar": "^0.88.0",
+		"@nivo/treemap": "^0.84.0",
 		"@tanstack/react-query": "^5.17.19",
 		"@tanstack/react-query-devtools": "^5.17.21",
 		"aws-amplify": "^6.8.2",

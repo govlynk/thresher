@@ -4,6 +4,7 @@ import { AgencySelector } from "./AgencySelector";
 import { ContractSpendingChart } from "./charts/ContractSpendingChart";
 import { IdvSpendingChart } from "./charts/IdvSpendingChart";
 import { ObligationsByCategoryChart } from "./charts/ObligationsByCategoryChart";
+import { AgencyTreemap } from "./charts/AgencyTreemap";
 import { AwardMetrics } from "./AwardMetrics";
 import { AgencyOverview } from "./AgencyOverview";
 import { useAgencyData } from "../../hooks/useAgencyData";
@@ -59,6 +60,11 @@ export function AgencyDashboard() {
 					<Grid item xs={12} md={6}>
 						<Paper sx={{ p: 3, height: "400px" }}>
 							<ObligationsByCategoryChart data={data?.obligations_by_category} />
+						</Paper>
+					</Grid>
+					<Grid item xs={12} md={6}>
+						<Paper sx={{ p: 3, height: "400px" }}>
+							<AgencyTreemap fiscalYear={fiscalYear} />
 						</Paper>
 					</Grid>
 				</Grid>
