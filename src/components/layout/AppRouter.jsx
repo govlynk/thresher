@@ -85,6 +85,24 @@ const AppRouter = ({ signOut }) => {
 					}
 				/>
 				<Route
+					path='calendar'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<CalendarScreen />
+						</Suspense>
+					}
+				/>
+
+				{/* Management */}
+				<Route
+					path='todos'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<TodoScreen />
+						</Suspense>
+					}
+				/>
+				<Route
 					path='sprints'
 					element={
 						<Suspense fallback={<LoadingScreen />}>
@@ -170,14 +188,6 @@ const AppRouter = ({ signOut }) => {
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<PipelineScreen />
-						</Suspense>
-					}
-				/>
-				<Route
-					path='calendar'
-					element={
-						<Suspense fallback={<LoadingScreen />}>
-							<CalendarScreen />
 						</Suspense>
 					}
 				/>

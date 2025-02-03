@@ -19,6 +19,26 @@ import {
 	BarChart,
 } from "lucide-react";
 
+const homeLinks = {
+	id: "home",
+	title: "Home",
+	icon: Home,
+	links: [
+		{
+			title: "Calendar",
+			path: "/calendar",
+		},
+		// {
+		// 	title: "Dashboard",
+		// 	path: "/dashboard",
+		// },
+		{
+			title: "To Do",
+			path: "/todos",
+		},
+	],
+};
+
 const profileLinks = {
 	id: "profile",
 	title: "Profile",
@@ -228,26 +248,7 @@ const systemLinks = {
 
 // Export organized menu structure
 export const menuLinks = [
-	{
-		id: "home",
-		title: "Home",
-		icon: Home,
-		links: [
-			{
-				title: "Calendar",
-				path: "/calendar",
-			},
-			// {
-			// 	title: "Dashboard",
-			// 	path: "/dashboard",
-			// },
-			{
-				title: "To Do",
-				path: "/todos",
-			},
-		],
-	},
-
+	homeLinks,
 	profileLinks,
 	strategyLinks,
 	marketIntelligenceLinks,

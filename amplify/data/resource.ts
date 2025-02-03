@@ -91,6 +91,7 @@ const schema = a.schema({
 			RegulationDocuments: a.hasMany("RegulationDocument", "companyId"),
 			users: a.hasMany("UserCompanyAccess", "companyId"),
 			teams: a.hasMany("Team", "companyId"),
+			sprints: a.hasMany("Sprint", "companyId"),
 		})
 		.authorization((allow) => [
 			allow.owner(),
@@ -425,7 +426,9 @@ const schema = a.schema({
 			endDate: a.datetime().required(),
 			status: a.string(),
 			position: a.integer(),
+			companyId: a.string(),
 			teamId: a.string().required(),
+			company: a.belongsTo("Company", "companyId"),
 			team: a.belongsTo("Team", "teamId"),
 			todos: a.hasMany("Todo", "sprintId"),
 		})

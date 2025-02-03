@@ -46,13 +46,16 @@ export const useSprintStore = create((set, get) => ({
 			const response = await client.models.Sprint.list({
 				filter: { teamId: { eq: teamId } },
 			});
+			console.log("Fetched sprints:", response.data);
 
-			// Sort sprints by name numerically
-			const sortedSprints = (response.data || []).sort((a, b) => {
-				const aNum = parseInt(a.name.match(/Sprint (\d+)/)?.[1] || "0");
-				const bNum = parseInt(b.name.match(/Sprint (\d+)/)?.[1] || "0");
-				return aNum - bNum;
+			// Sort sprints by start date
+			const sortedSprints = response.data.sort((a, b) => {
+				const dateA = new Date(a.startDate).getTime();
+				const dateB = new Date(b.startDate).getTime();
+				return dateA - dateB;
 			});
+
+			console.log("Sorted sprints:", sortedSprints);
 
 			// Find active sprint
 			const now = new Date();
@@ -76,7 +79,7 @@ export const useSprintStore = create((set, get) => ({
 			}
 
 			// Update sprint statuses based on dates
-			const updatedSprints = sortedSprints.map((sprint) => {
+			const updatedSprints = sortedSprints.map((sprint, index) => {
 				const startDate = new Date(sprint.startDate);
 				const endDate = new Date(sprint.endDate);
 				let status;
@@ -94,6 +97,7 @@ export const useSprintStore = create((set, get) => ({
 					client.models.Sprint.update({
 						id: sprint.id,
 						status,
+						position: index, // Update position to match sorted order
 					}).catch((err) => console.error("Error updating sprint status:", err));
 				}
 
@@ -142,6 +146,20 @@ export const useSprintStore = create((set, get) => ({
 					break;
 				}
 
+				// Check if sprint already exists for this team and start date
+				const existingSprints = await client.models.Sprint.list({
+					filter: {
+						and: [{ teamId: { eq: teamId } }, { startDate: { eq: sprintStart.toISOString() } }],
+					},
+				});
+
+				// Skip if sprint already exists
+				if (existingSprints.data?.length > 0) {
+					currentDate = addWeeks(currentDate, sprintDurationWeeks);
+					index++;
+					continue;
+				}
+
 				const sprintData = {
 					name: generateSprintName(sprintStart, index),
 					goal: `Sprint ${index + 1} Goals`,
@@ -163,9 +181,9 @@ export const useSprintStore = create((set, get) => ({
 
 			// Sort new sprints before adding them
 			const sortedNewSprints = newSprints.sort((a, b) => {
-				const aNum = parseInt(a.name.match(/Sprint (\d+)/)?.[1] || "0");
-				const bNum = parseInt(b.name.match(/Sprint (\d+)/)?.[1] || "0");
-				return aNum - bNum;
+				const dateA = a.startDate ? new Date(a.startDate) : new Date(0);
+				const dateB = b.startDate ? new Date(b.startDate) : new Date(0);
+				return dateA.getTime() - dateB.getTime();
 			});
 
 			// Update store state with new sprints

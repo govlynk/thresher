@@ -89,6 +89,7 @@ export function CompanySelector() {
 								</Typography>
 								{company.uei && (
 									<Chip
+										key={`chip-${company.id}`}
 										label={`UEI: ${company.uei}`}
 										size='small'
 										variant='outlined'
