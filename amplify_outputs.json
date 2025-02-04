@@ -814,6 +814,22 @@
                 ]
               }
             },
+            "sprints": {
+              "name": "sprints",
+              "isArray": true,
+              "type": {
+                "model": "Sprint"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "companyId"
+                ]
+              }
+            },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
@@ -3521,12 +3537,34 @@
               "isRequired": false,
               "attributes": []
             },
+            "companyId": {
+              "name": "companyId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "teamId": {
               "name": "teamId",
               "isArray": false,
               "type": "String",
               "isRequired": true,
               "attributes": []
+            },
+            "company": {
+              "name": "company",
+              "isArray": false,
+              "type": {
+                "model": "Company"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "companyId"
+                ]
+              }
             },
             "team": {
               "name": "team",

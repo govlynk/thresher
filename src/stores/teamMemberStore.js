@@ -9,24 +9,47 @@ export const useTeamMemberStore = create((set) => ({
 	teamMembers: [],
 	loading: false,
 	error: null,
+	subscription: null,
 
-	addTeamMember: async ({ teamId, contactId, role }) => {
-		console.log("TeamMemberStore: Adding member with data:", { teamId, contactId, role });
+	addTeamMember: async ({ teamId, contactId, role, isGovLynkUser, workload = 100 }) => {
+		console.log("TeamMemberStore: Adding member with data:", { teamId, contactId, role, isGovLynkUser, workload });
 		if (!teamId || !contactId || !role) {
-			console.error("TeamMemberStore: addTeamMember called with incomplete data");
+			console.error("TeamMemberStore: addTeamMember called with incomplete data", {
+				teamId,
+				contactId,
+				role,
+				isGovLynkUser,
+				workload,
+			});
 			throw new Error("Team ID, Contact ID, and Role are required");
 		}
 
 		set({ loading: true });
 		try {
-			const response = await client.models.TeamMember.create({
-				teamId,
-				contactId,
-				role,
+			// Check if member already exists
+			const existingMember = await client.models.TeamMember.list({
+				filter: {
+					and: [{ teamId: { eq: teamId } }, { contactId: { eq: contactId } }],
+				},
 			});
 
+			if (existingMember.data?.length > 0) {
+				throw new Error("This member is already part of the team");
+			}
+
+			let memberData = {
+				teamId,
+				contactId,
+				role: role || "Consultant", // Default role if none provided
+				workload,
+				isGovLynkUser: isGovLynkUser || false,
+				status: "ACTIVE",
+			};
+
+			const response = await client.models.TeamMember.create(memberData);
+			console.log("TeamMemberStore: after creat call:", response);
 			if (!response?.data) {
-				throw new Error("Failed to add team member");
+				throw new Error(`Failed to add ${isGovLynkUser ? "GovLynk" : ""} team member`);
 			}
 
 			console.log("TeamMemberStore: Successfully added team member:", response.data);

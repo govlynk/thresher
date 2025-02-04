@@ -1,9 +1,10 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, Suspense } from "react";
 import { Box, Container, Alert, useTheme } from "@mui/material";
 import { TodoHeader } from "../components/toDo/TodoHeader";
 import { TodoDialog } from "../components/toDo/TodoDialog";
 import { SprintModal } from "../components/toDo/SprintModal";
 import { KanbanBoard } from "../components/toDo/KanbanBoard";
+import { CircularProgress } from "@mui/material";
 import { useGlobalStore } from "../stores/globalStore";
 import { useTodoStore } from "../stores/todoStore";
 import { useSprintStore } from "../stores/sprintStore";
@@ -13,24 +14,28 @@ function ToDoScreen() {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [sprintModalOpen, setSprintModalOpen] = useState(false);
 	const [selectedTodo, setSelectedTodo] = useState(null);
+	const [isInitialized, setIsInitialized] = useState(false);
 	const { activeCompanyId, activeTeamId } = useGlobalStore();
 	const { fetchTodos } = useTodoStore();
-	const { sprints, activeSprint, fetchSprints, generateSprints } = useSprintStore();
+	const {
+		sprints,
+		activeSprint,
+		fetchSprints,
+		generateSprints,
+		loading: sprintsLoading,
+		error: sprintsError,
+	} = useSprintStore();
 
 	useEffect(() => {
 		const initializeData = async () => {
-			// Only proceed if we have both company and team IDs
 			if (!activeCompanyId) {
 				return;
 			}
 
 			try {
-				// Fetch sprints only if we have a specific team selected
 				if (activeTeamId) {
-					// First try to fetch existing sprints
 					await fetchSprints(activeTeamId);
 
-					// If no sprints exist, generate them
 					const { sprints } = useSprintStore.getState();
 					if (!sprints || sprints.length === 0) {
 						console.log("No sprints found, generating new sprints...");
@@ -38,10 +43,11 @@ function ToDoScreen() {
 					}
 				}
 
-				// Always fetch todos as they can be filtered by team
 				await fetchTodos();
+				setIsInitialized(true);
 			} catch (err) {
 				console.error("Error initializing data:", err);
+				setIsInitialized(false);
 			}
 		};
 
@@ -84,6 +90,26 @@ function ToDoScreen() {
 			<Container maxWidth={false}>
 				<Box sx={{ p: 4 }}>
 					<Alert severity='warning'>Please select a company to manage tasks</Alert>
+				</Box>
+			</Container>
+		);
+	}
+
+	if (sprintsLoading || !isInitialized) {
+		return (
+			<Container maxWidth={false}>
+				<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
+					<CircularProgress />
+				</Box>
+			</Container>
+		);
+	}
+
+	if (sprintsError) {
+		return (
+			<Container maxWidth={false}>
+				<Box sx={{ p: 4 }}>
+					<Alert severity='error'>{sprintsError}. Please try refreshing the page.</Alert>
 				</Box>
 			</Container>
 		);

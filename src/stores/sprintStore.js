@@ -31,7 +31,6 @@ export const useSprintStore = create((set, get) => ({
 
 	fetchSprints: async (teamId) => {
 		if (!teamId) {
-			// Reset sprints state when no team is selected
 			set({
 				sprints: [],
 				activeSprint: null,
@@ -43,13 +42,25 @@ export const useSprintStore = create((set, get) => ({
 
 		set({ loading: true });
 		try {
-			const response = await client.models.Sprint.list({
-				filter: { teamId: { eq: teamId } },
-			});
-			console.log("Fetched sprints:", response.data);
+			// Fetch all sprints using pagination
+			let allSprints = [];
+			let nextToken = null;
+
+			do {
+				const response = await client.models.Sprint.list({
+					filter: { teamId: { eq: teamId } },
+					limit: 1000,
+					nextToken,
+				});
+
+				allSprints = [...allSprints, ...response.data];
+				nextToken = response.nextToken;
+			} while (nextToken);
+
+			console.log("Fetched all sprints:", allSprints.length);
 
 			// Sort sprints by start date
-			const sortedSprints = response.data.sort((a, b) => {
+			const sortedSprints = allSprints.sort((a, b) => {
 				const dateA = new Date(a.startDate).getTime();
 				const dateB = new Date(b.startDate).getTime();
 				return dateA - dateB;

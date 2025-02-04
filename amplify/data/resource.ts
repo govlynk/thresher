@@ -121,6 +121,7 @@ const schema = a.schema({
 			teamId: a.string().required(),
 			contactId: a.string().required(),
 			role: a.string().required(),
+			isGovLynkUser: a.boolean(),
 			workload: a.integer(),
 			team: a.belongsTo("Team", "teamId"),
 			contact: a.belongsTo("Contact", "contactId"),

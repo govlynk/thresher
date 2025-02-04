@@ -22,6 +22,7 @@ import {
 	FormControl,
 	Select,
 	MenuItem,
+	InputAdornment,
 } from "@mui/material";
 import { Edit, Trash2, UserPlus, Filter, Search, ChevronDown, ChevronUp, Users, Info } from "lucide-react";
 import { TeamDialog } from "./TeamDialog";
@@ -127,10 +128,11 @@ export function TeamList() {
 		setEditMemberDialogOpen(true);
 	};
 
-	const handleUpdateMember = async (memberId, role) => {
+	const handleUpdateMember = async (memberId, role, workload = 100) => {
 		try {
 			await updateTeamMember(memberId, {
 				role: role,
+				workload: workload,
 			});
 			await fetchTeams(activeCompanyId);
 		} catch (err) {
@@ -369,35 +371,59 @@ export function TeamList() {
 														}}
 													>
 														<FormControl size='small' sx={{ minWidth: 120 }}>
-															<Select
-																value={member.role}
-																onChange={(e) => handleUpdateMember(member.id, e.target.value)}
-																variant='outlined'
-																sx={{
-																	"& .MuiOutlinedInput-notchedOutline": {
-																		borderColor: "divider",
-																	},
-																	"&:hover .MuiOutlinedInput-notchedOutline": {
-																		borderColor: "primary.main",
-																	},
-																	height: "30px",
-																	"& .MuiSelect-select": {
-																		py: "2px",
-																		px: 1.5,
-																		fontSize: "0.8125rem",
-																		lineHeight: "1.5",
-																		width: "100%",
-																	},
-																}}
-															>
-																{ROLES.map((role) => (
-																	<MenuItem key={role} value={role}>
-																		<Typography variant='body2' sx={{ fontSize: "0.8125rem" }}>
-																			{role}
-																		</Typography>
-																	</MenuItem>
-																))}
-															</Select>
+															<Box sx={{ display: "flex", gap: 1 }}>
+																<Select
+																	value={member.role}
+																	onChange={(e) => handleUpdateMember(member.id, e.target.value)}
+																	variant='outlined'
+																	sx={{
+																		"& .MuiOutlinedInput-notchedOutline": {
+																			borderColor: "divider",
+																		},
+																		"&:hover .MuiOutlinedInput-notchedOutline": {
+																			borderColor: "primary.main",
+																		},
+																		height: "30px",
+																		"& .MuiSelect-select": {
+																			py: "2px",
+																			px: 1.5,
+																			fontSize: "0.8125rem",
+																			lineHeight: "1.5",
+																			width: "100%",
+																		},
+																	}}
+																>
+																	{ROLES.map((role) => (
+																		<MenuItem key={role} value={role}>
+																			<Typography variant='body2' sx={{ fontSize: "0.8125rem" }}>
+																				{role}
+																			</Typography>
+																		</MenuItem>
+																	))}
+																</Select>
+																<TextField
+																	type='number'
+																	value={member.workload || 100}
+																	onChange={(e) => {
+																		const value = Math.max(
+																			0,
+																			Math.min(100, parseInt(e.target.value) || 0)
+																		);
+																		handleUpdateMember(member.id, member.role, value);
+																	}}
+																	sx={{ width: 100 }}
+																	InputProps={{
+																		endAdornment: <InputAdornment position='end'>%</InputAdornment>,
+																		sx: { height: "30px" },
+																	}}
+																	inputProps={{
+																		min: 0,
+																		max: 100,
+																		step: 5,
+																		style: { padding: "4px 8px" },
+																	}}
+																/>
+															</Box>
 														</FormControl>
 														<IconButton
 															title='Edit Member'
