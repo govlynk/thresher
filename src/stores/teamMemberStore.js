@@ -43,7 +43,6 @@ export const useTeamMemberStore = create((set) => ({
 				role: role || "Consultant", // Default role if none provided
 				workload,
 				isGovLynkUser: isGovLynkUser || false,
-				status: "ACTIVE",
 			};
 
 			const response = await client.models.TeamMember.create(memberData);

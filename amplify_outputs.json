@@ -1115,6 +1115,13 @@
               "isRequired": true,
               "attributes": []
             },
+            "isGovLynkUser": {
+              "name": "isGovLynkUser",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": false,
+              "attributes": []
+            },
             "workload": {
               "name": "workload",
               "isArray": false,
