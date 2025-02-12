@@ -20,17 +20,17 @@ export function TodoHeader({ onAddClick, onSprintClick, onClose }) {
 				return;
 			}
 
-			// if (!sprints || sprints.length === 0) {
-			// 	try {
-			// 		await generateSprints(activeTeamId);
-			// 	} catch (err) {
-			// 		console.error("Error generating sprints:", err);
-			// 	}
-			// }
+			if (!sprints || sprints.length === 0) {
+				try {
+					await generateSprints(activeTeamId);
+				} catch (err) {
+					console.error("Error generating sprints:", err);
+				}
+			}
 		};
 
 		initializeSprints();
-	}, [activeTeamId, sprints?.length, generateSprints]);
+	}, [activeTeamId]);
 
 	const getDaysRemaining = () => {
 		if (!activeSprint) return 0;

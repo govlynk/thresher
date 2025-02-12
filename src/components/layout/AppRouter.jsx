@@ -4,6 +4,7 @@ import { Box, CircularProgress } from "@mui/material";
 import { useGlobalStore } from "../../stores/globalStore";
 import MainLayout from "../layout/MainLayout";
 import NotFoundPage from "../../screens/NotFoundPage";
+import SettingsScreen from "../../screens/SettingsScreen";
 
 // Loading component
 const LoadingScreen = () => (
@@ -250,6 +251,14 @@ const AppRouter = ({ signOut }) => {
 						<Suspense fallback={<LoadingScreen />}>
 							<ContactAdminScreen />
 						</Suspense>
+					}
+				/>
+				<Route
+					path='settings'
+					element={
+						<ProtectedRoute requiredGroups={["COMPANY_ADMIN", "GOVLYNK_ADMIN"]}>
+							<SettingsScreen />
+						</ProtectedRoute>
 					}
 				/>
 

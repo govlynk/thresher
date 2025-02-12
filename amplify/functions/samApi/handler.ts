@@ -1,5 +1,6 @@
 import { type Handler } from "aws-lambda";
 import axios from "axios";
+import type { Schema } from "../../data/resource";
 
 // Types for API responses and parameters
 interface ApiEvent {
@@ -26,10 +27,12 @@ const sanitizeData = (data: any): any => {
 const buildSamApiUrl = (uei: string, includeSections: string = ""): string => {
 	const baseUrl = "https://api.sam.gov/entity-information/v3/entities";
 	const params = new URLSearchParams({
-		api_key: process.env.SAM_API_KEY || "",
+		// api_key: process.env.SAM_API_KEY || "",
+		api_key: "l5nES3FOs2N3Z1Uzd2IYck2eQn6xETUyfGnNPoEl",
 		ueiSAM: uei,
 		...(includeSections && { includeSections }),
 	});
+
 	return `${baseUrl}?${params.toString()}`;
 };
 
@@ -49,62 +52,44 @@ const handleApiResponse = async (response: any, section: string = ""): Promise<a
 	return sanitizeData(dataToSanitize);
 };
 
-export const handler: Handler = async (event: ApiEvent): Promise<ApiResponse> => {
+export const handler: Schema["getSamData"]["functionHandler"] = async (event) => {
 	console.log("Event received:", JSON.stringify(event));
+	const { uei, action } = event.arguments;
 
-	try {
-		const { uei, action } = event.queryStringParameters || {};
-
-		if (!uei) {
-			return {
-				statusCode: 400,
-				headers: {
-					"Content-Type": "application/json",
-					"Access-Control-Allow-Origin": "*",
-				},
-				body: JSON.stringify({ error: "UEI parameter is required" }),
-			};
-		}
-
-		let response;
-		let data;
-
-		switch (action) {
-			case "repsAndCerts":
-				console.log("Fetching reps and certs for UEI:", uei);
-				response = await axios.get(buildSamApiUrl(uei, "repsAndCerts"));
-				data = await handleApiResponse(response, "repsAndCerts");
-				break;
-
-			case "entity":
-			default:
-				console.log("Fetching entity data for UEI:", uei);
-				response = await axios.get(buildSamApiUrl(uei));
-				data = await handleApiResponse(response);
-				break;
-		}
-
-		return {
-			statusCode: 200,
-			headers: {
-				"Content-Type": "application/json",
-				"Access-Control-Allow-Origin": "*",
-			},
-			body: JSON.stringify(data),
-		};
-	} catch (error: any) {
-		console.error("Lambda execution error:", error);
-
-		return {
-			statusCode: error.response?.status || 500,
-			headers: {
-				"Content-Type": "application/json",
-				"Access-Control-Allow-Origin": "*",
-			},
-			body: JSON.stringify({
-				error: error.message || "Internal server error",
-				details: process.env.NODE_ENV === "development" ? error.stack : undefined,
-			}),
-		};
+	if (!uei) {
+		throw new Error("UEI parameter is required");
 	}
+
+	let response;
+	let data;
+
+	switch (action) {
+		case "repsAndCerts":
+			console.log("Fetching reps and certs for UEI:", uei);
+			response = await axios.get(buildSamApiUrl(uei, "repsAndCerts"));
+			data = await handleApiResponse(response, "repsAndCerts");
+			break;
+
+		case "entity":
+		default:
+			console.log("Fetching entity data for UEI:", uei);
+			response = await axios.get(buildSamApiUrl(uei));
+			// data = sanitizeData(response.data.entityData[0]);
+
+			data = response.data.entityData?.[0];
+			console.log("%%% raw data", data);
+			if (!data) {
+				throw new Error("No entity data found");
+			}
+			break;
+	}
+
+	return {
+		statusCode: 200,
+		headers: {
+			"Content-Type": "application/json",
+			"Access-Control-Allow-Origin": "*",
+		},
+		body: JSON.stringify(data),
+	};
 };

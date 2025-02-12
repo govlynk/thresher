@@ -5,6 +5,8 @@ import { NavLink } from "react-router-dom";
 import { menuLinks } from "../../config/menu-links";
 import SidebarHeader from "./SidebarHeader";
 import { useGlobalStore } from "../../stores/globalStore";
+import { ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import React from "react";
 
 // Keep existing themes configuration
 const themes = {
@@ -96,7 +98,8 @@ const MenuItems = ({ items, selected, setSelected, theme }) => {
 	);
 };
 
-const SidebarMenu = ({ isCollapsed, onToggleCollapse }) => {
+const SidebarMenu = () => {
+	const [isCollapsed, setIsCollapsed] = useState(false);
 	const [selected, setSelected] = useState("Dashboard");
 	const [theme, setTheme] = useState("light");
 
@@ -134,18 +137,15 @@ const SidebarMenu = ({ isCollapsed, onToggleCollapse }) => {
 	return (
 		<Sidebar
 			collapsed={isCollapsed}
-			width='250px'
 			backgroundColor={hexToRgba(themes[theme].sidebar.backgroundColor, 1)}
 			rootStyles={{
 				color: themes[theme].sidebar.color,
-				height: "100%",
-				overflow: "auto",
 			}}
 		>
 			<div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "black" }}>
 				<SidebarHeader
 					isCollapsed={isCollapsed}
-					setIsCollapsed={onToggleCollapse}
+					setIsCollapsed={setIsCollapsed}
 					style={{ marginBottom: "24px", marginTop: "16px" }}
 				/>
 

@@ -35,14 +35,7 @@ function ToDoScreen() {
 			try {
 				if (activeTeamId) {
 					await fetchSprints(activeTeamId);
-
-					const { sprints } = useSprintStore.getState();
-					if (!sprints || sprints.length === 0) {
-						console.log("No sprints found, generating new sprints...");
-						await generateSprints(activeTeamId);
-					}
 				}
-
 				await fetchTodos();
 				setIsInitialized(true);
 			} catch (err) {
@@ -52,6 +45,17 @@ function ToDoScreen() {
 		};
 
 		initializeData();
+
+		// Set up periodic sprint status check
+		const checkInterval = setInterval(() => {
+			if (activeTeamId) {
+				fetchSprints(activeTeamId).catch(err => 
+					console.error("Error checking sprint status:", err)
+				);
+			}
+		}, 60 * 60 * 1000); // Check every hour
+
+		return () => clearInterval(checkInterval);
 	}, [activeCompanyId, activeTeamId, fetchSprints, fetchTodos]);
 
 	// Handle team changes

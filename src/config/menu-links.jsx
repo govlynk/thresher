@@ -220,6 +220,19 @@ const administrationLinks = {
 	],
 };
 
+const settingsLinks = {
+	id: "settings",
+	title: "Settings",
+	icon: Settings2,
+	requiredGroups: ["COMPANY_ADMIN", "GOVLYNK_ADMIN"], // Can also protect individual links
+	links: [
+		{
+			title: "Settings",
+			path: "/settings",
+		},
+	],
+};
+
 const systemLinks = {
 	id: "govlynk",
 	title: "GovLynk",
@@ -259,4 +272,5 @@ export const menuLinks = [
 	regulationLinks,
 	administrationLinks,
 	systemLinks,
+	settingsLinks,
 ];

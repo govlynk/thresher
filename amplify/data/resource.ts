@@ -1,5 +1,7 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { type DefaultAuthorizationMode } from "@aws-amplify/backend-data";
+import { getOpportunities } from "../functions/getOpportunities/resource";
+import { samApi } from "../functions/samApi/resource";
 // add settings table
 
 const schema = a.schema({
@@ -14,6 +16,7 @@ const schema = a.schema({
 			avatar: a.url(),
 			contactId: a.string(),
 			opportunities: a.hasMany("Opportunity", "userId"),
+			opportunitySummaries: a.hasMany("OpportunitySummary", "userId"),
 			companies: a.hasMany("UserCompanyAccess", "userId"),
 			contact: a.belongsTo("Contact", "contactId"), // Relationship to Contact
 			todos: a.hasMany("Todo", "assigneeId"),
@@ -80,8 +83,12 @@ const schema = a.schema({
 			sbaCertificationExitDate: a.datetime().array(),
 			companyLogo: a.url(),
 			documentFolder: a.url(),
+			searchId: a.string(),
+
+			// Relationships
 			agencies: a.hasMany("TargetAgency", "companyId"),
 			opportunities: a.hasMany("Opportunity", "companyId"),
+			opportunitySummaries: a.hasMany("OpportunitySummary", "companyId"),
 			capabilities: a.hasMany("CapabilityStatement", "companyId"),
 			performances: a.hasMany("PastPerformance", "companyId"),
 			certifications: a.hasMany("Certification", "companyId"),
@@ -107,6 +114,7 @@ const schema = a.schema({
 			company: a.belongsTo("Company", "companyId"),
 			members: a.hasMany("TeamMember", "teamId"),
 			opportunities: a.hasMany("Opportunity", "teamId"),
+			opportunitySummaries: a.hasMany("OpportunitySummary", "teamId"),
 			sprint: a.hasMany("Sprint", "teamId"),
 			todos: a.hasMany("Todo", "teamId"),
 		})
@@ -354,6 +362,69 @@ const schema = a.schema({
 			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
 		]),
 
+	OpportunitySummary: a
+		.model({
+			sourceId: a.string().required(),
+			title: a.string().required(),
+			description: a.string(),
+			status: a.enum(["BACKLOG", "BID", "REVIEW", "SUBMITTED", "WON", "LOST", "REJECTED"]),
+			agency: a.string(),
+			agencyType: a.string(),
+			category: a.string(),
+			sourceType: a.string(),
+			opportunityType: a.string(),
+			AISummary: a.string(),
+			ValueEstLow: a.float(),
+			ValueEstHigh: a.float(),
+			typeOfSetAsideDescription: a.string(),
+
+			postedDate: a.datetime(),
+			responseDeadLine: a.datetime(),
+			naicsCode: a.string(),
+			pscCode: a.string(),
+
+			documentLinks: a.url().array(),
+			HGLink: a.url(),
+			sourceLink: a.url(),
+
+			// Office Address as embedded fields
+			officeZipcode: a.string(),
+			officeCity: a.string(),
+			officeCountryCode: a.string(),
+			officeState: a.string(),
+
+			// Point of Contact as embedded fields
+			pocName: a.string(),
+			pocEmail: a.string(),
+			pocPhone: a.string(),
+			pocType: a.string(),
+
+			// Pipeline fields
+			position: a.integer(),
+			priority: a.enum(["HIGH", "MEDIUM", "LOW"]),
+			estimatedEffort: a.integer(),
+			actualEffort: a.integer(),
+			tags: a.string().array(),
+			notes: a.string(),
+			assigneeId: a.string(),
+			dueDate: a.datetime(),
+
+			// Foreign key relationships
+			userId: a.string(),
+			companyId: a.string().required(),
+			teamId: a.string().required(),
+
+			// Relationships
+			user: a.belongsTo("User", "userId"),
+			company: a.belongsTo("Company", "companyId"),
+			team: a.belongsTo("Team", "teamId"),
+		})
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
+
 	Opportunity: a
 		.model({
 			noticeId: a.string().required(),
@@ -463,6 +534,34 @@ const schema = a.schema({
 			allow.authenticated().to(["create", "read", "update"]),
 			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
 		]),
+
+	// Custom queries
+	getSamData: a
+		.query()
+		.arguments({
+			uei: a.string().required(),
+			action: a.enum(["repsAndCerts", "entity"]),
+		})
+		.returns(a.json())
+		.authorization((allow) => [allow.authenticated()])
+		.handler(a.handler.function(samApi)),
+
+	getOpportunities: a
+		.query()
+		.arguments({
+			naicsCode: a.string(),
+			agency: a.string(),
+			setAside: a.string(),
+			state: a.string(),
+			limit: a.integer(),
+			offset: a.integer(),
+			sourceType: a.string(),
+			searchId: a.string(),
+			postedDate: a.string(),
+		})
+		.returns(a.json())
+		.authorization((allow) => [allow.authenticated()])
+		.handler(a.handler.function(getOpportunities)),
 });
 
 export type Schema = ClientSchema<typeof schema>;

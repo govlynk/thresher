@@ -4,7 +4,7 @@ import { Building2, Calendar, FileText } from "lucide-react";
 import { formatDate } from "../../utils/formatters";
 
 export default function CompanyHeader({ company }) {
-	const registrationStatus = company.registrationStatus.toUpperCase() || "ACTIVE";
+	const registrationStatus = (company?.registrationStatus || "ACTIVE").toUpperCase();
 	const isActive = registrationStatus === "ACTIVE";
 
 	return (
