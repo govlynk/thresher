@@ -1,23 +1,4 @@
-import {
-	Home,
-	Users,
-	Building,
-	Contact2,
-	Receipt,
-	User,
-	Medal,
-	ListTodo,
-	Building2,
-	UserCog,
-	Settings,
-	Search,
-	Briefcase,
-	DollarSign,
-	Settings2,
-	PieChart,
-	ChartLine,
-	BarChart,
-} from "lucide-react";
+import { Home, Users, Medal, Settings, Briefcase, Settings2, PieChart, ChartLine } from "lucide-react";
 
 const homeLinks = {
 	id: "home",
@@ -212,10 +193,6 @@ const administrationLinks = {
 		{
 			title: "Manage Users",
 			path: "/user-admin",
-		},
-		{
-			title: "Sprints",
-			path: "/sprints",
 		},
 	],
 };
