@@ -537,13 +537,19 @@ const schema = a.schema({
 		]),
 
 	// Custom queries
-	ZohoAuth: a.model({
-		id: a.id(),
-		accessToken: a.string(),
-		refreshToken: a.string(),
-		expiresAt: a.datetime(),
-		scope: a.string().array(),
-	}),
+	ZohoAuth: a
+		.model({
+			id: a.id(),
+			accessToken: a.string(),
+			refreshToken: a.string(),
+			expiresAt: a.datetime(),
+			scope: a.string().array(),
+		})
+		.authorization((allow) => [
+			allow.authenticated(),
+			allow.owner(),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
 
 	getZohoAuthUrl: a
 		.query()
