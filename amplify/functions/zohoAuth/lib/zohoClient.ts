@@ -12,17 +12,31 @@ export class AuthenticationClient {
 	}
 
 	generateAuthUrl(scopes: string[]) {
+		console.log("Auth URL Generation:", {
+			clientIdLength: this.clientId?.length,
+			hasClientSecret: !!this.clientSecret,
+			redirectUri: this.redirectUri,
+			scopes,
+		});
+
 		const scopeString = encodeURIComponent(scopes.join(","));
 		const redirectUri = encodeURIComponent(this.redirectUri);
 
-		return (
+		const url =
 			`https://accounts.zoho.com/oauth/v2/auth?` +
 			`scope=${scopeString}&` +
 			`client_id=${this.clientId}&` +
 			`response_type=code&` +
 			`access_type=offline&` +
-			`redirect_uri=${redirectUri}`
-		);
+			`redirect_uri=${redirectUri}`;
+
+		console.log("Generated URL components:", {
+			scopeString,
+			encodedRedirectUri: redirectUri,
+			fullUrl: url,
+		});
+
+		return url;
 	}
 
 	async generateTokens(code: string) {
