@@ -28,6 +28,7 @@ const MaturityAssessmentScreen = lazy(() => import("../../screens/MaturityAssess
 
 //Sales
 const OpportunitiesScreen = lazy(() => import("../../screens/OpportunitiesScreen"));
+const OpportunityHigherGovScreen = lazy(() => import("../../screens/OpportunityHigherGovScreen"));
 const PipelineScreen = lazy(() => import("../../screens/PipelineScreen"));
 
 //Market Positioning
@@ -172,6 +173,14 @@ const AppRouter = ({ signOut }) => {
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<OpportunitiesScreen />
+						</Suspense>
+					}
+				/>
+				<Route
+					path='hg'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<OpportunityHigherGovScreen />
 						</Suspense>
 					}
 				/>

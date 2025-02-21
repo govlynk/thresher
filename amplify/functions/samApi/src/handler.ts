@@ -1,7 +1,5 @@
-import { type Handler } from "aws-lambda";
 import axios from "axios";
-import type { Schema } from "../../data/resource";
-
+import type { Schema } from "../../../data/resource";
 // Types for API responses and parameters
 interface ApiEvent {
 	queryStringParameters?: {
@@ -26,12 +24,20 @@ const sanitizeData = (data: any): any => {
 
 const buildSamApiUrl = (uei: string, includeSections: string = ""): string => {
 	const baseUrl = "https://api.sam.gov/entity-information/v3/entities";
+	const apiKey = process.env.SAM_API_KEY;
+
+	if (!apiKey) {
+		throw new Error("SAM_API_KEY environment variable is not set");
+	}
+
 	const params = new URLSearchParams({
-		// api_key: process.env.SAM_API_KEY || "",
-		api_key: "l5nES3FOs2N3Z1Uzd2IYck2eQn6xETUyfGnNPoEl",
+		api_key: apiKey, // Use the retrieved API key
 		ueiSAM: uei,
 		...(includeSections && { includeSections }),
 	});
+
+	console.log("params", params.toString());
+	console.log("baseUrl", baseUrl);
 
 	return `${baseUrl}?${params.toString()}`;
 };
@@ -74,7 +80,6 @@ export const handler: Schema["getSamData"]["functionHandler"] = async (event) =>
 		default:
 			console.log("Fetching entity data for UEI:", uei);
 			response = await axios.get(buildSamApiUrl(uei));
-			// data = sanitizeData(response.data.entityData[0]);
 
 			data = response.data.entityData?.[0];
 			console.log("%%% raw data", data);

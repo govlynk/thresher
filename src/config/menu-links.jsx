@@ -233,6 +233,10 @@ const systemLinks = {
 			title: "Test",
 			path: "/test",
 		},
+		{
+			title: "HigherGov",
+			path: "/hg",
+		},
 	],
 };
 

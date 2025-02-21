@@ -1,6 +1,6 @@
 import { Fragment, useState } from "react";
 import { Sidebar, Menu, MenuItem, menuClasses, SubMenu } from "react-pro-sidebar";
-import { Typography } from "@mui/material";
+import { Typography, Box, Drawer, useTheme } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import { menuLinks } from "../../config/menu-links";
 import SidebarHeader from "./SidebarHeader";
@@ -98,10 +98,9 @@ const MenuItems = ({ items, selected, setSelected, theme }) => {
 	);
 };
 
-const SidebarMenu = () => {
-	const [isCollapsed, setIsCollapsed] = useState(false);
+export default function SidebarMenu({ isOpen, isCollapsed, onToggleCollapse, width }) {
+	const theme = useTheme();
 	const [selected, setSelected] = useState("Dashboard");
-	const [theme, setTheme] = useState("light");
 
 	const menuItemStyles = {
 		root: {
@@ -109,24 +108,30 @@ const SidebarMenu = () => {
 			fontWeight: 400,
 		},
 		icon: {
-			color: themes[theme].menu.icon,
+			color: themes[theme.palette.mode === "dark" ? "dark" : "light"].menu.icon,
 			[`&.${menuClasses.disabled}`]: {
-				color: themes[theme].menu.disabled.color,
+				color: themes[theme.palette.mode === "dark" ? "dark" : "light"].menu.disabled.color,
 			},
 		},
 		SubMenuExpandIcon: {
 			color: "#b6b7b9",
 		},
 		subMenuContent: ({ level }) => ({
-			backgroundColor: level === 0 ? hexToRgba(themes[theme].menu.menuContent, 1) : "transparent",
+			backgroundColor:
+				level === 0
+					? hexToRgba(themes[theme.palette.mode === "dark" ? "dark" : "light"].menu.menuContent, 1)
+					: "transparent",
 		}),
 		button: {
 			[`&.${menuClasses.disabled}`]: {
-				color: themes[theme].menu.disabled.color,
+				color: themes[theme.palette.mode === "dark" ? "dark" : "light"].menu.disabled.color,
 			},
 			"&:hover": {
-				backgroundColor: hexToRgba(themes[theme].menu.hover.backgroundColor, 1),
-				color: themes[theme].menu.hover.color,
+				backgroundColor: hexToRgba(
+					themes[theme.palette.mode === "dark" ? "dark" : "light"].menu.hover.backgroundColor,
+					1
+				),
+				color: themes[theme.palette.mode === "dark" ? "dark" : "light"].menu.hover.color,
 			},
 		},
 		label: ({ open }) => ({
@@ -135,38 +140,107 @@ const SidebarMenu = () => {
 	};
 
 	return (
-		<Sidebar
-			collapsed={isCollapsed}
-			backgroundColor={hexToRgba(themes[theme].sidebar.backgroundColor, 1)}
-			rootStyles={{
-				color: themes[theme].sidebar.color,
+		<Drawer
+			open={isOpen}
+			variant='persistent'
+			PaperProps={{
+				sx: {
+					width,
+					border: "none",
+					bgcolor: theme.palette.mode === "dark" ? "grey.900" : "grey.50",
+					transition: "width 0.2s ease-out",
+					display: "flex",
+				},
 			}}
 		>
-			<div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: "black" }}>
-				<SidebarHeader
-					isCollapsed={isCollapsed}
-					setIsCollapsed={setIsCollapsed}
-					style={{ marginBottom: "24px", marginTop: "16px" }}
-				/>
+			<Box
+				sx={{
+					height: "100vh",
+					width: "100%",
+					display: "flex",
+					flexDirection: "column",
+					borderRight: 1,
+					borderColor: "divider",
+					overflow: "hidden",
+				}}
+			>
+				{/* Header section - stays fixed */}
+				<Box
+					sx={{
+						p: 2,
+						borderBottom: 1,
+						borderColor: "divider",
+						flexShrink: 0,
+					}}
+				>
+					<SidebarHeader
+						isCollapsed={isCollapsed}
+						setIsCollapsed={onToggleCollapse}
+						style={{ marginBottom: "24px", marginTop: "16px" }}
+					/>
+				</Box>
 
-				<div style={{ flex: 1, marginBottom: "32px" }}>
-					<div style={{ padding: "0 24px", marginBottom: "8px" }}>
-						<Typography
-							variant='body2'
-							fontWeight={600}
-							style={{ opacity: isCollapsed ? 0 : 0.7, letterSpacing: "0.5px" }}
-						>
-							General
-						</Typography>
-					</div>
+				{/* Scrollable content section */}
+				<Box
+					sx={{
+						flex: 1,
+						minHeight: 0,
+						overflowY: "auto",
+						overflowX: "hidden",
+						"&::-webkit-scrollbar": {
+							width: "8px",
+							bgcolor: "transparent",
+						},
+						"&::-webkit-scrollbar-thumb": {
+							bgcolor: theme.palette.mode === "dark" ? "grey.800" : "grey.300",
+							borderRadius: "4px",
+						},
+						"&:hover::-webkit-scrollbar-thumb": {
+							bgcolor: theme.palette.mode === "dark" ? "grey.700" : "grey.400",
+						},
+					}}
+				>
+					<Menu
+						menuItemStyles={menuItemStyles}
+						style={{
+							height: "100%",
+							border: "none",
+						}}
+					>
+						<Box sx={{ p: 2 }}>
+							<div style={{ padding: "0 24px", marginBottom: "8px" }}>
+								<Typography
+									variant='body2'
+									fontWeight={600}
+									style={{ opacity: isCollapsed ? 0 : 0.7, letterSpacing: "0.5px" }}
+								>
+									General
+								</Typography>
+							</div>
 
-					<Menu menuItemStyles={menuItemStyles}>
-						<MenuItems items={menuLinks} selected={selected} setSelected={setSelected} theme={theme} />
+							<MenuItems
+								items={menuLinks}
+								selected={selected}
+								setSelected={setSelected}
+								theme={theme.palette.mode === "dark" ? "dark" : "light"}
+							/>
+						</Box>
 					</Menu>
-				</div>
-			</div>
-		</Sidebar>
-	);
-};
+				</Box>
 
-export default SidebarMenu;
+				{/* Footer section - stays fixed at bottom if needed */}
+				<Box
+					sx={{
+						p: 2,
+						borderTop: 1,
+						borderColor: "divider",
+						mt: "auto",
+						flexShrink: 0,
+					}}
+				>
+					{/* ... footer content if any ... */}
+				</Box>
+			</Box>
+		</Drawer>
+	);
+}

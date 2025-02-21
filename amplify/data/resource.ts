@@ -2,6 +2,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { type DefaultAuthorizationMode } from "@aws-amplify/backend-data";
 import { getOpportunities } from "../functions/getOpportunities/resource";
 import { samApi } from "../functions/samApi/resource";
+import { zohoAuth } from "../functions/zohoAuth/resource";
 // add settings table
 
 const schema = a.schema({
@@ -536,6 +537,33 @@ const schema = a.schema({
 		]),
 
 	// Custom queries
+	ZohoAuth: a.model({
+		id: a.id(),
+		accessToken: a.string(),
+		refreshToken: a.string(),
+		expiresAt: a.datetime(),
+		scope: a.string().array(),
+	}),
+
+	getZohoAuthUrl: a
+		.query()
+		.returns(a.string())
+		.authorization((allow) => [allow.authenticated()])
+		.handler(a.handler.function(zohoAuth)),
+
+	getZohoTokens: a
+		.query()
+		.arguments({ code: a.string() })
+		.returns(a.ref("ZohoAuth"))
+		.authorization((allow) => [allow.authenticated()])
+		.handler(a.handler.function(zohoAuth)),
+
+	refreshZohoTokens: a
+		.query()
+		.returns(a.ref("ZohoAuth"))
+		.authorization((allow) => [allow.authenticated()])
+		.handler(a.handler.function(zohoAuth)),
+
 	getSamData: a
 		.query()
 		.arguments({

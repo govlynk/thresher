@@ -14,6 +14,10 @@ export default function MainLayout({ signOut }) {
 	const COLLAPSED_WIDTH = 80;
 	const TOPBAR_HEIGHT = 64;
 
+	const handleToggleCollapse = () => {
+		setIsCollapsed(!isCollapsed);
+	};
+
 	return (
 		<Box
 			sx={{
@@ -40,7 +44,12 @@ export default function MainLayout({ signOut }) {
 					}),
 				}}
 			>
-				<SidebarMenu isCollapsed={isCollapsed} onToggleCollapse={() => setIsCollapsed(!isCollapsed)} />
+				<SidebarMenu
+					isOpen={true}
+					isCollapsed={isCollapsed}
+					onToggleCollapse={handleToggleCollapse}
+					width={isCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH}
+				/>
 			</Box>
 
 			{/* Main Content Area */}

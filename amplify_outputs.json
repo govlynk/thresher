@@ -120,6 +120,22 @@
                 ]
               }
             },
+            "opportunitySummaries": {
+              "name": "opportunitySummaries",
+              "isArray": true,
+              "type": {
+                "model": "OpportunitySummary"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "userId"
+                ]
+              }
+            },
             "companies": {
               "name": "companies",
               "isArray": true,
@@ -638,6 +654,13 @@
               "isRequired": false,
               "attributes": []
             },
+            "searchId": {
+              "name": "searchId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
             "agencies": {
               "name": "agencies",
               "isArray": true,
@@ -659,6 +682,22 @@
               "isArray": true,
               "type": {
                 "model": "Opportunity"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "companyId"
+                ]
+              }
+            },
+            "opportunitySummaries": {
+              "name": "opportunitySummaries",
+              "isArray": true,
+              "type": {
+                "model": "OpportunitySummary"
               },
               "isRequired": false,
               "attributes": [],
@@ -969,6 +1008,22 @@
               "isArray": true,
               "type": {
                 "model": "Opportunity"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "teamId"
+                ]
+              }
+            },
+            "opportunitySummaries": {
+              "name": "opportunitySummaries",
+              "isArray": true,
+              "type": {
+                "model": "OpportunitySummary"
               },
               "isRequired": false,
               "attributes": [],
@@ -3071,6 +3126,412 @@
             "sortKeyFieldNames": []
           }
         },
+        "OpportunitySummary": {
+          "name": "OpportunitySummary",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "sourceId": {
+              "name": "sourceId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "title": {
+              "name": "title",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "description": {
+              "name": "description",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "status": {
+              "name": "status",
+              "isArray": false,
+              "type": {
+                "enum": "OpportunitySummaryStatus"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "agency": {
+              "name": "agency",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "agencyType": {
+              "name": "agencyType",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "category": {
+              "name": "category",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "sourceType": {
+              "name": "sourceType",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "opportunityType": {
+              "name": "opportunityType",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "AISummary": {
+              "name": "AISummary",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "ValueEstLow": {
+              "name": "ValueEstLow",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "ValueEstHigh": {
+              "name": "ValueEstHigh",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "typeOfSetAsideDescription": {
+              "name": "typeOfSetAsideDescription",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "postedDate": {
+              "name": "postedDate",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "responseDeadLine": {
+              "name": "responseDeadLine",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "naicsCode": {
+              "name": "naicsCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "pscCode": {
+              "name": "pscCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "documentLinks": {
+              "name": "documentLinks",
+              "isArray": true,
+              "type": "AWSURL",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "HGLink": {
+              "name": "HGLink",
+              "isArray": false,
+              "type": "AWSURL",
+              "isRequired": false,
+              "attributes": []
+            },
+            "sourceLink": {
+              "name": "sourceLink",
+              "isArray": false,
+              "type": "AWSURL",
+              "isRequired": false,
+              "attributes": []
+            },
+            "officeZipcode": {
+              "name": "officeZipcode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "officeCity": {
+              "name": "officeCity",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "officeCountryCode": {
+              "name": "officeCountryCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "officeState": {
+              "name": "officeState",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "pocName": {
+              "name": "pocName",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "pocEmail": {
+              "name": "pocEmail",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "pocPhone": {
+              "name": "pocPhone",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "pocType": {
+              "name": "pocType",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "position": {
+              "name": "position",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "priority": {
+              "name": "priority",
+              "isArray": false,
+              "type": {
+                "enum": "OpportunitySummaryPriority"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "estimatedEffort": {
+              "name": "estimatedEffort",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "actualEffort": {
+              "name": "actualEffort",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "tags": {
+              "name": "tags",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "notes": {
+              "name": "notes",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "assigneeId": {
+              "name": "assigneeId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "dueDate": {
+              "name": "dueDate",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "userId": {
+              "name": "userId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "companyId": {
+              "name": "companyId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "teamId": {
+              "name": "teamId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "user": {
+              "name": "user",
+              "isArray": false,
+              "type": {
+                "model": "User"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "userId"
+                ]
+              }
+            },
+            "company": {
+              "name": "company",
+              "isArray": false,
+              "type": {
+                "model": "Company"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "companyId"
+                ]
+              }
+            },
+            "team": {
+              "name": "team",
+              "isArray": false,
+              "type": {
+                "model": "Team"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "teamId"
+                ]
+              }
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "OpportunitySummaries",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "provider": "userPools",
+                    "ownerField": "owner",
+                    "allow": "owner",
+                    "identityClaim": "cognito:username",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  },
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "GOVLYNK_ADMIN"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
         "Opportunity": {
           "name": "Opportunity",
           "fields": {
@@ -3980,6 +4441,26 @@
             "COMPLETED"
           ]
         },
+        "OpportunitySummaryStatus": {
+          "name": "OpportunitySummaryStatus",
+          "values": [
+            "BACKLOG",
+            "BID",
+            "REVIEW",
+            "SUBMITTED",
+            "WON",
+            "LOST",
+            "REJECTED"
+          ]
+        },
+        "OpportunitySummaryPriority": {
+          "name": "OpportunitySummaryPriority",
+          "values": [
+            "HIGH",
+            "MEDIUM",
+            "LOW"
+          ]
+        },
         "OpportunityStatus": {
           "name": "OpportunityStatus",
           "values": [
@@ -4007,9 +4488,102 @@
             "MEDIUM",
             "HIGH"
           ]
+        },
+        "GetSamDataAction": {
+          "name": "GetSamDataAction",
+          "values": [
+            "repsAndCerts",
+            "entity"
+          ]
         }
       },
-      "nonModels": {}
+      "nonModels": {},
+      "queries": {
+        "getSamData": {
+          "name": "getSamData",
+          "isArray": false,
+          "type": "AWSJSON",
+          "isRequired": false,
+          "arguments": {
+            "uei": {
+              "name": "uei",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            },
+            "action": {
+              "name": "action",
+              "isArray": false,
+              "type": {
+                "enum": "GetSamDataAction"
+              },
+              "isRequired": false
+            }
+          }
+        },
+        "getOpportunities": {
+          "name": "getOpportunities",
+          "isArray": false,
+          "type": "AWSJSON",
+          "isRequired": false,
+          "arguments": {
+            "naicsCode": {
+              "name": "naicsCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "agency": {
+              "name": "agency",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "setAside": {
+              "name": "setAside",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "state": {
+              "name": "state",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "limit": {
+              "name": "limit",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false
+            },
+            "offset": {
+              "name": "offset",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false
+            },
+            "sourceType": {
+              "name": "sourceType",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "searchId": {
+              "name": "searchId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "postedDate": {
+              "name": "postedDate",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            }
+          }
+        }
+      }
     }
   },
   "storage": {

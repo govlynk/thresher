@@ -2,8 +2,10 @@ import { defineFunction, secret } from "@aws-amplify/backend";
 
 export const samApi = defineFunction({
 	name: "samApi",
+	entry: "./src/handler.ts",
 	environment: {
-		SAM_API_KEY: secret("l5nES3FOs2N3Z1Uzd2IYck2eQn6xETUyfGnNPoEl"),
+		SAM_API_KEY: secret("sam-api-key"),
 	},
-	entry: "./handler.ts",
+	timeoutSeconds: 30,
+	memoryMB: 1024,
 });

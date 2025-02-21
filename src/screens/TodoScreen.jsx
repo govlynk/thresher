@@ -17,61 +17,51 @@ function ToDoScreen() {
 	const [isInitialized, setIsInitialized] = useState(false);
 	const { activeCompanyId, activeTeamId } = useGlobalStore();
 	const { fetchTodos } = useTodoStore();
-	const {
-		sprints,
-		activeSprint,
-		fetchSprints,
-		generateSprints,
-		loading: sprintsLoading,
-		error: sprintsError,
-	} = useSprintStore();
+	const { fetchSprints, activeSprint, error: sprintsError } = useSprintStore();
 
+	// Single effect for initialization
 	useEffect(() => {
+		let mounted = true;
+		let intervalId = null;
+
 		const initializeData = async () => {
-			if (!activeCompanyId) {
+			if (!activeCompanyId || !activeTeamId) {
+				setIsInitialized(false);
 				return;
 			}
 
 			try {
-				if (activeTeamId) {
-					await fetchSprints(activeTeamId);
+				await Promise.all([fetchSprints(activeTeamId), fetchTodos()]);
+
+				if (mounted) {
+					setIsInitialized(true);
 				}
-				await fetchTodos();
-				setIsInitialized(true);
 			} catch (err) {
 				console.error("Error initializing data:", err);
-				setIsInitialized(false);
+				if (mounted) {
+					setIsInitialized(false);
+				}
 			}
 		};
 
+		// Initial load
 		initializeData();
 
-		// Set up periodic sprint status check
-		const checkInterval = setInterval(() => {
+		// Set up sprint status check interval
+		intervalId = setInterval(() => {
 			if (activeTeamId) {
-				fetchSprints(activeTeamId).catch(err => 
-					console.error("Error checking sprint status:", err)
-				);
+				fetchSprints(activeTeamId).catch((err) => console.error("Error checking sprint status:", err));
 			}
 		}, 60 * 60 * 1000); // Check every hour
 
-		return () => clearInterval(checkInterval);
-	}, [activeCompanyId, activeTeamId, fetchSprints, fetchTodos]);
-
-	// Handle team changes
-	useEffect(() => {
-		if (activeTeamId) {
-			const fetchTeamSprints = async () => {
-				try {
-					await fetchSprints(activeTeamId);
-				} catch (err) {
-					console.error("Error fetching sprints for team:", err);
-				}
-			};
-
-			fetchTeamSprints();
-		}
-	}, [activeTeamId, fetchSprints]);
+		// Cleanup function
+		return () => {
+			mounted = false;
+			if (intervalId) {
+				clearInterval(intervalId);
+			}
+		};
+	}, [activeCompanyId, activeTeamId]); // Only re-run if company or team changes
 
 	const handleAddClick = () => {
 		setSelectedTodo(null);
@@ -99,7 +89,7 @@ function ToDoScreen() {
 		);
 	}
 
-	if (sprintsLoading || !isInitialized) {
+	if (!isInitialized) {
 		return (
 			<Container maxWidth={false}>
 				<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
