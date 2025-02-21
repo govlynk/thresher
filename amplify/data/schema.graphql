@@ -1,0 +1,13 @@
+type ZohoAuth @model {
+  id: ID!
+  accessToken: String!
+  refreshToken: String!
+  expiresAt: AWSDateTime!
+  scope: [String]!
+}
+
+type Query {
+  getZohoAuthUrl: String! @function(name: "zohoAuth")
+  getZohoTokens(code: String!): ZohoAuth! @function(name: "zohoAuth")
+  refreshZohoTokens: ZohoAuth! @function(name: "zohoAuth")
+} 
