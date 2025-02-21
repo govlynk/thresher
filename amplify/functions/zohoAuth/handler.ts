@@ -1,6 +1,6 @@
 import { AuthenticationClient } from "./lib/zohoClient";
 
-export async function handler(event, context) {
+export async function handler(event) {
 	try {
 		const client = new AuthenticationClient({
 			clientId: process.env.ZOHO_CLIENT_ID,
@@ -8,42 +8,29 @@ export async function handler(event, context) {
 			redirectUri: process.env.REDIRECT_URI,
 		});
 
-		switch (event.arguments?.operation || event.operation) {
-			case "getAuthUrl":
-				return {
-					statusCode: 200,
-					url: client.generateAuthUrl(["ZohoCRM.modules.ALL"]),
-				};
+		// For direct queries, the operation is in fieldName
+		const operation = event.fieldName || event.arguments?.operation;
 
-			case "getTokens":
+		switch (operation) {
+			case "getZohoAuthUrl":
+				const url = client.generateAuthUrl(["ZohoCRM.modules.ALL"]);
+				return url; // Return URL directly for GraphQL string return type
+
+			case "getZohoTokens":
 				const { code } = event.arguments;
 				const tokens = await client.generateTokens(code);
+				return tokens;
 
-				if (tokens.refresh_token) {
-					await context.secrets.put("ZOHO_REFRESH_TOKEN", tokens.refresh_token);
-				}
-
-				return {
-					statusCode: 200,
-					accessToken: tokens.access_token,
-					expiresIn: tokens.expires_in,
-				};
-
-			case "refreshToken":
-				const refreshToken = await context.secrets.get("ZOHO_REFRESH_TOKEN");
+			case "refreshZohoTokens":
+				const refreshToken = process.env.ZOHO_REFRESH_TOKEN;
 				if (!refreshToken) {
 					throw new Error("Refresh token not found");
 				}
-
 				const newTokens = await client.refreshAccessToken(refreshToken);
-				return {
-					statusCode: 200,
-					accessToken: newTokens.access_token,
-					expiresIn: newTokens.expires_in,
-				};
+				return newTokens;
 
 			default:
-				throw new Error("Invalid operation");
+				throw new Error(`Invalid operation: ${operation}`);
 		}
 	} catch (error) {
 		console.error("Zoho Auth Error:", error);
