@@ -578,10 +578,23 @@ const schema = a.schema({
 		.authorization((allow) => [allow.authenticated()])
 		.handler(a.handler.function(getOpportunities)),
 
+	getZohoAuthUrl: a
+		.query()
+		.returns(a.string())
+		.authorization((allow) => [allow.authenticated(), allow.group("GOVLYNK_ADMIN")])
+		.handler(a.handler.function(zohoAuth)),
+
+	getZohoTokens: a
+		.query()
+		.arguments({ code: a.string() })
+		.returns(a.json())
+		.authorization((allow) => [allow.authenticated(), allow.group("GOVLYNK_ADMIN")])
+		.handler(a.handler.function(zohoAuth)),
+
 	refreshZohoTokens: a
 		.query()
 		.returns(a.json())
-		.authorization((allow) => [allow.authenticated()])
+		.authorization((allow) => [allow.authenticated(), allow.group("GOVLYNK_ADMIN")])
 		.handler(a.handler.function(zohoAuth)),
 });
 
