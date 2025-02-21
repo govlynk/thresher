@@ -6,13 +6,13 @@ export async function handler(event) {
 		console.log("Environment variables:", {
 			hasClientId: !!process.env.ZOHO_CLIENT_ID,
 			hasClientSecret: !!process.env.ZOHO_CLIENT_SECRET,
-			redirectUri: process.env.REDIRECT_URI,
+			hasRefreshToken: !!process.env.ZOHO_REFRESH_TOKEN,
 		});
 
 		const client = new AuthenticationClient({
 			clientId: process.env.ZOHO_CLIENT_ID,
 			clientSecret: process.env.ZOHO_CLIENT_SECRET,
-			redirectUri: process.env.REDIRECT_URI,
+			refreshToken: process.env.ZOHO_REFRESH_TOKEN,
 		});
 
 		// For direct queries, the operation is in fieldName
@@ -20,35 +20,13 @@ export async function handler(event) {
 		console.log("Operation:", operation);
 
 		switch (operation) {
-			case "getZohoAuthUrl":
-				console.log("Generating auth URL with scopes:", ["ZohoCRM.modules.ALL"]);
-				const url = client.generateAuthUrl(["ZohoCRM.modules.ALL"]);
-				console.log("Generated URL:", url);
-				return url; // Return URL directly for GraphQL string return type
-
-			case "getZohoTokens":
-				const { code } = event.arguments;
-				console.log("Exchanging code for tokens:", { codeLength: code?.length });
-				const tokens = await client.generateTokens(code);
-				console.log("Received tokens:", {
-					hasAccessToken: !!tokens.access_token,
-					hasRefreshToken: !!tokens.refresh_token,
-					expiresIn: tokens.expires_in,
-				});
-				return tokens;
-
 			case "refreshZohoTokens":
-				const refreshToken = process.env.ZOHO_REFRESH_TOKEN;
-				console.log("Refreshing tokens:", { hasRefreshToken: !!refreshToken });
-				if (!refreshToken) {
-					throw new Error("Refresh token not found");
-				}
-				const newTokens = await client.refreshAccessToken(refreshToken);
+				const refreshedTokens = await client.getAccessToken();
 				console.log("Refreshed tokens:", {
-					hasAccessToken: !!newTokens.access_token,
-					expiresIn: newTokens.expires_in,
+					hasAccessToken: !!refreshedTokens.access_token,
+					expiresIn: refreshedTokens.expires_in,
 				});
-				return newTokens;
+				return refreshedTokens;
 
 			default:
 				throw new Error(`Invalid operation: ${operation}`);

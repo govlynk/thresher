@@ -551,25 +551,6 @@ const schema = a.schema({
 			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
 		]),
 
-	getZohoAuthUrl: a
-		.query()
-		.returns(a.string())
-		.authorization((allow) => [allow.authenticated()])
-		.handler(a.handler.function(zohoAuth)),
-
-	getZohoTokens: a
-		.query()
-		.arguments({ code: a.string() })
-		.returns(a.ref("ZohoAuth"))
-		.authorization((allow) => [allow.authenticated()])
-		.handler(a.handler.function(zohoAuth)),
-
-	refreshZohoTokens: a
-		.query()
-		.returns(a.ref("ZohoAuth"))
-		.authorization((allow) => [allow.authenticated()])
-		.handler(a.handler.function(zohoAuth)),
-
 	getSamData: a
 		.query()
 		.arguments({
@@ -596,6 +577,12 @@ const schema = a.schema({
 		.returns(a.json())
 		.authorization((allow) => [allow.authenticated()])
 		.handler(a.handler.function(getOpportunities)),
+
+	refreshZohoTokens: a
+		.query()
+		.returns(a.json())
+		.authorization((allow) => [allow.authenticated()])
+		.handler(a.handler.function(zohoAuth)),
 });
 
 export type Schema = ClientSchema<typeof schema>;
