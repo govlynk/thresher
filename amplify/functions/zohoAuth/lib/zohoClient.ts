@@ -9,34 +9,57 @@ export class AuthenticationClient {
 		this.clientId = clientId;
 		this.clientSecret = clientSecret;
 		this.redirectUri = redirectUri;
-
-		// Initialize the SDK
-		ZOHOCRMSDK.SDKConfigBuilder.initialize({
-			clientId: this.clientId,
-			clientSecret: this.clientSecret,
-			redirectURL: this.redirectUri,
-			accessType: "offline",
-		});
 	}
 
 	generateAuthUrl(scopes: string[]) {
-		return ZOHOCRMSDK.Initializer.generateAuthorizationURL(scopes);
+		const scopeString = encodeURIComponent(scopes.join(","));
+		const redirectUri = encodeURIComponent(this.redirectUri);
+
+		return (
+			`https://accounts.zoho.com/oauth/v2/auth?` +
+			`scope=${scopeString}&` +
+			`client_id=${this.clientId}&` +
+			`response_type=code&` +
+			`access_type=offline&` +
+			`redirect_uri=${redirectUri}`
+		);
 	}
 
 	async generateTokens(code: string) {
-		const tokenResponse = await ZOHOCRMSDK.Initializer.generateToken(code);
+		const environment = ZOHOCRMSDK.USDataCenter.PRODUCTION();
+		const tokenParams = {
+			clientId: this.clientId,
+			clientSecret: this.clientSecret,
+			redirectURL: this.redirectUri,
+			grantToken: code,
+		};
+
+		await ZOHOCRMSDK.InitializeBuilder().environment(environment).token(tokenParams).initialize();
+
+		const token = await ZOHOCRMSDK.TokenStore.getToken();
+
 		return {
-			access_token: tokenResponse.getAccessToken(),
-			refresh_token: tokenResponse.getRefreshToken(),
-			expires_in: tokenResponse.getExpiresIn(),
+			access_token: token.getAccessToken(),
+			refresh_token: token.getRefreshToken(),
+			expires_in: token.getExpiresIn(),
 		};
 	}
 
 	async refreshAccessToken(refreshToken: string) {
-		const tokenResponse = await ZOHOCRMSDK.Initializer.refreshAccessToken(refreshToken);
+		const environment = ZOHOCRMSDK.USDataCenter.PRODUCTION();
+		const tokenParams = {
+			clientId: this.clientId,
+			clientSecret: this.clientSecret,
+			refreshToken: refreshToken,
+		};
+
+		await ZOHOCRMSDK.InitializeBuilder().environment(environment).token(tokenParams).initialize();
+
+		const token = await ZOHOCRMSDK.TokenStore.getToken();
+
 		return {
-			access_token: tokenResponse.getAccessToken(),
-			expires_in: tokenResponse.getExpiresIn(),
+			access_token: token.getAccessToken(),
+			expires_in: token.getExpiresIn(),
 		};
 	}
 }
