@@ -322,6 +322,9 @@ const AppRouter = ({ signOut }) => {
 					}
 				/>
 
+				{/* Add this route to handle Zoho callback */}
+				<Route path='/auth/zoho/callback' element={<TestScreen />} />
+
 				{/* 404 */}
 				<Route path='*' element={<NotFoundPage />} />
 			</Route>
