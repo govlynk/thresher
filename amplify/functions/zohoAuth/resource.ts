@@ -3,7 +3,7 @@ import { defineFunction, type FunctionResources } from "@aws-amplify/backend";
 export const zohoAuth = defineFunction({
 	name: "zohoAuth",
 	entry: "./handler.ts",
-	runtime: "nodejs18.x",
+	runtime: 18,
 	memory: 512,
 	timeout: 30,
 	environment: {
