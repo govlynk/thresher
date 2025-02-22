@@ -83,7 +83,7 @@ export default function TestScreen() {
 			addDebugLog("Fetching CRM user count");
 			// Add your CRM API call here using the token
 			// This is a placeholder - implement actual CRM call
-			const response = await fetch("https://www.zohoapis.com/crm/v2/users/count", {
+			const response = await fetch("https://www.zohoapis.eu/crm/v2/users/count", {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
