@@ -6,13 +6,6 @@ import { zohoAuth } from "../functions/zohoAuth/resource";
 // add settings table
 
 const schema = a.schema({
-	// First define the Log type at the top level
-	Log: a.model({
-		timestamp: a.string(),
-		message: a.string(),
-		data: a.string(),
-	}),
-
 	User: a
 		.model({
 			cognitoId: a.string(),
