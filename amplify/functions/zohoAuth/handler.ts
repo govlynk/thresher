@@ -1,15 +1,35 @@
 import { AuthenticationClient } from "./lib/zohoClient";
 
+// Add a helper to collect logs
+function createLogger() {
+	const logs: Array<{ timestamp: string; message: string; data?: any }> = [];
+
+	return {
+		log: (message: string, data?: any) => {
+			const logEntry = {
+				timestamp: new Date().toISOString(),
+				message,
+				data,
+			};
+			console.log(message, data); // Still log to CloudWatch
+			logs.push(logEntry);
+		},
+		getLogs: () => logs,
+	};
+}
+
 export async function handler(event) {
+	const logger = createLogger();
+
 	try {
-		console.log("Event received:", JSON.stringify(event, null, 2));
+		logger.log("Event received:", event);
 
 		// Debug environment variables
 		const clientId = process.env.ZOHO_CLIENT_ID;
 		const clientSecret = process.env.ZOHO_CLIENT_SECRET;
 		const redirectUri = process.env.REDIRECT_URI;
 
-		console.log("Environment variables:", {
+		logger.log("Environment variables:", {
 			clientIdLength: clientId?.length,
 			clientIdFirstChars: clientId?.substring(0, 8),
 			clientIdLastChars: clientId?.substring(-8),
@@ -30,43 +50,46 @@ export async function handler(event) {
 		});
 
 		const operation = event.fieldName || event.arguments?.operation;
-		console.log("Operation:", operation);
+		logger.log("Operation:", operation);
 
 		switch (operation) {
 			case "getZohoAuthUrl":
 				const scopes = ["ZohoCRM.modules.ALL"];
-				console.log("Generating auth URL with scopes:", scopes);
+				logger.log("Generating auth URL with scopes:", scopes);
 				const url = client.generateAuthUrl(scopes);
-				console.log("Generated URL components:", {
-					baseUrl: url.split("?")[0],
-					params: new URLSearchParams(url.split("?")[1]).toString(),
-					fullUrl: url,
-				});
-				return url;
+				logger.log("Generated URL:", url);
+				return {
+					url,
+					logs: logger.getLogs(),
+				};
 
 			case "getZohoTokens":
 				const { code } = event.arguments;
-				console.log("Exchanging code for tokens:", {
+				logger.log("Exchanging code for tokens:", {
 					codeLength: code?.length,
 					codeFirstChars: code?.substring(0, 8),
 				});
 				const tokens = await client.exchangeCodeForTokens(code);
-				console.log("Received tokens response:", {
-					hasAccessToken: !!tokens.access_token,
-					hasRefreshToken: !!tokens.refresh_token,
+
+				// Get user count using the new access token
+				const userCount = await client.getUserCount(tokens.access_token);
+
+				return {
+					accessToken: tokens.access_token,
+					refreshToken: tokens.refresh_token,
 					expiresIn: tokens.expires_in,
-					apiDomain: tokens.api_domain,
-				});
-				return tokens;
+					userCount,
+					logs: logger.getLogs(),
+				};
 
 			case "refreshZohoTokens":
 				const refreshToken = process.env.ZOHO_REFRESH_TOKEN;
-				console.log("Refreshing tokens:", { hasRefreshToken: !!refreshToken });
+				logger.log("Refreshing tokens:", { hasRefreshToken: !!refreshToken });
 				if (!refreshToken) {
 					throw new Error("Refresh token not found");
 				}
 				const newTokens = await client.refreshAccessToken(refreshToken);
-				console.log("Refreshed tokens response:", {
+				logger.log("Refreshed tokens response:", {
 					hasAccessToken: !!newTokens.access_token,
 					expiresIn: newTokens.expires_in,
 					apiDomain: newTokens.api_domain,
@@ -77,7 +100,7 @@ export async function handler(event) {
 				throw new Error(`Invalid operation: ${operation}`);
 		}
 	} catch (error) {
-		console.error("Zoho Auth Error:", {
+		logger.log("Error:", {
 			message: error.message,
 			stack: error.stack,
 			name: error.name,

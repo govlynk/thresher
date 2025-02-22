@@ -6,6 +6,13 @@ import { zohoAuth } from "../functions/zohoAuth/resource";
 // add settings table
 
 const schema = a.schema({
+	// First define the Log type at the top level
+	Log: a.model({
+		timestamp: a.string(),
+		message: a.string(),
+		data: a.string(),
+	}),
+
 	User: a
 		.model({
 			cognitoId: a.string(),
@@ -578,9 +585,10 @@ const schema = a.schema({
 		.authorization((allow) => [allow.authenticated()])
 		.handler(a.handler.function(getOpportunities)),
 
+	// Then update the queries
 	getZohoAuthUrl: a
 		.query()
-		.returns(a.string())
+		.returns(a.json()) // Use json() for complex return types
 		.authorization((allow) => [allow.authenticated(), allow.group("GOVLYNK_ADMIN")])
 		.handler(a.handler.function(zohoAuth)),
 

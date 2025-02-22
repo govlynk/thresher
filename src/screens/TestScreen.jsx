@@ -31,15 +31,25 @@ export default function TestScreen() {
 			addDebugLog("Requesting Zoho auth URL");
 			const response = await client.graphql({
 				query: `query GetZohoAuthUrl {
-					getZohoAuthUrl
+					getZohoAuthUrl {
+						url
+						logs {
+							timestamp
+							message
+							data
+						}
+					}
 				}`,
 			});
 
-			const url = response.data.getZohoAuthUrl;
+			const { url, logs } = response.data.getZohoAuthUrl;
 			setAuthUrl(url);
-			addDebugLog("Received auth URL", url);
 
-			// Open auth URL in new window
+			// Add server logs to debug display
+			logs.forEach((log) => {
+				addDebugLog(`[Server] ${log.message}`, log.data);
+			});
+
 			window.open(url, "_blank");
 		} catch (err) {
 			setError(err.message);
@@ -59,41 +69,30 @@ export default function TestScreen() {
 					getZohoTokens(code: $code) {
 						accessToken
 						expiresIn
+						userCount
+						logs {
+							timestamp
+							message
+							data
+						}
 					}
 				}`,
 				variables: { code },
 			});
 
-			const { accessToken, expiresIn } = response.data.getZohoTokens;
+			const { accessToken, userCount: count, logs } = response.data.getZohoTokens;
 			setAccessToken(accessToken);
-			addDebugLog("Received access token", { accessToken, expiresIn });
+			setUserCount(count);
 
-			// Test getting user count
-			await getUserCount(accessToken);
+			// Add server logs to debug display
+			logs.forEach((log) => {
+				addDebugLog(`[Server] ${log.message}`, log.data);
+			});
 		} catch (err) {
 			setError(err.message);
 			addDebugLog("Error in auth callback", err);
 		} finally {
 			setLoading(false);
-		}
-	};
-
-	const getUserCount = async (token) => {
-		try {
-			addDebugLog("Fetching CRM user count");
-			// Add your CRM API call here using the token
-			// This is a placeholder - implement actual CRM call
-			const response = await fetch("https://www.zohoapis.eu/crm/v2/users/count", {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
-			const data = await response.json();
-			setUserCount(data.count);
-			addDebugLog("Received user count", data);
-		} catch (err) {
-			addDebugLog("Error getting user count", err);
-			throw err;
 		}
 	};
 
