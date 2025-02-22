@@ -41,6 +41,7 @@ export class AuthenticationClient {
 				client_id: this.clientId,
 				client_secret: this.clientSecret,
 				redirect_uri: this.redirectUri,
+				access_type: "offline",
 				code,
 			});
 
@@ -50,6 +51,8 @@ export class AuthenticationClient {
 					"Content-Type": "application/x-www-form-urlencoded",
 				},
 			});
+
+			console.log("***Exchange Response:", response);
 
 			if (!response.ok) {
 				throw new Error(`Token exchange failed: ${response.statusText}`);
@@ -80,7 +83,7 @@ export class AuthenticationClient {
 					"Content-Type": "application/x-www-form-urlencoded",
 				},
 			});
-
+			console.log("***Refresh Response:", response);
 			if (!response.ok) {
 				throw new Error(`Token refresh failed: ${response.statusText}`);
 			}
