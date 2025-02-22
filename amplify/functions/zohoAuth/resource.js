@@ -15,7 +15,7 @@ export const zohoAuth = defineFunction({
 	memory: 512,
 	timeout: 30,
 	environment: {
-		REDIRECT_URI: "https://d1hcn7nmh82rdz.execute-api.us-east-1.amazonaws.com/dev/zoho/callback,
+		REDIRECT_URI: "https://d1hcn7nmh82rdz.execute-api.us-east-1.amazonaws.com/dev/zoho/callback",
 	},
 	secrets: zohoSecrets,
 });
