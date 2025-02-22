@@ -34,7 +34,7 @@ export async function handler(event) {
 
 		switch (operation) {
 			case "getZohoAuthUrl":
-				const scopes = ["ZohoCRM.modules.ALL", "aaaserver.profile.Read"];
+				const scopes = ["ZohoCRM.modules.ALL"];
 				console.log("Generating auth URL with scopes:", scopes);
 				const url = client.generateAuthUrl(scopes);
 				console.log("Generated URL components:", {
