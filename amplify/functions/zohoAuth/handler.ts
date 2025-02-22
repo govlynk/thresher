@@ -1,109 +1,133 @@
 import { AuthenticationClient } from "./lib/zohoClient";
+import { APIGatewayProxyEventV2WithJWTAuthorizer } from "aws-lambda";
+import { AppSyncResolverHandler } from "aws-lambda";
 
 // Add a helper to collect logs
 function createLogger() {
 	const logs: Array<{ timestamp: string; message: string; data?: any }> = [];
-
 	return {
 		log: (message: string, data?: any) => {
-			const logEntry = {
-				timestamp: new Date().toISOString(),
-				message,
-				data,
-			};
-			console.log(message, data); // Still log to CloudWatch
+			const logEntry = { timestamp: new Date().toISOString(), message, data };
+			console.log(message, data); // Log to CloudWatch
 			logs.push(logEntry);
 		},
 		getLogs: () => logs,
 	};
 }
 
-export async function handler(event) {
+// Update the event type
+type AppSyncEvent = {
+	fieldName: string;
+	arguments: Record<string, any>;
+};
+
+type ZohoEvent = APIGatewayProxyEventV2WithJWTAuthorizer | AppSyncEvent;
+
+export async function handler(event: ZohoEvent) {
 	const logger = createLogger();
 
 	try {
-		logger.log("Event received:", event);
-
-		// Debug environment variables
-		const clientId = process.env.ZOHO_CLIENT_ID;
-		const clientSecret = process.env.ZOHO_CLIENT_SECRET;
-		const redirectUri = process.env.REDIRECT_URI;
-
-		logger.log("Environment variables:", {
-			clientIdLength: clientId?.length,
-			clientIdFirstChars: clientId?.substring(0, 8),
-			clientIdLastChars: clientId?.substring(-8),
-			hasClientSecret: !!clientSecret,
-			clientSecretLength: clientSecret?.length,
-			redirectUri,
-		});
-
-		// Validate required environment variables
-		if (!clientId) throw new Error("ZOHO_CLIENT_ID is not set");
-		if (!clientSecret) throw new Error("ZOHO_CLIENT_SECRET is not set");
-		if (!redirectUri) throw new Error("REDIRECT_URI is not set");
-
-		const client = new AuthenticationClient({
-			clientId,
-			clientSecret,
-			redirectUri,
-		});
-
-		const operation = event.fieldName || event.arguments?.operation;
-		logger.log("Operation:", operation);
-
-		switch (operation) {
-			case "getZohoAuthUrl":
-				const scopes = ["ZohoCRM.modules.ALL"];
-				logger.log("Generating auth URL with scopes:", scopes);
-				const url = client.generateAuthUrl(scopes);
-				logger.log("Generated URL:", url);
-				return url;
-
-			case "getZohoTokens":
-				const { code } = event.arguments;
-				logger.log("Exchanging code for tokens:", {
-					codeLength: code?.length,
-					codeFirstChars: code?.substring(0, 8),
-				});
-				const tokens = await client.exchangeCodeForTokens(code);
-
-				// Get user count using the new access token
-				const userCount = await client.getUserCount(tokens.access_token);
-
-				return {
-					accessToken: tokens.access_token,
-					refreshToken: tokens.refresh_token,
-					expiresIn: tokens.expires_in,
-					userCount,
-					logs: logger.getLogs(),
-				};
-
-			case "refreshZohoTokens":
-				const refreshToken = process.env.ZOHO_REFRESH_TOKEN;
-				logger.log("Refreshing tokens:", { hasRefreshToken: !!refreshToken });
-				if (!refreshToken) {
-					throw new Error("Refresh token not found");
-				}
-				const newTokens = await client.refreshAccessToken(refreshToken);
-				logger.log("Refreshed tokens response:", {
-					hasAccessToken: !!newTokens.access_token,
-					expiresIn: newTokens.expires_in,
-					apiDomain: newTokens.api_domain,
-				});
-				return newTokens;
-
-			default:
-				throw new Error(`Invalid operation: ${operation}`);
+		// Handle HTTP API request
+		if ("requestContext" in event && event.requestContext?.http) {
+			return handleHttpRequest(event as APIGatewayProxyEventV2WithJWTAuthorizer, logger);
 		}
+
+		// Handle AppSync operations
+		return handleAppSyncRequest(event as AppSyncEvent, logger);
 	} catch (error) {
-		logger.log("Error:", {
-			message: error.message,
-			stack: error.stack,
-			name: error.name,
-			status: error.status,
-			response: error.response?.data,
-		});
+		logger.log("Unhandled error:", error);
 		throw error;
 	}
+}
+
+async function handleHttpRequest(event: APIGatewayProxyEventV2WithJWTAuthorizer, logger: any) {
+	logger.log("Event received:", event);
+
+	// Handle HTTP API request
+	if (event.requestContext?.http) {
+		const code = event.queryStringParameters?.code;
+		if (!code) {
+			return {
+				statusCode: 400,
+				body: JSON.stringify({ error: "No authorization code received" }),
+			};
+		}
+
+		try {
+			const client = new AuthenticationClient({
+				clientId: process.env.ZOHO_CLIENT_ID,
+				clientSecret: process.env.ZOHO_CLIENT_SECRET,
+				redirectUri: process.env.REDIRECT_URI,
+			});
+
+			// Exchange code for tokens
+			const tokens = await client.exchangeCodeForTokens(code);
+
+			// Get user count
+			const userCount = await client.getUserCount(tokens.access_token);
+
+			// Store tokens securely (e.g., in a database or user session)
+			await updateUserAttributes(event, tokens);
+
+			return {
+				statusCode: 200,
+				body: JSON.stringify({
+					message: "Authorization successful",
+					userCount,
+				}),
+			};
+		} catch (error) {
+			logger.log("Error during token exchange or user count retrieval:", error);
+			return {
+				statusCode: 500,
+				body: JSON.stringify({ error: error.message }),
+			};
+		}
+	}
+}
+
+async function handleAppSyncRequest(event: AppSyncEvent, logger: any) {
+	// Handle AppSync operations
+	const operation = event.fieldName;
+
+	logger.log("Operation:", operation);
+
+	if (!process.env.ZOHO_CLIENT_ID || !process.env.ZOHO_CLIENT_SECRET || !process.env.REDIRECT_URI) {
+		throw new Error("Missing required environment variables");
+	}
+
+	const client = new AuthenticationClient({
+		clientId: process.env.ZOHO_CLIENT_ID,
+		clientSecret: process.env.ZOHO_CLIENT_SECRET,
+		redirectUri: process.env.REDIRECT_URI,
+	});
+
+	switch (operation) {
+		case "getZohoAuthUrl":
+			const scopes = ["ZohoCRM.modules.ALL"];
+			logger.log("Generating auth URL with scopes:", scopes);
+			return client.generateAuthUrl(scopes);
+
+		case "getZohoTokens":
+			const { code } = event.arguments;
+			logger.log("Exchanging code for tokens:", { code });
+			const tokens = await client.exchangeCodeForTokens(code);
+			const userCount = await client.getUserCount(tokens.access_token);
+			return { ...tokens, userCount };
+
+		case "refreshZohoTokens":
+			const refreshToken = process.env.ZOHO_REFRESH_TOKEN;
+			if (!refreshToken) throw new Error("Refresh token not found");
+			return await client.refreshAccessToken(refreshToken);
+
+		default:
+			throw new Error(`Invalid operation: ${operation}`);
+	}
+}
+
+async function updateUserAttributes(event, tokens) {
+	const userId = event.requestContext?.authorizer?.jwt?.claims?.sub;
+	if (!userId) throw new Error("User not authenticated");
+
+	console.log("Storing tokens for user:", userId);
 }

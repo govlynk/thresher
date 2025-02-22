@@ -79,10 +79,20 @@ export default function TestScreen() {
 	// Handle auth callback from URL
 	useEffect(() => {
 		const urlParams = new URLSearchParams(window.location.search);
-		const code = urlParams.get("code");
-		if (code) {
-			addDebugLog("Found auth code in URL", { code });
-			handleAuthCallback(code);
+		const data = urlParams.get("data");
+
+		if (data) {
+			try {
+				const responseData = JSON.parse(data);
+				if (responseData.userCount) {
+					setUserCount(responseData.userCount);
+					setAccessToken("token_received"); // Indicate successful auth
+					addDebugLog("Auth successful", responseData);
+				}
+			} catch (err) {
+				setError("Failed to process response data");
+				addDebugLog("Error processing response", err);
+			}
 		}
 	}, []);
 
