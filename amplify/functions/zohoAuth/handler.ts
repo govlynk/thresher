@@ -58,10 +58,7 @@ export async function handler(event) {
 				logger.log("Generating auth URL with scopes:", scopes);
 				const url = client.generateAuthUrl(scopes);
 				logger.log("Generated URL:", url);
-				return {
-					url,
-					logs: logger.getLogs(),
-				};
+				return url;
 
 			case "getZohoTokens":
 				const { code } = event.arguments;

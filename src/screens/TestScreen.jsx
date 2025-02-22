@@ -31,25 +31,13 @@ export default function TestScreen() {
 			addDebugLog("Requesting Zoho auth URL");
 			const response = await client.graphql({
 				query: `query GetZohoAuthUrl {
-					getZohoAuthUrl {
-						url
-						logs {
-							timestamp
-							message
-							data
-						}
-					}
+					getZohoAuthUrl
 				}`,
 			});
 
-			const { url, logs } = response.data.getZohoAuthUrl;
+			const url = response.data.getZohoAuthUrl;
 			setAuthUrl(url);
-
-			// Add server logs to debug display
-			logs.forEach((log) => {
-				addDebugLog(`[Server] ${log.message}`, log.data);
-			});
-
+			addDebugLog("Received auth URL", url);
 			window.open(url, "_blank");
 		} catch (err) {
 			setError(err.message);
@@ -63,31 +51,23 @@ export default function TestScreen() {
 		setLoading(true);
 		setError(null);
 		try {
-			addDebugLog("Exchanging auth code for tokens", { code });
+			addDebugLog("Exchanging code for tokens", { code });
 			const response = await client.graphql({
 				query: `query GetZohoTokens($code: String!) {
 					getZohoTokens(code: $code) {
 						accessToken
+						refreshToken
 						expiresIn
 						userCount
-						logs {
-							timestamp
-							message
-							data
-						}
 					}
 				}`,
 				variables: { code },
 			});
 
-			const { accessToken, userCount: count, logs } = response.data.getZohoTokens;
+			addDebugLog("Full response:", response.data.getZohoTokens);
+			const { accessToken, userCount } = response.data.getZohoTokens;
 			setAccessToken(accessToken);
-			setUserCount(count);
-
-			// Add server logs to debug display
-			logs.forEach((log) => {
-				addDebugLog(`[Server] ${log.message}`, log.data);
-			});
+			setUserCount(userCount);
 		} catch (err) {
 			setError(err.message);
 			addDebugLog("Error in auth callback", err);
