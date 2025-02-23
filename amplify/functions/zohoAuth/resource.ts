@@ -1,7 +1,6 @@
 import { defineFunction } from "@aws-amplify/backend-function";
 import { defineBackend } from "@aws-amplify/backend";
 import { RestApi, LambdaIntegration, Cors } from "aws-cdk-lib/aws-apigateway";
-import { Function } from "aws-cdk-lib/aws-lambda";
 
 // Define the Lambda function
 export const zohoAuth = defineFunction({
