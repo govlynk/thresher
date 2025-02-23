@@ -24,9 +24,6 @@ export const backend = defineBackend({
 
 const apiStack = backend.createStack("api-stack");
 
-// Get Lambda function
-const lambdaFn = apiStack.node.findChild("zohoAuth") as Function;
-
 // Create API Gateway
 const restApi = new RestApi(apiStack, "ZohoRestApi", {
 	restApiName: "ZohoRestApi",
@@ -38,6 +35,10 @@ const restApi = new RestApi(apiStack, "ZohoRestApi", {
 });
 
 // Create API route with Lambda integration
+const lambdaFn = apiStack.node.tryFindChild("ZohoAuthFunction") as Function;
+if (!lambdaFn) {
+	throw new Error("Lambda function not found in stack");
+}
 const integration = new LambdaIntegration(lambdaFn);
 restApi.root.addResource("zoho").addResource("callback").addMethod("GET", integration);
 
