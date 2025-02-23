@@ -2,6 +2,10 @@ import { defineFunction } from "@aws-amplify/backend-function";
 import { defineBackend } from "@aws-amplify/backend";
 import { RestApi, LambdaIntegration, Cors } from "aws-cdk-lib/aws-apigateway";
 
+// Define the backend first
+export const backend = defineBackend({});
+
+// Define the Lambda function
 export const zohoAuth = defineFunction({
 	name: "zohoAuth",
 	entry: "./handler.ts", // Path to your Lambda function handler
@@ -10,11 +14,10 @@ export const zohoAuth = defineFunction({
 	timeoutSeconds: 30,
 });
 
-export const backend = defineBackend({
-	zohoAuth, // Add the Lambda function to the backend definition
-});
+// Add function to backend
+backend.addFunction("zohoAuth", zohoAuth);
 
-// Create a new stack for API Gateway
+// Create API Gateway stack
 const apiStack = backend.createStack("api-stack");
 
 // Define the REST API
@@ -27,13 +30,9 @@ const restApi = new RestApi(apiStack, "ZohoRestApi", {
 	},
 });
 
-// Integrate the Lambda function with API Gateway
-const lambdaIntegration = new LambdaIntegration(zohoAuth.resources.lambda);
-
-// Create resources and methods in the REST API
-const zohoResource = restApi.root.addResource("zoho");
-const callbackResource = zohoResource.addResource("callback");
-callbackResource.addMethod("GET", lambdaIntegration);
+// Create API route with Lambda integration
+const integration = new LambdaIntegration(zohoAuth.node.defaultChild);
+restApi.root.addResource("zoho").addResource("callback").addMethod("GET", integration);
 
 // Add an output for the REST API endpoint
 backend.addOutput({
