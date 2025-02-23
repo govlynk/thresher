@@ -47,35 +47,6 @@ export default function TestScreen() {
 		}
 	};
 
-	const handleAuthCallback = async (code) => {
-		setLoading(true);
-		setError(null);
-		try {
-			addDebugLog("Exchanging code for tokens", { code });
-			const response = await client.graphql({
-				query: `query GetZohoTokens($code: String!) {
-					getZohoTokens(code: $code) {
-						accessToken
-						refreshToken
-						expiresIn
-						userCount
-					}
-				}`,
-				variables: { code },
-			});
-
-			addDebugLog("Full response:", response.data.getZohoTokens);
-			const { accessToken, userCount } = response.data.getZohoTokens;
-			setAccessToken(accessToken);
-			setUserCount(userCount);
-		} catch (err) {
-			setError(err.message);
-			addDebugLog("Error in auth callback", err);
-		} finally {
-			setLoading(false);
-		}
-	};
-
 	// Handle auth callback from URL
 	useEffect(() => {
 		const urlParams = new URLSearchParams(window.location.search);
