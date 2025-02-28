@@ -1,20 +1,37 @@
-import React from "react";
-import { Box, Container, Button, Typography, CircularProgress, Paper } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Container, Button, Typography, CircularProgress, Paper, TextField } from "@mui/material";
 import { generateClient } from "aws-amplify/api";
-import { createAIHooks } from "@aws-amplify/ui-react-ai";
 
 export default function TestScreen() {
 	const client = generateClient();
-	const { useAIGeneration } = createAIHooks(client);
-	const description = "Create a recipe for chocolate chip cookies";
+	const [description, setDescription] = useState("Create a recipe for chocolate chip cookies");
+	const [isLoading, setIsLoading] = useState(false);
+	const [data, setData] = useState(null);
 
-	// data is React state and will be populated when the generation is returned
-	const [{ data, isLoading }, generateResearch] = useAIGeneration("generateResearch");
+	const handleGenerateResearch = async () => {
+		setIsLoading(true);
+		try {
+			const response = await client.graphql({
+				query: `
+					mutation GenerateResearch($description: String!) {
+						generateResearch(description: $description) {
+							name
+							ingredients
+							instructions
+						}
+					}
+				`,
+				variables: {
+					description,
+				},
+			});
 
-	const handleGenerateResearch = () => {
-		generateResearch({
-			description,
-		});
+			setData(response.data.generateResearch);
+		} catch (error) {
+			console.error("Error generating research:", error);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -24,7 +41,17 @@ export default function TestScreen() {
 					AI Recipe Generation
 				</Typography>
 
-				<Button variant='contained' onClick={handleGenerateRecipe} disabled={isLoading} sx={{ mb: 2 }}>
+				<TextField
+					fullWidth
+					label='Recipe Description'
+					value={description}
+					onChange={(e) => setDescription(e.target.value)}
+					margin='normal'
+					variant='outlined'
+					sx={{ mb: 2 }}
+				/>
+
+				<Button variant='contained' onClick={handleGenerateResearch} disabled={isLoading} sx={{ mb: 2 }}>
 					{isLoading ? <CircularProgress size={24} /> : "Generate Recipe"}
 				</Button>
 
