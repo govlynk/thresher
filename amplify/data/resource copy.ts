@@ -2,6 +2,7 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 import { type DefaultAuthorizationMode } from "@aws-amplify/backend-data";
 import { getOpportunities } from "../functions/getOpportunities/resource";
 import { samApi } from "../functions/samApi/resource";
+// import { zohoAuth } from "../functions/zohoAuth/resource";
 // add settings table
 
 const schema = a.schema({
@@ -576,29 +577,26 @@ const schema = a.schema({
 		.returns(a.json())
 		.authorization((allow) => [allow.authenticated()])
 		.handler(a.handler.function(getOpportunities)),
-	chat: a
-		.conversation({
-			aiModel: a.ai.model("Claude 3.5 Sonnet"),
-			systemPrompt: "You are a helpful assistant",
-		})
-		.authorization((allow) => allow.owner()),
 
-	generateRecipe: a
-		.generation({
-			aiModel: a.ai.model("Claude 3.5 Sonnet"),
-			systemPrompt: "You are a helpful assistant that generates recipes.",
-		})
-		.arguments({
-			description: a.string(),
-		})
-		.returns(
-			a.customType({
-				name: a.string(),
-				ingredients: a.string().array(),
-				instructions: a.string(),
-			})
-		)
-		.authorization((allow) => allow.authenticated()),
+	// Then update the queries
+	// getZohoAuthUrl: a
+	// 	.query()
+	// 	.returns(a.json()) // Use json() for complex return types
+	// 	.authorization((allow) => [allow.authenticated(), allow.group("GOVLYNK_ADMIN")])
+	// 	.handler(a.handler.function(zohoAuth)),
+
+	// getZohoTokens: a
+	// 	.query()
+	// 	.arguments({ code: a.string() })
+	// 	.returns(a.json())
+	// 	.authorization((allow) => [allow.authenticated(), allow.group("GOVLYNK_ADMIN")])
+	// 	.handler(a.handler.function(zohoAuth)),
+
+	// refreshZohoTokens: a
+	// 	.query()
+	// 	.returns(a.json())
+	// 	.authorization((allow) => [allow.authenticated(), allow.group("GOVLYNK_ADMIN")])
+	// 	.handler(a.handler.function(zohoAuth)),
 });
 
 export type Schema = ClientSchema<typeof schema>;

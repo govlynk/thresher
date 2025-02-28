@@ -220,6 +220,10 @@ const systemLinks = {
 			title: "Client Setup",
 			path: "/client-setup",
 		},
+		{
+			title: "Sprint Admin",
+			path: "/sprint-admin",
+		},
 
 		{
 			title: "Contact Admin",

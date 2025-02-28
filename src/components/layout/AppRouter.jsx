@@ -46,6 +46,7 @@ const RegulationManagement = lazy(() => import("../../screens/RegulationManageme
 const ClientSetupScreen = lazy(() => import("../../screens/ClientSetupScreen"));
 const UserScreen = lazy(() => import("../../screens/UserScreen"));
 const CompanyScreen = lazy(() => import("../../screens/CompanyScreen"));
+const SprintAdminScreen = lazy(() => import("../../screens/SprintAdminScreen"));
 const TeamScreen = lazy(() => import("../../screens/TeamScreen"));
 const UserCompanyAccessScreen = lazy(() => import("../../screens/UserCompanyAccessScreen"));
 const ContactsScreen = lazy(() => import("../../screens/ContactsScreen"));
@@ -291,6 +292,16 @@ const AppRouter = ({ signOut }) => {
 						<ProtectedRoute requiredGroups={["GOVLYNK_ADMIN", "COMPANY_ADMIN"]}>
 							<Suspense fallback={<LoadingScreen />}>
 								<TestScreen />
+							</Suspense>
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path='sprint-admin'
+					element={
+						<ProtectedRoute requiredGroups={["GOVLYNK_ADMIN"]}>
+							<Suspense fallback={<LoadingScreen />}>
+								<SprintAdminScreen />
 							</Suspense>
 						</ProtectedRoute>
 					}
