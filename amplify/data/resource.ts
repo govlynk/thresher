@@ -593,13 +593,7 @@ const schema = a.schema({
 		.arguments({
 			description: a.string(),
 		})
-		.returns(
-			a.customType({
-				name: a.string(),
-				ingredients: a.string().array(),
-				instructions: a.string(),
-			})
-		)
+		.returns(a.string())
 		.authorization((allow) => allow.authenticated()),
 });
 
