@@ -13,7 +13,7 @@ export default function TestScreen() {
 		try {
 			const response = await client.graphql({
 				query: `
-					mutation GenerateResearch($description: String!) {
+					query GenerateResearch($description: String!) {
 						generateResearch(description: $description) {
 							name
 							ingredients
@@ -25,6 +25,7 @@ export default function TestScreen() {
 					description,
 				},
 			});
+			console.log(response);
 
 			setData(response.data.generateResearch);
 		} catch (error) {

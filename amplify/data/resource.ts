@@ -576,9 +576,10 @@ const schema = a.schema({
 		.returns(a.json())
 		.authorization((allow) => [allow.authenticated()])
 		.handler(a.handler.function(getOpportunities)),
+
 	chat: a
 		.conversation({
-			aiModel: a.ai.model("Claude 3.5 Sonnet"),
+			aiModel: a.ai.model("Claude 3.5 Sonnet v2"),
 			systemPrompt:
 				"You are a helpful assistant that performs research on a given topic. Format your responses in markdown.",
 		})
@@ -586,7 +587,7 @@ const schema = a.schema({
 
 	generateResearch: a
 		.generation({
-			aiModel: a.ai.model("Claude 3.5 Sonnet"),
+			aiModel: a.ai.model("Claude 3.5 Sonnet v2"),
 			systemPrompt: "You are a helpful assistant that generates recipes.",
 		})
 		.arguments({
