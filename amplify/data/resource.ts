@@ -578,15 +578,29 @@ const schema = a.schema({
 		.handler(a.handler.function(getOpportunities)),
 	chat: a
 		.conversation({
-			aiModel: a.ai.model("Claude 3.5 Sonnet"),
-			systemPrompt: "You are a helpful assistant",
+			aiModel: {
+				resourcePath: "meta.llama3-3-70b-instruct-v1:0",
+			},
+			systemPrompt:
+				"You are a helpful assistant that performs reserch on a given topic.  Format your responses in markdown.  Do not use wikipedia as a resource.",
+			inferenceConfiguration: {
+				temperature: 0.4,
+				maxTokens: 1024,
+			},
 		})
 		.authorization((allow) => allow.owner()),
 
 	generateRecipe: a
 		.generation({
-			aiModel: a.ai.model("Claude 3.5 Sonnet"),
-			systemPrompt: "You are a helpful assistant that generates recipes.",
+			aiModel: {
+				resourcePath: "meta.llama3-3-70b-instruct-v1:0",
+			},
+			systemPrompt:
+				"You are a helpful assistant that performs reserch on a given topic.  Format your responses in markdown.  Do not use wikipedia as a resource.",
+			inferenceConfiguration: {
+				temperature: 0.4,
+				maxTokens: 1024,
+			},
 		})
 		.arguments({
 			description: a.string(),
