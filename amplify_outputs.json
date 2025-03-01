@@ -5168,22 +5168,6 @@
           }
         }
       },
-      "generations": {
-        "generateResearch": {
-          "name": "generateResearch",
-          "isArray": false,
-          "type": "String",
-          "isRequired": false,
-          "arguments": {
-            "description": {
-              "name": "description",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false
-            }
-          }
-        }
-      },
       "conversations": {
         "chat": {
           "name": "chat",

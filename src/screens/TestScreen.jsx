@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Box, Container, Typography, Card, CardContent } from "@mui/material";
 import { generateClient } from "aws-amplify/api";
 import { useAIConversation } from "./client";
+import { AIConversation, createAIHooks } from "@aws-amplify/ui-react-ai";
 import ReactMarkdown from "react-markdown";
 
 export default function TestScreen() {
