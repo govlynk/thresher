@@ -4625,33 +4625,6 @@
         }
       },
       "nonModels": {
-        "GenerateResearchReturnType": {
-          "name": "GenerateResearchReturnType",
-          "fields": {
-            "name": {
-              "name": "name",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "ingredients": {
-              "name": "ingredients",
-              "isArray": true,
-              "type": "String",
-              "isRequired": false,
-              "attributes": [],
-              "isArrayNullable": true
-            },
-            "instructions": {
-              "name": "instructions",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            }
-          }
-        },
         "AmplifyAIDocumentBlockSource": {
           "name": "AmplifyAIDocumentBlockSource",
           "fields": {
@@ -5199,9 +5172,7 @@
         "generateResearch": {
           "name": "generateResearch",
           "isArray": false,
-          "type": {
-            "nonModel": "GenerateResearchReturnType"
-          },
+          "type": "String",
           "isRequired": false,
           "arguments": {
             "description": {
