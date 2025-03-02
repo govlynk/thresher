@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
 	Paper,
 	Box,
@@ -25,11 +25,15 @@ export function FileBrowser({ companyId }) {
 	const { files, loading, error, uploadFile, downloadFile, deleteFile, listFiles, getFileUrl } =
 		useStorageManager(companyId);
 
-	useEffect(() => {
+	const refreshFiles = useCallback(() => {
 		if (companyId) {
 			listFiles(currentPath);
 		}
 	}, [companyId, currentPath, listFiles]);
+
+	useEffect(() => {
+		refreshFiles();
+	}, [refreshFiles]);
 
 	const handlePathChange = (newPath) => {
 		setCurrentPath(newPath);
@@ -38,7 +42,7 @@ export function FileBrowser({ companyId }) {
 	const handleUpload = async (file) => {
 		try {
 			await uploadFile(file, currentPath);
-			await listFiles(currentPath);
+			refreshFiles();
 		} catch (err) {
 			console.error("Upload error:", err);
 		}
@@ -47,6 +51,7 @@ export function FileBrowser({ companyId }) {
 	const handleDownload = async (file) => {
 		try {
 			await downloadFile(file);
+			// No need to refresh after download as it doesn't modify the file list
 		} catch (err) {
 			console.error("Download error:", err);
 		}
@@ -56,7 +61,7 @@ export function FileBrowser({ companyId }) {
 		if (window.confirm("Are you sure you want to delete this file?")) {
 			try {
 				await deleteFile(file);
-				await listFiles(currentPath);
+				refreshFiles();
 			} catch (err) {
 				console.error("Delete error:", err);
 			}
@@ -70,6 +75,11 @@ export function FileBrowser({ companyId }) {
 		} catch (err) {
 			console.error("Preview error:", err);
 		}
+	};
+
+	const handleUploadDialogClose = () => {
+		setUploadDialogOpen(false);
+		refreshFiles(); // Refresh files when dialog closes in case files were uploaded
 	};
 
 	const renderBreadcrumbs = () => {
@@ -124,7 +134,7 @@ export function FileBrowser({ companyId }) {
 
 			<FileUploadDialog
 				open={uploadDialogOpen}
-				onClose={() => setUploadDialogOpen(false)}
+				onClose={handleUploadDialogClose}
 				onUpload={handleUpload}
 				currentPath={currentPath}
 			/>
