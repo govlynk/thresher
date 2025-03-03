@@ -4,61 +4,65 @@ import { defineStorage } from "@aws-amplify/backend";
 export const storage = defineStorage({
 	name: "govlynkWorkDrive",
 	access: (allow) => ({
-		// Allow listing bucket contents and company directories
-
-		"company/{company_id}/*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN", "GOVLYNK_USER", "COMPANY_USER"]).to(["list"]),
-			allow.entity("identity").to(["list"]),
+		// Root company directory - only list access
+		"company/{company_id}": [
+			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN", "GOVLYNK_USER", "COMPANY_USER"]).to(["get", "list"]),
+			allow.entity("identity").to(["get", "list"]),
 		],
 
-		// Documents subdirectory
-		"company/{company_id}/documents/*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
-			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["read", "write"]), // Add read permissions for user groups
-			allow.entity("identity").to(["read"]),
-		],
-		// Documents subdirectory
-		"company/{company_id}/documents/deliverables/*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
-			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["read", "write"]), // Add read permissions for user groups
-			allow.entity("identity").to(["read"]),
+		// Documents directory
+		"company/{company_id}/documents": [
+			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN", "GOVLYNK_USER", "COMPANY_USER"]).to(["get", "list"]),
+			allow.entity("identity").to(["get", "list"]),
 		],
 
-		// Contracts subdirectory
-		"company/{company_id}/documents/contracts/*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
-			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["read", "write"]), // Add read permissions for user groups
-			allow.entity("identity").to(["read"]),
+		// Deliverables directory
+		"company/{company_id}/documents/deliverables": [
+			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["get", "list", "write", "delete"]),
+			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["get", "list", "write"]),
+			allow.entity("identity").to(["get", "list"]),
 		],
-		// Contracts subdirectory
-		"company/{company_id}/documents/branding/*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
-			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["read", "write"]), // Add read permissions for user groups
-			allow.entity("identity").to(["read"]),
+
+		// Contracts directory
+		"company/{company_id}/documents/contracts": [
+			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["get", "list", "write", "delete"]),
+			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["get", "list", "write"]),
+			allow.entity("identity").to(["get", "list"]),
 		],
-		// team subdirectory
-		"company/{company_id}/team/*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
-			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["read", "write"]), // Add read permissions for user groups
-			allow.entity("identity").to(["read"]),
+
+		// Branding directory
+		"company/{company_id}/documents/branding": [
+			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["get", "list", "write", "delete"]),
+			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["get", "list", "write"]),
+			allow.entity("identity").to(["get", "list"]),
 		],
-		// contacts subdirectory
-		"company/{company_id}/contacts/*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
-			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["read", "write"]), // Add read permissions for user groups
-			allow.entity("identity").to(["read"]),
+
+		// Team directory
+		"company/{company_id}/team": [
+			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["get", "list", "write", "delete"]),
+			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["get", "list", "write"]),
+			allow.entity("identity").to(["get", "list"]),
 		],
-		// contacts subdirectory
-		"company/{company_id}/contacts/{contact_id}*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
-			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["read", "write"]), // Add read permissions for user groups
-			allow.entity("identity").to(["read"]),
+
+		// Contacts directory
+		"company/{company_id}/contacts": [
+			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["get", "list", "write", "delete"]),
+			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["get", "list", "write"]),
+			allow.entity("identity").to(["get", "list"]),
 		],
-		// Certifications subdirectory
-		"company/{company_id}/certifications/*": [
-			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["read", "write", "delete"]),
-			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["read", "write"]), // Add read permissions for user groups
-			allow.entity("identity").to(["read"]),
+
+		// Individual contact files
+		"company/{company_id}/contacts/{contact_id}": [
+			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["get", "list", "write", "delete"]),
+			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["get", "list", "write"]),
+			allow.entity("identity").to(["get", "list"]),
+		],
+
+		// Certifications directory
+		"company/{company_id}/certifications": [
+			allow.groups(["GOVLYNK_ADMIN", "COMPANY_ADMIN"]).to(["get", "list", "write", "delete"]),
+			allow.groups(["GOVLYNK_USER", "COMPANY_USER"]).to(["get", "list", "write"]),
+			allow.entity("identity").to(["get", "list"]),
 		],
 	}),
 });
