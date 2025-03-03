@@ -36,22 +36,40 @@ export function useStorageManager(companyId) {
 
 				// Process files to show relative paths without the company prefix
 				const processedFiles = result.items
-					.filter((item) => item.key !== storagePath) // Filter out the current directory entry
+					.filter((item) => {
+						// Filter out the current directory entry and empty entries
+						if (item.key === storagePath || !item.key) return false;
+
+						// Get the relative path from the current directory
+						const relativePath = item.key.replace(storagePath ? `${storagePath}/` : storagePath, "");
+						if (!relativePath) return false;
+
+						// Only show immediate children of the current directory
+						const parts = relativePath.split("/");
+						return parts[0] !== "" && (parts.length === 1 || (parts.length === 2 && parts[1] === ""));
+					})
 					.map((item) => {
 						const relativePath = item.key.replace(storagePath ? `${storagePath}/` : storagePath, "");
+						const name = relativePath.split("/")[0];
+
+						// In S3, directories are virtual and represented by the "/" suffix
+						const isFolder =
+							item.key.endsWith("/") || result.items.some((other) => other.key.startsWith(item.key + "/"));
+
 						return {
 							key: item.key,
-							name: relativePath.split("/")[0], // Get the first segment of the relative path
-							size: item.size,
+							name,
+							size: isFolder ? 0 : item.size,
 							lastModified: item.lastModified,
-							isFolder: item.size === 0 && item.key.endsWith("/"),
+							isFolder,
 						};
 					});
 
-				setFiles(processedFiles);
+				return processedFiles;
 			} catch (err) {
 				console.error("Error listing files:", err);
 				setError(err.message || "Failed to list files");
+				return [];
 			} finally {
 				setLoading(false);
 			}
@@ -59,7 +77,94 @@ export function useStorageManager(companyId) {
 		[companyId, activeCompanyId]
 	);
 
-	const uploadFile = async (file, path = "") => {
+	const createDirectory = async (path, directoryName) => {
+		try {
+			validateCompanyAccess();
+			setError(null);
+
+			// Normalize directory name (allow letters, numbers, hyphens, and underscores)
+			const normalizedName = directoryName.trim().replace(/[^a-zA-Z0-9-_]/g, "-");
+			if (!normalizedName) {
+				throw new Error("Invalid directory name");
+			}
+
+			// Construct the directory path with a trailing slash
+			const dirPath = path ? `${path}/${normalizedName}/` : `${normalizedName}/`;
+			const key = getCompanyStoragePath(companyId, dirPath);
+
+			console.log("Creating directory with key:", key);
+
+			try {
+				// Create an empty object with a trailing slash to represent a directory in S3
+				await uploadData({
+					key,
+					data: new Blob([""]),
+					options: {
+						accessLevel: "private",
+						contentType: "application/x-directory",
+					},
+				});
+			} catch (uploadError) {
+				console.error("Error in uploadData:", uploadError);
+				throw uploadError;
+			}
+
+			// Verify the directory was created by listing it
+			const result = await list({
+				prefix: key,
+				options: {
+					accessLevel: "private",
+				},
+			});
+
+			console.log("Directory creation verification:", result);
+
+			if (!result.items.some((item) => item.key === key)) {
+				throw new Error("Failed to verify directory creation");
+			}
+
+			await listFiles(path); // Refresh the file list after creating directory
+			return key;
+		} catch (err) {
+			console.error("Error creating directory:", err);
+			setError(err.message || "Failed to create directory");
+			throw err;
+		}
+	};
+
+	const deleteDirectory = async (path) => {
+		try {
+			validateCompanyAccess();
+			setError(null);
+
+			// List all files in the directory
+			const storagePath = getCompanyStoragePath(companyId, path);
+			const result = await list({
+				prefix: storagePath,
+				options: {
+					accessLevel: "private",
+				},
+			});
+
+			// Delete all files in the directory
+			await Promise.all(
+				result.items.map((item) =>
+					remove({
+						key: item.key,
+						options: {
+							accessLevel: "private",
+						},
+					})
+				)
+			);
+		} catch (err) {
+			console.error("Error deleting directory:", err);
+			setError(err.message || "Failed to delete directory");
+			throw err;
+		}
+	};
+
+	const uploadFile = async (path = "", file) => {
 		try {
 			validateCompanyAccess();
 			setError(null);
@@ -80,13 +185,13 @@ export function useStorageManager(companyId) {
 		}
 	};
 
-	const downloadFile = async (file) => {
+	const downloadFile = async (key) => {
 		try {
 			validateCompanyAccess();
 			setError(null);
 
 			const url = await getUrl({
-				key: file.key,
+				key,
 				options: {
 					accessLevel: "private",
 					download: true,
@@ -96,7 +201,7 @@ export function useStorageManager(companyId) {
 			// Create a temporary link to download the file
 			const link = document.createElement("a");
 			link.href = url.url;
-			link.download = file.name;
+			link.download = key.split("/").pop();
 			document.body.appendChild(link);
 			link.click();
 			document.body.removeChild(link);
@@ -107,13 +212,13 @@ export function useStorageManager(companyId) {
 		}
 	};
 
-	const deleteFile = async (file) => {
+	const deleteFile = async (key) => {
 		try {
 			validateCompanyAccess();
 			setError(null);
 
 			await remove({
-				key: file.key,
+				key,
 				options: {
 					accessLevel: "private",
 				},
@@ -144,7 +249,6 @@ export function useStorageManager(companyId) {
 	};
 
 	return {
-		files,
 		loading,
 		error,
 		uploadFile,
@@ -152,5 +256,7 @@ export function useStorageManager(companyId) {
 		deleteFile,
 		listFiles,
 		getFileUrl,
+		createDirectory,
+		deleteDirectory,
 	};
 }

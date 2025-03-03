@@ -1,12 +1,19 @@
 export const getCompanyStoragePath = (companyId, path = "") => {
 	if (!companyId) throw new Error("Company ID is required");
 
-	// Construct the path without company prefix since it's added by the S3 structure
-	const normalizedPath = path ? path.replace(/^\/+|\/+$/g, "") : "";
-	return normalizedPath;
+	// Normalize the path and ensure proper structure
+	const normalizedPath = path ? path.replace(/^\/+|\/+$/g, "").replace(/\/+$/g, "") : "";
+	const basePath = `company/${companyId}`;
+
+	// For directory creation, preserve the trailing slash if it was in the original path
+	const shouldAddTrailingSlash = path && path.endsWith("/");
+	const finalPath = normalizedPath ? `${basePath}/${normalizedPath}` : basePath;
+	return shouldAddTrailingSlash ? `${finalPath}/` : finalPath;
 };
 
 export const validateStoragePath = (path) => {
-	// No need to validate company prefix since it's handled by S3 structure
+	if (!path.startsWith("company/")) {
+		throw new Error("Invalid storage path: must start with company/");
+	}
 	return path;
 };

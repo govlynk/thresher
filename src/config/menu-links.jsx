@@ -26,7 +26,11 @@ const profileLinks = {
 	icon: Users,
 	links: [
 		{
-			title: "Experience",
+			title: "Strategic Positioning",
+			path: "/strategy",
+		},
+		{
+			title: "Past Performance",
 			path: "/experience",
 		},
 		{
@@ -34,32 +38,16 @@ const profileLinks = {
 			path: "/certification",
 		},
 		{
-			title: "SAM Registration",
-			path: "/sam",
+			title: "SWOT",
+			path: "/swot",
 		},
-		{
-			title: "File Browser",
-			path: "/company-files",
-		},
-	],
-};
-
-const strategyLinks = {
-	id: "strategy",
-	title: "Strategic Positioning",
-	icon: Users,
-	links: [
 		{
 			title: "Maturity Assessment",
 			path: "/maturity",
 		},
 		{
-			title: "Strategic Positioning",
-			path: "/strategy",
-		},
-		{
-			title: "SWOT",
-			path: "/swot",
+			title: "SAM Registration",
+			path: "/sam",
 		},
 	],
 };
@@ -194,6 +182,10 @@ const administrationLinks = {
 			title: "Manage Users",
 			path: "/user-admin",
 		},
+		{
+			title: "File Browser",
+			path: "/company-files",
+		},
 	],
 };
 
@@ -248,7 +240,6 @@ const systemLinks = {
 export const menuLinks = [
 	homeLinks,
 	profileLinks,
-	strategyLinks,
 	marketIntelligenceLinks,
 	marketPositioningLinks,
 	productLinks,

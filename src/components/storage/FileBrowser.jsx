@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
 	Paper,
 	Box,
@@ -11,101 +11,186 @@ import {
 	Link,
 	Dialog,
 	DialogContent,
+	DialogTitle,
+	DialogActions,
+	TextField,
+	CircularProgress,
 } from "@mui/material";
-import { Upload, FolderUp, File, Trash2, Download, Eye, Image as ImageIcon, FileText } from "lucide-react";
+import {
+	Upload,
+	FolderPlus,
+	File,
+	Trash2,
+	Download,
+	Eye,
+	Image as ImageIcon,
+	FileText,
+	Home,
+	ChevronRight,
+} from "lucide-react";
 import { FileList } from "./FileList";
 import { FileUploadDialog } from "./FileUploadDialog";
 import { FilePreview } from "./FilePreview";
 import { useStorageManager } from "../../hooks/useStorageManager";
 
 export function FileBrowser({ companyId }) {
+	const [files, setFiles] = useState([]);
 	const [currentPath, setCurrentPath] = useState("");
-	const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(null);
+	const [createDirDialogOpen, setCreateDirDialogOpen] = useState(false);
+	const [newDirName, setNewDirName] = useState("");
 	const [previewFile, setPreviewFile] = useState(null);
-	const { files, loading, error, uploadFile, downloadFile, deleteFile, listFiles, getFileUrl } =
+	const { uploadFile, downloadFile, deleteFile, listFiles, getFileUrl, createDirectory, deleteDirectory } =
 		useStorageManager(companyId);
 
-	const refreshFiles = useCallback(() => {
-		if (companyId) {
-			listFiles(currentPath);
-		}
-	}, [companyId, currentPath, listFiles]);
+	const refreshFiles = useCallback(
+		async (path = currentPath) => {
+			try {
+				setLoading(true);
+				setError(null);
+				const files = await listFiles(path);
+				// Filter out the current directory and parent directory entries
+				const processedFiles = files.filter((file) => file.name !== "." && file.name !== ".." && file.name !== "");
+				setFiles(processedFiles);
+			} catch (err) {
+				setError(err.message);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[listFiles, currentPath]
+	);
 
 	useEffect(() => {
 		refreshFiles();
-	}, [refreshFiles]);
+	}, [currentPath, refreshFiles]);
 
-	const handlePathChange = (newPath) => {
-		setCurrentPath(newPath);
-	};
+	const handleNavigate = useCallback(
+		(folderName) => {
+			const newPath = currentPath ? `${currentPath}/${folderName}` : folderName;
+			setCurrentPath(newPath);
+		},
+		[currentPath]
+	);
 
-	const handleUpload = async (file) => {
-		try {
-			await uploadFile(file, currentPath);
-			refreshFiles();
-		} catch (err) {
-			console.error("Upload error:", err);
-		}
-	};
+	const handleUpload = useCallback(
+		async (event) => {
+			const files = event.target.files;
+			if (!files.length) return;
 
-	const handleDownload = async (file) => {
-		try {
-			await downloadFile(file);
-			// No need to refresh after download as it doesn't modify the file list
-		} catch (err) {
-			console.error("Download error:", err);
-		}
-	};
-
-	const handleDelete = async (file) => {
-		if (window.confirm("Are you sure you want to delete this file?")) {
 			try {
-				await deleteFile(file);
-				refreshFiles();
+				setLoading(true);
+				setError(null);
+
+				for (const file of files) {
+					await uploadFile(currentPath, file);
+				}
+
+				await refreshFiles();
 			} catch (err) {
-				console.error("Delete error:", err);
+				setError(err.message);
+			} finally {
+				setLoading(false);
 			}
-		}
-	};
+		},
+		[uploadFile, currentPath, refreshFiles]
+	);
 
-	const handlePreview = async (file) => {
+	const handleDownload = useCallback(
+		async (file) => {
+			try {
+				setError(null);
+				await downloadFile(file.key);
+			} catch (err) {
+				setError(err.message);
+			}
+		},
+		[downloadFile]
+	);
+
+	const handleDelete = useCallback(
+		async (file) => {
+			if (!window.confirm(`Are you sure you want to delete ${file.name}?`)) {
+				return;
+			}
+
+			try {
+				setLoading(true);
+				setError(null);
+
+				if (file.isFolder) {
+					await deleteDirectory(file.key);
+					// If we're in the directory being deleted, go up one level
+					const currentDir = currentPath.split("/").pop();
+					if (currentDir === file.name) {
+						const parentPath = currentPath.split("/").slice(0, -1).join("/");
+						setCurrentPath(parentPath);
+					} else {
+						await refreshFiles();
+					}
+				} else {
+					await deleteFile(file.key);
+					await refreshFiles();
+				}
+			} catch (err) {
+				setError(err.message);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[deleteDirectory, deleteFile, currentPath, refreshFiles]
+	);
+
+	const handleCreateDirectory = useCallback(async () => {
+		if (!newDirName.trim()) {
+			setError("Please enter a directory name");
+			return;
+		}
+
 		try {
-			const url = await getFileUrl(file.key);
-			setPreviewFile({ ...file, url });
+			setLoading(true);
+			setError(null);
+			await createDirectory(currentPath, newDirName.trim());
+			setCreateDirDialogOpen(false);
+			setNewDirName("");
+			await refreshFiles();
 		} catch (err) {
-			console.error("Preview error:", err);
+			setError(err.message);
+		} finally {
+			setLoading(false);
 		}
-	};
+	}, [createDirectory, currentPath, newDirName, refreshFiles]);
 
-	const handleUploadDialogClose = () => {
-		setUploadDialogOpen(false);
-		refreshFiles(); // Refresh files when dialog closes in case files were uploaded
-	};
+	const handlePreview = useCallback(
+		async (file) => {
+			try {
+				setError(null);
+				const url = await getFileUrl(file.key);
+				setPreviewFile({ ...file, url });
+			} catch (err) {
+				setError(err.message);
+			}
+		},
+		[getFileUrl]
+	);
 
-	const renderBreadcrumbs = () => {
-		const paths = currentPath.split("/").filter(Boolean);
-		return (
-			<Breadcrumbs sx={{ mb: 2 }}>
-				<Link component='button' variant='body1' onClick={() => setCurrentPath("")} underline='hover'>
-					Root
-				</Link>
-				{paths.map((path, index) => {
-					const fullPath = paths.slice(0, index + 1).join("/");
-					return (
-						<Link
-							key={fullPath}
-							component='button'
-							variant='body1'
-							onClick={() => setCurrentPath(fullPath)}
-							underline='hover'
-						>
-							{path}
-						</Link>
-					);
-				})}
-			</Breadcrumbs>
-		);
-	};
+	const handleBreadcrumbClick = useCallback(
+		(index) => {
+			if (index === -1) {
+				setCurrentPath("");
+			} else {
+				const pathParts = currentPath.split("/");
+				setCurrentPath(pathParts.slice(0, index + 1).join("/"));
+			}
+		},
+		[currentPath]
+	);
+
+	const breadcrumbs = useMemo(() => {
+		if (!currentPath) return [];
+		return currentPath.split("/");
+	}, [currentPath]);
 
 	return (
 		<Paper sx={{ p: 3 }}>
@@ -118,26 +203,76 @@ export function FileBrowser({ companyId }) {
 			)}
 
 			<Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-				<Box>{renderBreadcrumbs()}</Box>
-				<Button variant='contained' startIcon={<Upload />} onClick={() => setUploadDialogOpen(true)}>
-					Upload Files
-				</Button>
+				<Box>
+					<Breadcrumbs sx={{ mb: 2 }}>
+						<Link component='button' variant='body1' onClick={() => setCurrentPath("")} underline='hover'>
+							Root
+						</Link>
+						{breadcrumbs.map((path, index) => {
+							const fullPath = breadcrumbs.slice(0, index + 1).join("/");
+							return (
+								<Link
+									key={fullPath}
+									component='button'
+									variant='body1'
+									onClick={() => handleBreadcrumbClick(index)}
+									underline='hover'
+								>
+									{path}
+								</Link>
+							);
+						})}
+					</Breadcrumbs>
+				</Box>
+				<Box sx={{ display: "flex", gap: 2 }}>
+					<Button variant='outlined' startIcon={<FolderPlus />} onClick={() => setCreateDirDialogOpen(true)}>
+						New Folder
+					</Button>
+					<Button variant='contained' startIcon={<Upload />} component='label'>
+						Upload Files
+						<input type='file' hidden multiple onChange={handleUpload} />
+					</Button>
+				</Box>
 			</Box>
 
-			<FileList
-				files={files}
-				onNavigate={handlePathChange}
-				onDownload={handleDownload}
-				onDelete={handleDelete}
-				onPreview={handlePreview}
-			/>
+			{loading ? (
+				<Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+					<CircularProgress />
+				</Box>
+			) : (
+				<FileList
+					files={files}
+					onNavigate={handleNavigate}
+					onDownload={handleDownload}
+					onDelete={handleDelete}
+					onPreview={handlePreview}
+				/>
+			)}
 
-			<FileUploadDialog
-				open={uploadDialogOpen}
-				onClose={handleUploadDialogClose}
-				onUpload={handleUpload}
-				currentPath={currentPath}
-			/>
+			<Dialog open={createDirDialogOpen} onClose={() => setCreateDirDialogOpen(false)}>
+				<DialogTitle>Create New Folder</DialogTitle>
+				<DialogContent>
+					<TextField
+						autoFocus
+						margin='dense'
+						label='Folder Name'
+						fullWidth
+						value={newDirName}
+						onChange={(e) => setNewDirName(e.target.value)}
+						onKeyPress={(e) => {
+							if (e.key === "Enter") {
+								handleCreateDirectory();
+							}
+						}}
+					/>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={() => setCreateDirDialogOpen(false)}>Cancel</Button>
+					<Button onClick={handleCreateDirectory} variant='contained' disabled={!newDirName.trim()}>
+						Create
+					</Button>
+				</DialogActions>
+			</Dialog>
 
 			<FilePreview file={previewFile} onClose={() => setPreviewFile(null)} />
 		</Paper>
