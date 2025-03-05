@@ -93,7 +93,6 @@ const schema = a.schema({
 			performances: a.hasMany("PastPerformance", "companyId"),
 			certifications: a.hasMany("Certification", "companyId"),
 			maturity: a.hasMany("MaturityAssessment", "companyId"),
-			qualifications: a.hasMany("Qualification", "companyId"),
 			swot: a.hasMany("SwotAnalysis", "companyId"),
 			federalRegulations: a.hasMany("FederalRegulation", "companyId"),
 			RegulationDocuments: a.hasMany("RegulationDocument", "companyId"),
