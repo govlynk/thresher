@@ -350,7 +350,6 @@ const schema = a.schema({
 	Qualification: a
 		.model({
 			opportunityId: a.string().required(),
-			companyId: a.string().required(),
 			status: a.string().required(),
 			technicalScore: a.float().required(),
 			pastPerformanceScore: a.float().required(),
@@ -360,8 +359,7 @@ const schema = a.schema({
 			overallScore: a.float().required(),
 			assessmentDate: a.datetime().required(),
 			notes: a.string(),
-			opportunity: a.hasOne("Opportunity", ["opportunityId"]),
-			company: a.hasOne("Company", ["companyId"]),
+			opportunity: a.belongsTo("Opportunity", "opportunityId"),
 		})
 		.authorization((allow) => [
 			allow.owner(),
@@ -506,7 +504,7 @@ const schema = a.schema({
 			user: a.belongsTo("User", "userId"),
 			company: a.belongsTo("Company", "companyId"),
 			team: a.belongsTo("Team", "teamId"),
-			qualifications: a.hasMany("Qualification", "opportunityId"),
+			qualification: a.hasOne("Qualification", "opportunityId"),
 		})
 		.authorization((allow) => [
 			allow.owner(),

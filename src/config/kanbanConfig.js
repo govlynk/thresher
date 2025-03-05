@@ -62,4 +62,38 @@ export const BOARD_CONFIGS = {
 			},
 		},
 	},
+	[BOARD_TYPES.BID]: {
+		columns: {
+			backlog: {
+				id: "prebid",
+				title: "Pre-Proposal",
+				limit: 4,
+				color: "#D671AE",
+			},
+			inProgress: {
+				id: "response",
+				title: "Preparing Response",
+				limit: 4,
+				color: "#6ddba6",
+			},
+			review: {
+				id: "review",
+				title: "Review",
+				limit: 4,
+				color: "#ffbd0a",
+			},
+			submitted: {
+				id: "submitted",
+				title: "Submitted",
+				limit: 4,
+				color: "#8FABFB",
+			},
+			done: {
+				id: "done",
+				title: "Done",
+				limit: 4,
+				color: "#6ddba6",
+			},
+		},
+	},
 };
