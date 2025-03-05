@@ -93,6 +93,7 @@ const schema = a.schema({
 			performances: a.hasMany("PastPerformance", "companyId"),
 			certifications: a.hasMany("Certification", "companyId"),
 			maturity: a.hasMany("MaturityAssessment", "companyId"),
+			qualifications: a.hasMany("Qualification", "companyId"),
 			swot: a.hasMany("SwotAnalysis", "companyId"),
 			federalRegulations: a.hasMany("FederalRegulation", "companyId"),
 			RegulationDocuments: a.hasMany("RegulationDocument", "companyId"),
@@ -339,6 +340,25 @@ const schema = a.schema({
 			completedAt: a.datetime(),
 			lastModified: a.datetime(),
 			company: a.belongsTo("Company", "companyId"),
+		})
+		.authorization((allow) => [
+			allow.owner(),
+			allow.authenticated().to(["create", "read", "update"]),
+			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
+		]),
+
+		Qualification: a
+		.model({
+			companyId: a.string().required(),
+			title: a.string(),
+			opportunityId: a.string(),
+			answers: a.json(),
+			qualificationScore: a.json(),
+			status: a.enum(["IN_PROGRESS", "COMPLETED"]),
+			completedAt: a.datetime(),
+			lastModified: a.datetime(),
+			company: a.belongsTo("Company", "companyId"),
+			opportunity: a.belongsTo("Opportunity", "opportunityId"),
 		})
 		.authorization((allow) => [
 			allow.owner(),
