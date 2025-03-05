@@ -795,22 +795,6 @@
                 ]
               }
             },
-            "qualifications": {
-              "name": "qualifications",
-              "isArray": true,
-              "type": {
-                "model": "Qualification"
-              },
-              "isRequired": false,
-              "attributes": [],
-              "isArrayNullable": true,
-              "association": {
-                "connectionType": "HAS_MANY",
-                "associatedWith": [
-                  "companyId"
-                ]
-              }
-            },
             "swot": {
               "name": "swot",
               "isArray": true,
@@ -3031,78 +3015,75 @@
               "isRequired": true,
               "attributes": []
             },
-            "companyId": {
-              "name": "companyId",
+            "opportunityId": {
+              "name": "opportunityId",
               "isArray": false,
               "type": "String",
               "isRequired": true,
               "attributes": []
             },
-            "title": {
-              "name": "title",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "opportunityId": {
-              "name": "opportunityId",
-              "isArray": false,
-              "type": "String",
-              "isRequired": false,
-              "attributes": []
-            },
-            "answers": {
-              "name": "answers",
-              "isArray": false,
-              "type": "AWSJSON",
-              "isRequired": false,
-              "attributes": []
-            },
-            "qualificationScore": {
-              "name": "qualificationScore",
-              "isArray": false,
-              "type": "AWSJSON",
-              "isRequired": false,
-              "attributes": []
-            },
             "status": {
               "name": "status",
               "isArray": false,
-              "type": {
-                "enum": "QualificationStatus"
-              },
-              "isRequired": false,
+              "type": "String",
+              "isRequired": true,
               "attributes": []
             },
-            "completedAt": {
-              "name": "completedAt",
+            "technicalScore": {
+              "name": "technicalScore",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true,
+              "attributes": []
+            },
+            "pastPerformanceScore": {
+              "name": "pastPerformanceScore",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true,
+              "attributes": []
+            },
+            "competitionScore": {
+              "name": "competitionScore",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true,
+              "attributes": []
+            },
+            "pricingScore": {
+              "name": "pricingScore",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true,
+              "attributes": []
+            },
+            "riskScore": {
+              "name": "riskScore",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true,
+              "attributes": []
+            },
+            "overallScore": {
+              "name": "overallScore",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true,
+              "attributes": []
+            },
+            "assessmentDate": {
+              "name": "assessmentDate",
               "isArray": false,
               "type": "AWSDateTime",
-              "isRequired": false,
+              "isRequired": true,
               "attributes": []
             },
-            "lastModified": {
-              "name": "lastModified",
+            "notes": {
+              "name": "notes",
               "isArray": false,
-              "type": "AWSDateTime",
+              "type": "String",
               "isRequired": false,
               "attributes": []
-            },
-            "company": {
-              "name": "company",
-              "isArray": false,
-              "type": {
-                "model": "Company"
-              },
-              "isRequired": false,
-              "attributes": [],
-              "association": {
-                "connectionType": "BELONGS_TO",
-                "targetNames": [
-                  "companyId"
-                ]
-              }
             },
             "opportunity": {
               "name": "opportunity",
@@ -4089,20 +4070,20 @@
                 ]
               }
             },
-            "qualifications": {
-              "name": "qualifications",
-              "isArray": true,
+            "qualification": {
+              "name": "qualification",
+              "isArray": false,
               "type": {
                 "model": "Qualification"
               },
               "isRequired": false,
               "attributes": [],
-              "isArrayNullable": true,
               "association": {
-                "connectionType": "HAS_MANY",
+                "connectionType": "HAS_ONE",
                 "associatedWith": [
                   "opportunityId"
-                ]
+                ],
+                "targetNames": []
               }
             },
             "createdAt": {
@@ -4780,13 +4761,6 @@
         },
         "MaturityAssessmentStatus": {
           "name": "MaturityAssessmentStatus",
-          "values": [
-            "IN_PROGRESS",
-            "COMPLETED"
-          ]
-        },
-        "QualificationStatus": {
-          "name": "QualificationStatus",
           "values": [
             "IN_PROGRESS",
             "COMPLETED"

@@ -358,6 +358,7 @@ const schema = a.schema({
 			overallScore: a.float().required(),
 			assessmentDate: a.datetime().required(),
 			notes: a.string(),
+			formAnswers: a.json(),
 			opportunity: a.belongsTo("Opportunity", "opportunityId"),
 		})
 		.authorization((allow) => [

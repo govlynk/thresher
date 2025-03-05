@@ -37,17 +37,29 @@ import { formatCurrency, formatDate } from "../utils/formatters";
 import { ThumbsUp, ThumbsDown, ArrowRight, BarChart2, X as XIcon, PlusCircle } from "lucide-react";
 import { generateClient } from "aws-amplify/api";
 import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 const client = generateClient();
 
 function QualificationScreen() {
 	const { activeCompanyId } = useGlobalStore();
-	const { qualification, loading, error, fetchQualification } = useQualificationStore();
+	const { qualification, loading: storeLoading, error, fetchQualification } = useQualificationStore();
 	const { savedOpportunities, fetchSavedOpportunities, moveOpportunity } = useOpportunityStore();
 	const [selectedOpportunities, setSelectedOpportunities] = useState([]);
 	const [showQualification, setShowQualification] = useState(false);
 	const [isSelectingOpportunity, setIsSelectingOpportunity] = useState(false);
 	const [assessments, setAssessments] = useState({});
+	const [loadingStates, setLoadingStates] = useState({});
+	const [currentAssessmentOpportunity, setCurrentAssessmentOpportunity] = useState(null);
+	const queryClient = useQueryClient();
+
+	const scaleValues = {
+		"No Experience": 1,
+		Basic: 2,
+		Intermediate: 3,
+		Advanced: 4,
+		Expert: 5,
+	};
 
 	useEffect(() => {
 		if (activeCompanyId) {
@@ -90,20 +102,53 @@ function QualificationScreen() {
 	const { data: qualificationResults, isLoading: isLoadingQualifications } = useQuery({
 		queryKey: ["qualifications", selectedOpportunities],
 		queryFn: async () => {
+			console.log("Fetching qualifications for:", selectedOpportunities);
 			const results = {};
 			for (const oppId of selectedOpportunities) {
 				try {
-					const response = await client.models.Qualification.get({
-						opportunityId: oppId,
-						companyId: activeCompanyId,
+					console.log("Fetching qualification for opportunity:", oppId);
+					// First get the qualification ID by filtering
+					const listResponse = await client.models.Qualification.list({
+						filter: {
+							opportunityId: { eq: oppId },
+						},
 					});
-					if (response?.data) {
-						results[oppId] = response.data;
+					console.log("List response:", {
+						data: listResponse?.data,
+						errors: listResponse?.errors?.map((e) => ({
+							message: e.message,
+							errorType: e.errorType,
+							errorInfo: e.errorInfo,
+						})),
+					});
+
+					if (listResponse?.data?.length > 0) {
+						const qualificationId = listResponse.data[0].id;
+						const response = await client.models.Qualification.get({
+							id: qualificationId,
+						});
+						console.log("Qualification response:", {
+							data: response?.data,
+							errors: response?.errors?.map((e) => ({
+								message: e.message,
+								errorType: e.errorType,
+								errorInfo: e.errorInfo,
+							})),
+						});
+						if (response?.data) {
+							results[oppId] = response.data;
+						}
 					}
 				} catch (err) {
-					console.error(`Error fetching qualification for opportunity ${oppId}:`, err);
+					console.error("Error fetching qualification:", {
+						message: err.message,
+						name: err.name,
+						code: err.code,
+						stack: err.stack,
+					});
 				}
 			}
+			console.log("Final qualification results:", results);
 			return results;
 		},
 		enabled: selectedOpportunities.length > 0,
@@ -138,73 +183,322 @@ function QualificationScreen() {
 		);
 	};
 
-	const runQualification = async (opportunityId) => {
-		setLoading((prev) => ({ ...prev, [opportunityId]: true }));
+	const handleQualificationComplete = async (formData) => {
+		if (!currentAssessmentOpportunity) return;
+		console.log("Starting qualification completion for:", currentAssessmentOpportunity.id);
+		console.log("Form data received:", formData);
+
+		setLoadingStates((prev) => ({ ...prev, [currentAssessmentOpportunity.id]: true }));
 		try {
-			const opportunity = savedOpportunities.find((opp) => opp.id === opportunityId);
-			if (!opportunity) throw new Error("Opportunity not found");
+			// Get answers from the form data
+			const answers = formData.answers || formData;
+			console.log("Processing answers:", answers);
 
-			// Calculate scores based on opportunity data
-			const technicalScore = Math.min(
-				(opportunity.naicsCodes?.length || 0) * 20 +
-					(opportunity.typeOfSetAside ? 20 : 0) +
-					(opportunity.description ? 20 : 0),
-				100
-			);
-
-			const pastPerformanceScore = 75; // This should be calculated based on past performance data
-
-			const competitionScore = opportunity.typeOfSetAside ? 60 : 80;
-
-			const pricingScore =
-				opportunity.ValueEstHigh && opportunity.ValueEstLow
-					? 80
-					: opportunity.ValueEstHigh || opportunity.ValueEstLow
-					? 60
-					: 40;
-
-			const riskScore = Math.min(
-				(opportunity.responseDeadLine ? 0 : 20) +
-					(opportunity.pocEmail ? 0 : 20) +
-					(opportunity.description ? 0 : 20) +
-					(opportunity.agency ? 0 : 20) +
-					(opportunity.naicsCodes?.length ? 0 : 20),
-				100
-			);
+			// Calculate scores based on form data
+			const scores = {
+				technicalScore: calculateTechnicalScore(answers),
+				pastPerformanceScore: calculatePastPerformanceScore(answers),
+				competitionScore: calculateCompetitionScore(answers),
+				pricingScore: calculatePricingScore(answers),
+				riskScore: calculateRiskScore(answers),
+			};
+			console.log("Calculated scores:", scores);
 
 			const qualificationData = {
-				opportunityId,
-				companyId: activeCompanyId,
+				opportunityId: currentAssessmentOpportunity.id,
 				status: "COMPLETED",
-				technicalScore,
-				pastPerformanceScore,
-				competitionScore,
-				pricingScore,
-				riskScore,
-				overallScore: calculateOverallScore({
-					technicalScore,
-					pastPerformanceScore,
-					competitionScore,
-					pricingScore,
-					riskScore,
-				}),
+				...scores,
+				overallScore: calculateOverallScore(scores),
 				assessmentDate: new Date().toISOString(),
-				notes: "",
+				notes: answers.notes || "",
+				formAnswers: JSON.stringify(answers),
 			};
+			console.log("Qualification data to save:", qualificationData);
 
-			const qualificationResponse = await client.models.Qualification.create(qualificationData);
+			// Check for existing qualification
+			console.log("Checking for existing qualification...");
+			let existingQualification;
+			try {
+				const listResponse = await client.models.Qualification.list({
+					filter: {
+						opportunityId: { eq: currentAssessmentOpportunity.id },
+					},
+				});
+				console.log("List response:", {
+					data: listResponse?.data,
+					errors: listResponse?.errors?.map((e) => ({
+						message: e.message,
+						errorType: e.errorType,
+						errorInfo: e.errorInfo,
+					})),
+				});
 
-			if (!qualificationResponse?.data) {
-				throw new Error("Failed to create qualification");
+				if (listResponse?.data?.length > 0) {
+					existingQualification = {
+						data: listResponse.data[0],
+					};
+				}
+			} catch (err) {
+				console.error("Error checking existing qualification:", {
+					message: err.message,
+					name: err.name,
+					code: err.code,
+					stack: err.stack,
+				});
 			}
 
-			setError(null);
+			let qualificationResponse;
+			try {
+				if (existingQualification?.data) {
+					console.log("Updating existing qualification with ID:", existingQualification.data.id);
+					qualificationResponse = await client.models.Qualification.update({
+						id: existingQualification.data.id,
+						...qualificationData,
+					});
+				} else {
+					console.log("Creating new qualification with data:", qualificationData);
+					qualificationResponse = await client.models.Qualification.create(qualificationData);
+				}
+				console.log("Qualification response:", {
+					data: qualificationResponse?.data,
+					errors: qualificationResponse?.errors?.map((e) => ({
+						message: e.message,
+						errorType: e.errorType,
+						errorInfo: e.errorInfo,
+					})),
+				});
+			} catch (err) {
+				console.error("Error saving qualification:", {
+					message: err.message,
+					name: err.name,
+					code: err.code,
+					stack: err.stack,
+				});
+				throw err;
+			}
+
+			if (!qualificationResponse?.data) {
+				throw new Error("Failed to save qualification - no data returned");
+			}
+
+			// Update the local assessments state
+			setAssessments((prev) => ({
+				...prev,
+				[currentAssessmentOpportunity.id]: qualificationResponse.data,
+			}));
+
+			// Reset all states related to qualification form
+			setShowQualification(false);
+			setCurrentAssessmentOpportunity(null);
+
+			// Invalidate the qualifications query to force a refresh
+			console.log("Invalidating qualifications query cache");
+			await queryClient.invalidateQueries(["qualifications"]);
 		} catch (err) {
-			console.error("Error running qualification:", err);
-			setError(err.message);
+			console.error("Error in qualification completion:", {
+				message: err.message,
+				name: err.name,
+				code: err.code,
+				stack: err.stack,
+			});
+			throw err;
 		} finally {
-			setLoading((prev) => ({ ...prev, [opportunityId]: false }));
+			setLoadingStates((prev) => ({ ...prev, [currentAssessmentOpportunity.id]: false }));
 		}
+	};
+
+	const runQualification = async (opportunityId) => {
+		console.log("Starting qualification run for opportunity:", opportunityId);
+		const opportunity = savedOpportunities.find((opp) => opp.id === opportunityId);
+		if (!opportunity) {
+			console.log("Opportunity not found:", opportunityId);
+			return;
+		}
+
+		// Check for existing qualification
+		try {
+			console.log("Checking for existing qualification...");
+			const listResponse = await client.models.Qualification.list({
+				filter: {
+					opportunityId: { eq: opportunityId },
+				},
+			});
+			console.log("List response:", {
+				data: listResponse?.data,
+				errors: listResponse?.errors?.map((e) => ({
+					message: e.message,
+					errorType: e.errorType,
+					errorInfo: e.errorInfo,
+				})),
+			});
+
+			// Add the opportunity to the selected opportunities for comparison
+			if (!selectedOpportunities.includes(opportunityId)) {
+				console.log("Adding opportunity to selected opportunities");
+				setSelectedOpportunities((prev) => {
+					if (prev.length >= 3) {
+						return [...prev.slice(1), opportunityId];
+					}
+					return [...prev, opportunityId];
+				});
+			}
+
+			// If we have an existing qualification, convert the scores back to form data
+			let initialFormData = null;
+			if (listResponse?.data?.length > 0) {
+				console.log("Converting existing qualification to form data");
+				const qualification = listResponse.data[0];
+				console.log("Raw qualification data:", qualification);
+
+				if (qualification.formAnswers) {
+					try {
+						initialFormData = JSON.parse(qualification.formAnswers);
+						console.log("Retrieved stored form answers:", initialFormData);
+					} catch (err) {
+						console.error("Error parsing stored form answers:", err);
+						// Fall back to calculating from scores if parsing fails
+						initialFormData = {
+							technicalCapability: {
+								questions: {
+									technicalExperience: convertScoreToLikertAnswers(qualification.technicalScore),
+									staffingCapability: convertScoreToLikertAnswers(qualification.technicalScore),
+								},
+							},
+							pastPerformance: {
+								questions: {
+									contractPerformance: convertScoreToLikertAnswers(qualification.pastPerformanceScore),
+								},
+							},
+							managementApproach: {
+								questions: {
+									projectManagement: convertScoreToLikertAnswers(qualification.competitionScore),
+								},
+							},
+							notes: qualification.notes || "",
+						};
+					}
+				} else {
+					// No stored form answers, calculate from scores
+					initialFormData = {
+						technicalCapability: {
+							questions: {
+								technicalExperience: convertScoreToLikertAnswers(qualification.technicalScore),
+								staffingCapability: convertScoreToLikertAnswers(qualification.technicalScore),
+							},
+						},
+						pastPerformance: {
+							questions: {
+								contractPerformance: convertScoreToLikertAnswers(qualification.pastPerformanceScore),
+							},
+						},
+						managementApproach: {
+							questions: {
+								projectManagement: convertScoreToLikertAnswers(qualification.competitionScore),
+							},
+						},
+						notes: qualification.notes || "",
+					};
+				}
+				console.log("Final form data:", initialFormData);
+			}
+
+			setCurrentAssessmentOpportunity(opportunity);
+			setShowQualification(true);
+			return initialFormData;
+		} catch (err) {
+			console.error("Error in runQualification:", {
+				message: err.message,
+				name: err.name,
+				code: err.code,
+				stack: err.stack,
+			});
+			setCurrentAssessmentOpportunity(opportunity);
+			setShowQualification(true);
+			return null;
+		}
+	};
+
+	// Helper function to convert numeric scores back to Likert scale answers
+	const convertScoreToLikertAnswers = (score) => {
+		console.log("Converting score to Likert:", score);
+		const scaleValues = [
+			{ min: 0, max: 20, value: "No Experience" },
+			{ min: 21, max: 40, value: "Basic" },
+			{ min: 41, max: 60, value: "Intermediate" },
+			{ min: 61, max: 80, value: "Advanced" },
+			{ min: 81, max: 100, value: "Expert" },
+		];
+
+		const value = scaleValues.find((range) => score >= range.min && score <= range.max)?.value || "Intermediate";
+		console.log("Converted to Likert value:", value);
+		return value;
+	};
+
+	// Score calculation functions
+	const calculateTechnicalScore = (formData) => {
+		const technicalSection = formData.technicalCapability?.questions || {};
+		console.log("Technical section data:", technicalSection);
+		const scores = {
+			technicalExperience: scaleValues[technicalSection.technicalExperience] || 0,
+			staffingCapability: scaleValues[technicalSection.staffingCapability] || 0,
+		};
+		console.log("Technical scores:", scores);
+		return ((scores.technicalExperience + scores.staffingCapability) / 2) * 20;
+	};
+
+	const calculatePastPerformanceScore = (formData) => {
+		const pastPerformanceSection = formData.pastPerformance?.questions || {};
+		console.log("Past performance section data:", pastPerformanceSection);
+		const score = scaleValues[pastPerformanceSection.contractPerformance] || 0;
+		console.log("Past performance score:", score);
+		return score * 20;
+	};
+
+	const calculateCompetitionScore = (formData) => {
+		const managementSection = formData.managementApproach?.questions || {};
+		console.log("Management section data:", managementSection);
+		const score = scaleValues[managementSection.projectManagement] || 0;
+		console.log("Competition score:", score);
+		return score * 20;
+	};
+
+	const calculatePricingScore = (formData) => {
+		// Default to 75 for now - this should be calculated based on pricing analysis
+		return 75;
+	};
+
+	const calculateRiskScore = (formData) => {
+		// Calculate risk based on management approach scores
+		const managementSection = formData.managementApproach?.questions || {};
+		const riskScore = 100 - averageLikertScores(managementSection.projectManagement) * 20;
+		return Math.max(0, Math.min(100, riskScore));
+	};
+
+	const averageLikertScores = (likertData = {}) => {
+		if (!likertData || typeof likertData !== "object" || Object.keys(likertData).length === 0) return 0;
+
+		const scaleValues = {
+			"No Experience": 1,
+			Basic: 2,
+			Intermediate: 3,
+			Advanced: 4,
+			Expert: 5,
+			Inadequate: 1,
+			Adequate: 3,
+			Strong: 4,
+			Exceptional: 5,
+			Poor: 1,
+			Fair: 2,
+			Good: 3,
+			"Very Good": 4,
+			Excellent: 5,
+			None: 1,
+			Established: 3,
+			Optimized: 5,
+		};
+
+		const scores = Object.values(likertData).map((answer) => scaleValues[answer] || 3);
+		return scores.reduce((sum, score) => sum + score, 0) / scores.length;
 	};
 
 	const renderQualificationCard = (opportunityId) => {
@@ -303,9 +597,9 @@ function QualificationScreen() {
 							<Button
 								variant='contained'
 								onClick={() => runQualification(opportunityId)}
-								disabled={loading[opportunityId]}
+								disabled={loadingStates[opportunityId]}
 							>
-								{loading[opportunityId] ? <CircularProgress size={24} /> : "Run Qualification"}
+								{loadingStates[opportunityId] ? <CircularProgress size={24} /> : "Run Qualification"}
 							</Button>
 						</Box>
 					)}
@@ -324,7 +618,7 @@ function QualificationScreen() {
 		);
 	}
 
-	if (loading) {
+	if (storeLoading) {
 		return (
 			<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
 				<CircularProgress />
@@ -341,9 +635,12 @@ function QualificationScreen() {
 			<Container maxWidth={false} disableGutters>
 				<Box sx={{ p: 2, width: "100%" }}>
 					<Typography variant='h4' gutterBottom>
-						Qualification Assessment
+						Qualification Assessment for {currentAssessmentOpportunity?.title}
 					</Typography>
-					<QualificationForm />
+					<QualificationForm
+						onComplete={handleQualificationComplete}
+						initialData={async () => await runQualification(currentAssessmentOpportunity.id)}
+					/>
 				</Box>
 			</Container>
 		);
@@ -423,6 +720,14 @@ function QualificationScreen() {
 												onClick={() => handleProceed(opportunity)}
 											>
 												Proceed
+											</Button>
+											<Button
+												startIcon={<BarChart2 />}
+												variant='outlined'
+												onClick={() => runQualification(opportunity.id)}
+												disabled={loadingStates[opportunity.id]}
+											>
+												{loadingStates[opportunity.id] ? <CircularProgress size={20} /> : "Run Assessment"}
 											</Button>
 											<Button
 												startIcon={<ArrowRight />}
