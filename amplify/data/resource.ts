@@ -503,6 +503,7 @@ const schema = a.schema({
 			user: a.belongsTo("User", "userId"),
 			company: a.belongsTo("Company", "companyId"),
 			team: a.belongsTo("Team", "teamId"),
+			qualifications: a.hasMany("Qualification", "opportunityId"),
 		})
 		.authorization((allow) => [
 			allow.owner(),

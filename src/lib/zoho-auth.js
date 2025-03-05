@@ -7,13 +7,13 @@ export async function getZohoAccessToken() {
 		const response = await client.graphql({
 			query: `query RefreshZohoTokens {
         refreshZohoTokens {
-          access_token
-          expires_in
+          accessToken
+          expiresAt
         }
       }`,
 		});
 
-		return response.data.refreshZohoTokens.access_token;
+		return response.data.refreshZohoTokens.accessToken;
 	} catch (error) {
 		console.error("Error refreshing Zoho token:", error);
 		throw error;
