@@ -14,6 +14,28 @@
     "user_verification_types": [
       "email"
     ],
+    "groups": [
+      {
+        "COMPANY_ADMIN": {
+          "precedence": 0
+        }
+      },
+      {
+        "COMPANY_USER": {
+          "precedence": 1
+        }
+      },
+      {
+        "GOVLYNK_ADMIN": {
+          "precedence": 2
+        }
+      },
+      {
+        "GOVLYNK_USER": {
+          "precedence": 3
+        }
+      }
+    ],
     "mfa_configuration": "NONE",
     "password_policy": {
       "min_length": 8,
@@ -762,6 +784,22 @@
               "isArray": true,
               "type": {
                 "model": "MaturityAssessment"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "companyId"
+                ]
+              }
+            },
+            "qualifications": {
+              "name": "qualifications",
+              "isArray": true,
+              "type": {
+                "model": "Qualification"
               },
               "isRequired": false,
               "attributes": [],
@@ -2983,6 +3021,176 @@
             "sortKeyFieldNames": []
           }
         },
+        "Qualification": {
+          "name": "Qualification",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "companyId": {
+              "name": "companyId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "title": {
+              "name": "title",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "opportunityId": {
+              "name": "opportunityId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "answers": {
+              "name": "answers",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false,
+              "attributes": []
+            },
+            "qualificationScore": {
+              "name": "qualificationScore",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false,
+              "attributes": []
+            },
+            "status": {
+              "name": "status",
+              "isArray": false,
+              "type": {
+                "enum": "QualificationStatus"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "completedAt": {
+              "name": "completedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "lastModified": {
+              "name": "lastModified",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "company": {
+              "name": "company",
+              "isArray": false,
+              "type": {
+                "model": "Company"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "companyId"
+                ]
+              }
+            },
+            "opportunity": {
+              "name": "opportunity",
+              "isArray": false,
+              "type": {
+                "model": "Opportunity"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "association": {
+                "connectionType": "BELONGS_TO",
+                "targetNames": [
+                  "opportunityId"
+                ]
+              }
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "Qualifications",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "provider": "userPools",
+                    "ownerField": "owner",
+                    "allow": "owner",
+                    "identityClaim": "cognito:username",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  },
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update"
+                    ]
+                  },
+                  {
+                    "groupClaim": "cognito:groups",
+                    "provider": "userPools",
+                    "allow": "groups",
+                    "operations": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ],
+                    "groups": [
+                      "GOVLYNK_ADMIN"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
         "SwotAnalysis": {
           "name": "SwotAnalysis",
           "fields": {
@@ -3881,6 +4089,22 @@
                 ]
               }
             },
+            "qualifications": {
+              "name": "qualifications",
+              "isArray": true,
+              "type": {
+                "model": "Qualification"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true,
+              "association": {
+                "connectionType": "HAS_MANY",
+                "associatedWith": [
+                  "opportunityId"
+                ]
+              }
+            },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
@@ -4561,6 +4785,13 @@
             "COMPLETED"
           ]
         },
+        "QualificationStatus": {
+          "name": "QualificationStatus",
+          "values": [
+            "IN_PROGRESS",
+            "COMPLETED"
+          ]
+        },
         "OpportunitySummaryStatus": {
           "name": "OpportunitySummaryStatus",
           "values": [
@@ -5227,6 +5458,13 @@
                   "isArray": false,
                   "isRequired": false,
                   "isReadOnly": true
+                },
+                "owner": {
+                  "name": "owner",
+                  "type": "String",
+                  "attributes": [],
+                  "isArray": false,
+                  "isRequired": false
                 }
               },
               "syncable": true,
@@ -5304,7 +5542,7 @@
                 "role": {
                   "name": "role",
                   "type": {
-                    "enum": "ConversationParticipantRole"
+                    "enum": "AmplifyAIConversationParticipantRole"
                   },
                   "attributes": [],
                   "isArray": false,
@@ -5313,7 +5551,7 @@
                 "content": {
                   "name": "content",
                   "type": {
-                    "nonModel": "ContentBlock"
+                    "nonModel": "AmplifyAIContentBlock"
                   },
                   "attributes": [],
                   "isArray": true,
@@ -5329,7 +5567,7 @@
                 "toolConfiguration": {
                   "name": "toolConfiguration",
                   "type": {
-                    "nonModel": "ToolConfiguration"
+                    "nonModel": "AmplifyAIToolConfiguration"
                   },
                   "attributes": [],
                   "isArray": true,
@@ -5359,10 +5597,7 @@
                 {
                   "type": "model",
                   "properties": {
-                    "subscriptions": {},
-                    "mutations": {
-                      "update": null
-                    }
+                    "subscriptions": {}
                   }
                 },
                 {
@@ -5395,7 +5630,7 @@
           "nonModels": {},
           "enums": {
             "ConversationParticipantRole": {
-              "name": "ConversationParticipantRole",
+              "name": "AmplifyAIConversationParticipantRole",
               "values": [
                 "user",
                 "assistant"
@@ -5451,7 +5686,7 @@
               "isRequired": false,
               "name": "onCreateAssistantResponseChat",
               "type": {
-                "model": "ConversationMessageChat"
+                "nonModel": "AmplifyAIConversationMessageStreamPart"
               },
               "arguments": {
                 "conversationId": {
@@ -5730,9 +5965,201 @@
       {
         "name": "govlynkWorkDrive",
         "bucket_name": "amplify-d1hcn7nmh82rdz-ma-govlynkworkdrivebucketd8-b1cwl09qaf18",
-        "aws_region": "us-east-1"
+        "aws_region": "us-east-1",
+        "paths": {
+          "company/{company_id}/*": {
+            "groupsGOVLYNK_ADMIN": [
+              "get",
+              "list"
+            ],
+            "groupsCOMPANY_ADMIN": [
+              "get",
+              "list"
+            ],
+            "groupsGOVLYNK_USER": [
+              "get",
+              "list"
+            ],
+            "groupsCOMPANY_USER": [
+              "get",
+              "list"
+            ],
+            "entityidentity": [
+              "get",
+              "list"
+            ]
+          },
+          "company/{company_id}/deliverables/*": {
+            "groupsGOVLYNK_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsCOMPANY_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsGOVLYNK_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "groupsCOMPANY_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "entityidentity": [
+              "get",
+              "list"
+            ]
+          },
+          "company/{company_id}/contracts/*": {
+            "groupsGOVLYNK_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsCOMPANY_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsGOVLYNK_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "groupsCOMPANY_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "entityidentity": [
+              "get",
+              "list"
+            ]
+          },
+          "company/{company_id}/branding/*": {
+            "groupsGOVLYNK_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsCOMPANY_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsGOVLYNK_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "groupsCOMPANY_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "entityidentity": [
+              "get",
+              "list"
+            ]
+          },
+          "company/{company_id}/team/*": {
+            "groupsGOVLYNK_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsCOMPANY_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsGOVLYNK_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "groupsCOMPANY_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "entityidentity": [
+              "get",
+              "list"
+            ]
+          },
+          "company/{company_id}/contacts/*": {
+            "groupsGOVLYNK_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsCOMPANY_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsGOVLYNK_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "groupsCOMPANY_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "entityidentity": [
+              "get",
+              "list"
+            ]
+          },
+          "company/{company_id}/certifications/*": {
+            "groupsGOVLYNK_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsCOMPANY_ADMIN": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ],
+            "groupsGOVLYNK_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "groupsCOMPANY_USER": [
+              "get",
+              "list",
+              "write"
+            ],
+            "entityidentity": [
+              "get",
+              "list"
+            ]
+          }
+        }
       }
     ]
   },
-  "version": "1.1"
+  "version": "1.3"
 }

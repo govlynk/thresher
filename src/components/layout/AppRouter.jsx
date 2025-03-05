@@ -53,6 +53,7 @@ const ContactsScreen = lazy(() => import("../../screens/ContactsScreen"));
 const ContactAdminScreen = lazy(() => import("../../screens/ContactAdminScreen"));
 //Development
 const TestScreen = lazy(() => import("../../screens/TestScreen"));
+const QualificationScreen = lazy(() => import("../../screens/QualificationScreen"));
 
 const ProtectedRoute = ({ children, requiredGroups }) => {
 	const { activeUserData } = useGlobalStore();
@@ -329,6 +330,15 @@ const AppRouter = ({ signOut }) => {
 					element={
 						<Suspense fallback={<LoadingScreen />}>
 							<RegulationManagement />
+						</Suspense>
+					}
+				/>
+
+				<Route
+					path='qualification'
+					element={
+						<Suspense fallback={<LoadingScreen />}>
+							<QualificationScreen />
 						</Suspense>
 					}
 				/>

@@ -52,7 +52,6 @@ const profileLinks = {
 	],
 };
 
-// Group related menu items
 const marketIntelligenceLinks = {
 	id: "market",
 	title: "Market Intelligence",
@@ -77,7 +76,6 @@ const marketIntelligenceLinks = {
 	],
 };
 
-// Group related menu items
 const marketPositioningLinks = {
 	id: "positioning",
 	title: "Market Positioning",
@@ -94,7 +92,6 @@ const marketPositioningLinks = {
 	],
 };
 
-// Group related menu items
 const productLinks = {
 	id: "product",
 	title: "Product Positioning",
@@ -115,7 +112,6 @@ const productLinks = {
 	],
 };
 
-// Group related menu items
 const salesLinks = {
 	id: "sales",
 	title: "Sales",
@@ -168,7 +164,7 @@ const administrationLinks = {
 	id: "administration",
 	title: "Administration",
 	icon: Settings2,
-	requiredGroups: ["COMPANY_ADMIN", "GOVLYNK_ADMIN"], // Can also protect individual links
+	requiredGroups: ["COMPANY_ADMIN", "GOVLYNK_ADMIN"],
 	links: [
 		{
 			title: "Manage Contacts",
@@ -193,7 +189,7 @@ const settingsLinks = {
 	id: "settings",
 	title: "Settings",
 	icon: Settings2,
-	requiredGroups: ["COMPANY_ADMIN", "GOVLYNK_ADMIN"], // Can also protect individual links
+	requiredGroups: ["COMPANY_ADMIN", "GOVLYNK_ADMIN"],
 	links: [
 		{
 			title: "Settings",
@@ -206,7 +202,7 @@ const systemLinks = {
 	id: "govlynk",
 	title: "GovLynk",
 	icon: Settings,
-	requiredGroups: ["GOVLYNK_ADMIN"], // Can also protect individual links
+	requiredGroups: ["GOVLYNK_ADMIN"],
 	links: [
 		{
 			title: "Client Setup",
@@ -216,7 +212,6 @@ const systemLinks = {
 			title: "Sprint Admin",
 			path: "/sprint-admin",
 		},
-
 		{
 			title: "Contact Admin",
 			path: "/contact-admin",
@@ -236,7 +231,6 @@ const systemLinks = {
 	],
 };
 
-// Export organized menu structure
 export const menuLinks = [
 	homeLinks,
 	profileLinks,
