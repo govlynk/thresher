@@ -289,90 +289,122 @@ export const useOpportunityStore = create((set, get) => ({
 				},
 			});
 
+			let savedOpportunity;
 			if (existingOpp?.data?.[0]) {
 				// Update existing opportunity
-				const response = await amplifyClient.models.Opportunity.update({
+				const updateData = {
 					id: existingOpp.data[0].id,
-					status: "BACKLOG",
-					updatedAt: new Date().toISOString(),
-				});
-				return response.data;
+					noticeId: opportunity.noticeId,
+					title: opportunity.title,
+					description: opportunity.description,
+					status: opportunity.status,
+					department: opportunity.department,
+					agency: opportunity.agency,
+					office: opportunity.office,
+					subOffice: opportunity.subOffice,
+					solicitationNumber: opportunity.solicitationNumber,
+					type: opportunity.type,
+					typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription,
+					typeOfSetAside: opportunity.typeOfSetAside,
+					naicsCode: opportunity.naicsCode,
+					naicsCodes: opportunity.naicsCodes,
+					classificationCode: opportunity.classificationCode,
+					active: opportunity.active,
+					organizationType: opportunity.organizationType,
+					resourceLinks: opportunity.resourceLinks,
+					uiLink: opportunity.uiLink,
+					officeZipcode: opportunity.officeZipcode,
+					officeCity: opportunity.officeCity,
+					officeCountryCode: opportunity.officeCountryCode,
+					officeState: opportunity.officeState,
+					pocName: opportunity.pocName,
+					pocEmail: opportunity.pocEmail,
+					pocPhone: opportunity.pocPhone,
+					pocType: opportunity.pocType,
+					position: opportunity.position,
+					priority: opportunity.priority,
+					estimatedEffort: opportunity.estimatedEffort,
+					actualEffort: opportunity.actualEffort,
+					tags: opportunity.tags,
+					notes: opportunity.notes,
+					assigneeId: opportunity.assigneeId,
+					dueDate: opportunity.dueDate,
+					postedDate: opportunity.postedDate,
+					responseDeadLine: opportunity.responseDeadLine,
+					companyId: activeCompanyId,
+					teamId: activeTeamId,
+					userId: activeUserId,
+				};
+
+				savedOpportunity = await amplifyClient.models.Opportunity.update(updateData);
+			} else {
+				// Create new opportunity with required fields
+				const createData = {
+					noticeId: opportunity.noticeId,
+					title: opportunity.title,
+					description: opportunity.description,
+					status: opportunity.status,
+					department: opportunity.department,
+					agency: opportunity.agency,
+					office: opportunity.office,
+					subOffice: opportunity.subOffice,
+					solicitationNumber: opportunity.solicitationNumber,
+					type: opportunity.type,
+					typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription,
+					typeOfSetAside: opportunity.typeOfSetAside,
+					naicsCode: opportunity.naicsCode,
+					naicsCodes: opportunity.naicsCodes,
+					classificationCode: opportunity.classificationCode,
+					active: opportunity.active,
+					organizationType: opportunity.organizationType,
+					resourceLinks: opportunity.resourceLinks,
+					uiLink: opportunity.uiLink,
+					officeZipcode: opportunity.officeZipcode,
+					officeCity: opportunity.officeCity,
+					officeCountryCode: opportunity.officeCountryCode,
+					officeState: opportunity.officeState,
+					pocName: opportunity.pocName,
+					pocEmail: opportunity.pocEmail,
+					pocPhone: opportunity.pocPhone,
+					pocType: opportunity.pocType,
+					position: opportunity.position,
+					priority: opportunity.priority,
+					estimatedEffort: opportunity.estimatedEffort,
+					actualEffort: opportunity.actualEffort,
+					tags: opportunity.tags,
+					notes: opportunity.notes,
+					assigneeId: opportunity.assigneeId,
+					dueDate: opportunity.dueDate,
+					postedDate: opportunity.postedDate,
+					responseDeadLine: opportunity.responseDeadLine,
+					companyId: activeCompanyId,
+					teamId: activeTeamId,
+					userId: activeUserId,
+				};
+
+				console.log("Creating new opportunity with data:", createData);
+				savedOpportunity = await amplifyClient.models.Opportunity.create(createData);
+
+				if (!savedOpportunity?.data) {
+					console.error("Failed to create opportunity:", savedOpportunity);
+					throw new Error("Failed to create opportunity in database");
+				}
 			}
 
-			// Create new opportunity if it doesn't exist
-			const newOpportunityData = {
-				status: "BACKLOG",
-				noticeId: opportunity.noticeId,
-				updatedAt: new Date().toISOString(),
-				department: opportunity.department || "N/A",
-				agency: opportunity.agency || "N/A",
-				office: opportunity.office || "N/A",
-				subOffice: opportunity.subOffice || "N/A",
-				title: opportunity.title || "",
-				description: opportunity.description || "No description available", // Now contains actual description text
-				solicitationNumber: opportunity.solicitationNumber || "",
-				postedDate: opportunity.postedDate ? new Date(opportunity.postedDate).toISOString() : null,
-				type: opportunity.type || "",
-				typeOfSetAsideDescription: opportunity.typeOfSetAsideDescription || "",
-				typeOfSetAside: opportunity.typeOfSetAside || "",
-				responseDeadLine: opportunity.responseDeadLine
-					? new Date(opportunity.responseDeadLine).toISOString()
-					: null,
-				naicsCode: opportunity.naicsCode || "",
-				naicsCodes: opportunity.naicsCodes || "",
-				classificationCode: opportunity.classificationCode || "",
-				active: opportunity.active || "Yes",
-				organizationType: opportunity.organizationType || "",
-				resourceLinks: opportunity.resourceLinks || "",
-				uiLink: opportunity.uiLink || "",
-				// Office Address as embedded fields
-				officeZipcode: opportunity.officeZipcode || "",
-				officeCity: opportunity.officeCity || "",
-				officeCountryCode: opportunity.officeCountryCode || "",
-				officeState: opportunity.officeState || "",
-				// Point of Contact as embedded fields
-				pocName: opportunity.pocName || "",
-				pocEmail: opportunity.pocEmail || "",
-				pocPhone: opportunity.pocPhone || "",
-				pocType: opportunity.pocType || "",
-				// Default Pipeline fields
-				position: 0,
-				priority: "MEDIUM",
-				estimatedEffort: 0,
-				actualEffort: 0,
-				tags: "",
-				notes: "",
-				assigneeId: activeUserId,
-				// set initial due date to response deadline
-				dueDate: opportunity.responseDeadLine ? new Date(opportunity.responseDeadLine).toISOString() : null,
-
-				notes: "",
-
-				// Foreign key relationships
-				userId: activeUserId,
-				companyId: activeCompanyId,
-				teamId: activeTeamId,
-			};
-
-			const response = await amplifyClient.models.Opportunity.create(newOpportunityData);
-			console.log("Saved opportunity response:", response);
-
-			if (!response?.data) {
-				throw new Error("Failed to save opportunity");
-			}
-
+			// Update the local state
+			const savedData = savedOpportunity.data;
 			set((state) => ({
-				savedOpportunities: [...state.savedOpportunities, response.data],
-				opportunities: state.opportunities.filter((opp) => opp.noticeId !== opportunity.noticeId),
 				loading: false,
 				error: null,
+				savedOpportunities: [...state.savedOpportunities, savedData],
+				opportunities: state.opportunities.filter((opp) => opp.noticeId !== opportunity.noticeId),
 			}));
 
-			return response.data;
-		} catch (err) {
-			console.error("Error saving opportunity:", err);
-			set({ error: err.message || "Failed to save opportunity", loading: false });
-			throw err;
+			return savedData;
+		} catch (error) {
+			console.error("Error saving opportunity:", error);
+			set({ loading: false, error: error.message });
+			throw error;
 		}
 	},
 

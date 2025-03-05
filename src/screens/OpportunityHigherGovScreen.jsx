@@ -27,6 +27,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { Download, Table as TableIcon, TableOfContents } from "lucide-react";
 import { OpportunitySummaryCard } from "../components/opportunities/HigherGov/OpportunitySummaryCard";
 import { useGlobalStore } from "../stores/globalStore";
+import { useOpportunityStore } from "../stores/opportunityStore";
 
 /** @type {import('../../amplify/data/resource').Schema} */
 const client = generateClient();
@@ -106,6 +107,9 @@ function convertToCSV(opportunities) {
 function OpportunitiesScreen() {
 	const { activeCompanyId } = useGlobalStore();
 	const [company, setCompany] = useState(null);
+	const { saveOpportunity } = useOpportunityStore();
+	const [loading, setLoading] = useState(false);
+	const [saveError, setError] = useState(null);
 
 	// State for filters and pagination
 	const defaultPostedDate = new Date();
@@ -140,7 +144,12 @@ function OpportunitiesScreen() {
 	}, [activeCompanyId]);
 
 	// Query for fetching opportunities
-	const { data, isLoading, error, refetch } = useQuery({
+	const {
+		data,
+		isLoading,
+		error: fetchError,
+		refetch,
+	} = useQuery({
 		queryKey: ["opportunities", filters, page, rowsPerPage],
 		queryFn: async () => {
 			try {
@@ -253,10 +262,76 @@ function OpportunitiesScreen() {
 		document.body.removeChild(link);
 	}, [data]);
 
-	if (error) {
+	const handleSave = async (opportunity) => {
+		setLoading(true);
+		try {
+			// Map the opportunity data to match the database schema
+			const opportunityData = {
+				noticeId: opportunity.source_id,
+				title: opportunity.title,
+				description: opportunity.description_text || opportunity.ai_summary || "",
+				status: "BACKLOG",
+				department: opportunity.agency?.agency_name || "N/A",
+				agency: opportunity.agency?.agency_name || "N/A",
+				office: opportunity.agency?.agency_type || "N/A",
+				subOffice: "",
+				solicitationNumber: opportunity.source_id || "",
+				type: opportunity.opp_type?.description || "",
+				typeOfSetAsideDescription: opportunity.set_aside || "",
+				typeOfSetAside: opportunity.set_aside || "",
+				naicsCode: opportunity.naics_code?.naics_code || "",
+				naicsCodes: [opportunity.naics_code?.naics_code || ""],
+				classificationCode: opportunity.psc_code?.psc_code || "",
+				active: "Yes",
+				organizationType: "",
+				resourceLinks: [],
+				uiLink: opportunity.path || opportunity.source_path || "",
+				officeZipcode: opportunity.pop_zip || "",
+				officeCity: opportunity.pop_city || "",
+				officeCountryCode: opportunity.pop_country || "USA",
+				officeState: opportunity.pop_state || "",
+				pocName: opportunity.primary_contact_email?.contact_name || "",
+				pocEmail: opportunity.primary_contact_email?.contact_email || "",
+				pocPhone: opportunity.primary_contact_email?.contact_phone || "",
+				pocType: "PRIMARY",
+				position: 0,
+				priority: "MEDIUM",
+				estimatedEffort: 0,
+				actualEffort: 0,
+				tags: [],
+				notes: "",
+				assigneeId: "",
+				postedDate: opportunity.posted_date ? new Date(opportunity.posted_date).toISOString() : null,
+				responseDeadLine: opportunity.due_date ? new Date(opportunity.due_date).toISOString() : null,
+				dueDate: opportunity.due_date ? new Date(opportunity.due_date).toISOString() : null,
+			};
+
+			console.log("Saving opportunity with data:", opportunityData);
+			const result = await saveOpportunity(opportunityData);
+
+			if (!result) {
+				throw new Error("Failed to save opportunity - no result returned");
+			}
+
+			console.log("Successfully saved opportunity:", result);
+			setError(null);
+		} catch (err) {
+			console.error("Error saving opportunity:", err);
+			setError(err.message || "Failed to save opportunity");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleReject = async (opportunity) => {
+		// Add reject handler if needed
+		console.log("Reject opportunity:", opportunity);
+	};
+
+	if (fetchError) {
 		return (
 			<Box sx={{ p: 3 }}>
-				<Typography color='error'>Error loading opportunities: {error.message}</Typography>
+				<Typography color='error'>Error loading opportunities: {fetchError.message}</Typography>
 			</Box>
 		);
 	}
@@ -502,6 +577,11 @@ function OpportunitiesScreen() {
 							))
 						)}
 					</Grid>
+				)}
+				{saveError && (
+					<Box sx={{ p: 2 }}>
+						<Typography color='error'>{saveError}</Typography>
+					</Box>
 				)}
 			</Box>
 		</LocalizationProvider>

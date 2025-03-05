@@ -76,8 +76,10 @@ export function OpportunityCard({ opportunity, type = "new" }) {
 			} else {
 				const result = await saveOpportunity({
 					...opportunity,
-					description: noticeDescription || "No description available",
+					description: noticeDescription || opportunity.description || "No description available",
 					teamId: selectedTeamId,
+					noticeId: opportunity.noticeId || opportunity.id,
+					sourceLink: opportunity.sourceLink || opportunity.uiLink,
 				});
 				console.log("Save result:", result);
 			}

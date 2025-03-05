@@ -347,18 +347,21 @@ const schema = a.schema({
 			allow.group("GOVLYNK_ADMIN").to(["create", "read", "update", "delete"]),
 		]),
 
-		Qualification: a
+	Qualification: a
 		.model({
+			opportunityId: a.string().required(),
 			companyId: a.string().required(),
-			title: a.string(),
-			opportunityId: a.string(),
-			answers: a.json(),
-			qualificationScore: a.json(),
-			status: a.enum(["IN_PROGRESS", "COMPLETED"]),
-			completedAt: a.datetime(),
-			lastModified: a.datetime(),
-			company: a.belongsTo("Company", "companyId"),
-			opportunity: a.belongsTo("Opportunity", "opportunityId"),
+			status: a.string().required(),
+			technicalScore: a.float().required(),
+			pastPerformanceScore: a.float().required(),
+			competitionScore: a.float().required(),
+			pricingScore: a.float().required(),
+			riskScore: a.float().required(),
+			overallScore: a.float().required(),
+			assessmentDate: a.datetime().required(),
+			notes: a.string(),
+			opportunity: a.hasOne("Opportunity", ["opportunityId"]),
+			company: a.hasOne("Company", ["companyId"]),
 		})
 		.authorization((allow) => [
 			allow.owner(),
